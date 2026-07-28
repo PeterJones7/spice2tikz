@@ -44,19 +44,28 @@ BIPOLE_NAMES: Final[dict[Kind, str]] = {
     Kind.CAPACITOR: "C",
     Kind.INDUCTOR: "L",
     Kind.DIODE: "D",
-    Kind.VSOURCE: "vsource",
-    Kind.ISOURCE: "isource",
-    Kind.VCVS: "cvsource",
-    Kind.CCVS: "cvsource",
-    Kind.VCCS: "cisource",
-    Kind.CCCS: "cisource",
+    Kind.VSOURCE: "american voltage source",
+    Kind.ISOURCE: "american current source",
+    Kind.VCVS: "american controlled voltage source",
+    Kind.CCVS: "american controlled voltage source",
+    Kind.VCCS: "american controlled current source",
+    Kind.CCCS: "american controlled current source",
     Kind.SWITCH: "switch",
     Kind.TLINE: "tline",
     Kind.GENERIC: "generic",
 }
 """``kind`` → circuitikz bipole name. Every name here has been checked to
 compile against circuitikz 1.4.6; ``generic`` is the deliberate placeholder for
-kinds with no dedicated symbol (DESIGN §6)."""
+kinds with no dedicated symbol (DESIGN §6).
+
+Sources name the American shape outright rather than using the ``vsource`` /
+``isource`` shorthands. Those shorthands follow circuitikz's
+``europeanvoltages`` flag, whose default draws a bar with no polarity marks; a
+schematic should show which terminal is positive. The long spelling is also the
+portable one — ``vsourceAM`` only exists from circuitikz 1.8 — and it avoids
+``\\ctikzset{american voltages}``, which would additionally switch voltage
+*annotation* arrows to +/- signs.
+"""
 
 ACTIVE_KINDS: Final[frozenset[Kind]] = frozenset(
     {

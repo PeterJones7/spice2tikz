@@ -163,7 +163,7 @@ def test_vsource_label_on_the_flipped_side_is_a_separate_option():
         )
     )
     lines = emit_snippet(ir).splitlines()
-    assert "  \\draw (0,4) to[vsource, l_=$V_1$] (0,0);" in lines
+    assert "  \\draw (0,4) to[american voltage source, l_=$V_1$] (0,0);" in lines
 
 
 def test_explicit_label_text_is_used_verbatim():
@@ -239,7 +239,11 @@ def test_value_label_avoids_the_side_the_flipped_ref_label_took():
         )
     )
     lines = emit_snippet(ir).splitlines()
-    assert "  \\draw (0,6) to[vsource, l_=$V_1$, a^=\\SI{1}{\\volt}] (0,0);" in lines
+    expected = (
+        "  \\draw (0,6) to[american voltage source, "
+        "l_=$V_1$, a^=\\SI{1}{\\volt}] (0,0);"
+    )
+    assert expected in lines
 
 
 def test_value_label_stays_on_the_annotation_side_for_an_unflipped_label():
@@ -349,8 +353,8 @@ def test_source_label_never_uses_the_bipole_shorthand():
     # annotated arrow instead of a name (CircuiTikZ manual §5.1.1).
     ir = _sheet(PathComponent(ref="V1", kind=Kind.VSOURCE, a=(0, 4), b=(0, 0)))
     text = emit_snippet(ir)
-    assert "to[vsource, l=$V_1$]" in text
-    assert "vsource=" not in text
+    assert "to[american voltage source, l=$V_1$]" in text
+    assert "american voltage source=" not in text
 
 
 @pytest.mark.parametrize("kind", [Kind.ISOURCE, Kind.VCVS, Kind.VCCS, Kind.CCVS])
@@ -496,7 +500,7 @@ def test_rc_lowpass_matches_the_normative_structure():
     assert emit_snippet(ir) == (
         "\\begin{circuitikz}[scale=0.5]\n"
         "  \\ctikzset{european resistors}\n"
-        "  \\draw (0,4) to[vsource, l_=$V_1$] (0,0);\n"
+        "  \\draw (0,4) to[american voltage source, l_=$V_1$] (0,0);\n"
         "  \\draw (0,4) to[R=$R_1$] (6,4);\n"
         "  \\draw (6,4) to[C=$C_1$] (6,0);\n"
         "  \\draw (0,0) -- (6,0);\n"
