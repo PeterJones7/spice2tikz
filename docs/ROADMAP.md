@@ -63,21 +63,114 @@ and tag if specified. Do not proceed past the point the user names.
   subcircuit boxes as plain rectangles with pin stubs and labels.
   `--standalone` wrapper (documentclass standalone, circuitikz,
   siunitx).
-- **2.3** Golden tests: create ≥6 hand-written Schematic IR corpus
-  files — rc_lowpass (from spec), voltage_divider, rlc_series,
-  bridge_rectifier (diodes, junctions), common_source_amp
-  (nmos node component, all four rotations exercised across files),
-  opamp_placeholder (generic box). Golden `.tex` for each, snippet and
-  standalone. Implement `--update-golden` regeneration flag.
-  Determinism test (emit twice, byte-equal).
-- **2.4** CLI wired: `spice2tikz x.schematic.json > x.tex` works
-  end-to-end. Write `docs/EMITTER.md`: emission rules, style options,
-  how to add a symbol.
-- **2.5** CI: add TeX Live container job compiling every golden
-  standalone `.tex` with `latexmk -pdf`; local auto-skip without
-  latexmk. Fix any compile failures in goldens.
-- **2.6** CHANGELOG, README (add example snippet). **Push.**
-  Tag `v0.0.3`.
+
+## 2.3 Golden tests
+
+Golden tests: create ≥6 hand-written Schematic IR corpus files:
+
+- rc_lowpass (from spec)
+- voltage_divider
+- rlc_series
+- bridge_rectifier (diodes, junctions)
+- common_source_amp (nmos node component, all four rotations exercised across files)
+- opamp_placeholder (generic box)
+
+Golden `.tex` for each, snippet and standalone.
+
+Implement `--update-golden` regeneration flag.
+
+Implement a helper script:
+
+```text
+tools/render_goldens.py
+```
+
+(or equivalent)
+
+which:
+
+1. compiles every standalone golden `.tex` file,
+2. renders each resulting PDF to PNG,
+3. writes images to a dedicated output directory.
+
+Determinism test (emit twice, byte-equal).
+
+### Human review required
+
+After regenerating goldens:
+
+```bash
+spice2tikz --update-golden
+python tools/render_goldens.py
+```
+
+Review every rendered PNG and verify:
+
+- all expected components are present,
+- component orientation and mirroring are correct,
+- labels are present and readable,
+- wires connect the intended pins,
+- junction dots appear where expected,
+- there are no obvious overlaps, collisions, or disconnected elements.
+
+Only accept regenerated golden files after visual inspection confirms the rendered schematics match the intended circuit topology.
+
+---
+
+## 2.4 CLI wired
+
+CLI wired:
+
+```bash
+spice2tikz x.schematic.json > x.tex
+```
+
+works end-to-end.
+
+Write `docs/EMITTER.md`:
+
+- emission rules,
+- style options,
+- how to add a symbol.
+
+---
+
+## 2.5 CI
+
+CI: add TeX Live container job compiling every golden standalone `.tex` with:
+
+```bash
+latexmk -pdf
+```
+
+local auto-skip without `latexmk`.
+
+Fix any compile failures in goldens.
+
+### Human review required
+
+After CI setup is complete, regenerate and render all goldens again and confirm there are no unexpected visual changes from the previously approved outputs.
+
+Any change to a golden file should be accompanied by inspection of the corresponding rendered image.
+
+---
+
+## 2.6 Release checkpoint
+
+CHANGELOG, README (add example snippet).
+
+Include at least one rendered example image in the README if repository conventions permit.
+
+Final checks before release:
+
+- clean working tree,
+- full test suite green,
+- golden tests passing,
+- standalone TeX compilation passing.
+
+**Push.**
+
+Tag `v0.0.3`.
 
 ## Section 3 — LTspice `.asc` importer  → first useful release
 

@@ -20,6 +20,20 @@ LaTeX documents.
   instruct you to implement up to a specific section (e.g. "up to end
   of 2.3"). **Never proceed past the instructed point.**
 
+other files:
+- `docs/circuitikz_manual.MD` - a very long manual exracted from pdf to MD, so poorly formatted [may be missing]
+- `docs/CIRCUITIKZ_NOTES` - a distillation of key parts of the manual 
+
+For emitter work, consult `docs/CIRCUITIKZ_NOTES.md` first.
+
+The full CircuiTikZ manual should only be consulted when:
+- a command is not documented in CIRCUITIKZ_NOTES.md,
+- a new component type is added,
+- anchor names need verification,
+- or a documented project assumption must be revalidated.
+
+Whenever the manual is consulted and new information is relied upon,
+add the relevant distilled information to CIRCUITIKZ_NOTES.md.
 ## Working rules
 
 1. **Follow the roadmap strictly.** Complete subsections in order.
@@ -115,3 +129,45 @@ Options:
 
 Exit codes: 0 ok, 1 input parse error, 2 validation error, 3 internal.
 ```
+
+### CircuiTikZ Reference Policy
+
+CircuiTikZ is treated as an external specification for all emitter work.
+
+When implementing or modifying functionality in:
+
+- `emit/circuitikz.py`
+- emitter tests
+- golden files
+- standalone document generation
+- symbol geometry mappings
+- node component emission
+
+the agent must consult the current CircuiTikZ manual before introducing:
+
+- component names,
+- shape names,
+- anchor names,
+- node options,
+- label options,
+- rotation or mirroring behaviour,
+- package configuration,
+- drawing commands.
+
+Rules:
+
+1. Do not invent or "best guess" CircuiTikZ command names, anchors, or options when documentation is available.
+2. If the manual documents a behaviour, follow the documented behaviour.
+3. If SPEC_IR, DESIGN.md, or DECISIONS.md require behaviour that differs from CircuiTikZ defaults, implement the project requirement and record any necessary translation in code comments.
+4. If a required feature appears unsupported or ambiguously documented in CircuiTikZ, stop and record the issue rather than silently emitting uncertain output.
+5. Any CircuiTikZ-specific assumption made during implementation must be recorded in `docs/DECISIONS.md`.
+
+Priority order for decisions:
+
+1. SPEC_IR
+2. docs/DESIGN.md
+3. docs/DECISIONS.md
+4. CircuiTikZ manual
+5. Existing tests and corpus files
+6. New implementation decision (must be recorded)
+
