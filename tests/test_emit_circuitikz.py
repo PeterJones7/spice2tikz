@@ -1,4 +1,4 @@
-"""Unit tests for the circuitikz emitter (roadmap §2.1)."""
+"""Unit tests for the circuitikz emitter (roadmap §2.1, §2.2)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,9 @@ import pytest
 from spice2tikz.emit.circuitikz import (
     BIPOLE_NAMES,
     derive_ref_label,
+    emit,
     emit_snippet,
+    emit_standalone,
     escape_latex,
     format_quantity,
 )
@@ -18,6 +20,7 @@ from spice2tikz.schematic_ir import (
     Label,
     LabelSpec,
     NetSymbol,
+    NodeComponent,
     PathComponent,
     Port,
     SchematicIR,
@@ -27,6 +30,7 @@ from spice2tikz.schematic_ir import (
     StyleOverride,
     Wire,
 )
+from spice2tikz.symbols import PinDef, SymbolDef
 
 # --- escaping (D12) ----------------------------------------------------------
 
@@ -358,3 +362,192 @@ def test_rc_lowpass_matches_the_normative_structure():
         "  \\node[right] at (6,4) {vout};\n"
         "\\end{circuitikz}\n"
     )
+
+
+# --- node components (§2.2) --------------------------------------------------
+
+
+def test_builtin_shape_node_uses_its_base_as_the_node_style():
+    ir = _sheet(
+        NodeComponent(
+            ref="M1",
+            kind=Kind.NMOS,
+            symbol="nmos",
+            at=(0, 0),
+            pins={"d": (2, 2), "g": (-2, 0), "s": (2, -2), "b": (2, 0)},
+        )
+    )
+    assert "\\node[nmos, label=above:{$M_1$}] at (0,0) {};" in emit_snippet(ir)
+
+
+def test_mirrored_and_rotated_node_gets_xscale_and_rotate():
+    ir = _sheet(
+        NodeComponent(
+            ref="M1",
+            kind=Kind.NMOS,
+            symbol="nmos",
+            at=(0, 0),
+            rot=90,
+            mirror=True,
+            pins={"d": (-2, -2), "g": (0, 2), "s": (2, -2), "b": (0, -2)},
+        )
+    )
+    line = emit_snippet(ir)
+    assert "xscale=-1" in line
+    assert "rotate=90" in line
+    assert line.index("xscale=-1") < line.index("rotate=90")
+
+
+def test_node_label_side_maps_to_a_label_position():
+    ir = _sheet(
+        NodeComponent(
+            ref="M1",
+            kind=Kind.NMOS,
+            symbol="nmos",
+            at=(0, 0),
+            label=LabelSpec(side="right"),
+            pins={"d": (2, 2), "g": (-2, 0), "s": (2, -2), "b": (2, 0)},
+        )
+    )
+    assert "label=right:{$M_1$}" in emit_snippet(ir)
+
+
+def test_node_style_override_is_appended():
+    ir = _sheet(
+        NodeComponent(
+            ref="M1",
+            kind=Kind.NMOS,
+            symbol="nmos",
+            at=(0, 0),
+            label=LabelSpec(text="-"),
+            style=StyleOverride(color="blue"),
+            pins={"d": (2, 2), "g": (-2, 0), "s": (2, -2), "b": (2, 0)},
+        )
+    )
+    assert "color=blue" in emit_snippet(ir)
+
+
+def test_generic_box_draws_a_rectangle_with_a_centered_label():
+    ir = SchematicIR(
+        meta=SchematicMeta(),
+        style=StyleDefaults(),
+        symbols={
+            "subckt:opamp": SymbolDef(
+                size=(6, 4),
+                pins={"out": PinDef(offset=(3, 0))},
+            )
+        },
+        sheets=[
+            Sheet(
+                name="main",
+                elements=[
+                    NodeComponent(
+                        ref="U1",
+                        kind=Kind.SUBCIRCUIT,
+                        symbol="subckt:opamp",
+                        at=(10, 0),
+                        pins={"out": (13, 0)},
+                    )
+                ],
+            )
+        ],
+    )
+    lines = emit_snippet(ir).splitlines()
+    assert "  \\draw (7,-2) rectangle (13,2);" in lines
+    assert "  \\node at (10,0) {$U_1$};" in lines
+
+
+def test_generic_box_draws_a_stub_for_a_pin_off_the_edge():
+    ir = SchematicIR(
+        meta=SchematicMeta(),
+        style=StyleDefaults(),
+        symbols={
+            "subckt:opamp": SymbolDef(
+                size=(6, 4),
+                pins={"in": PinDef(offset=(-4, 1))},
+            )
+        },
+        sheets=[
+            Sheet(
+                name="main",
+                elements=[
+                    NodeComponent(
+                        ref="U1",
+                        kind=Kind.SUBCIRCUIT,
+                        symbol="subckt:opamp",
+                        at=(10, 0),
+                        pins={"in": (6, 1)},
+                    )
+                ],
+            )
+        ],
+    )
+    assert "  \\draw (6,1) -- (7,1);" in emit_snippet(ir).splitlines()
+
+
+def test_generic_box_omits_a_stub_when_the_pin_is_already_on_the_edge():
+    ir = SchematicIR(
+        meta=SchematicMeta(),
+        style=StyleDefaults(),
+        symbols={
+            "subckt:opamp": SymbolDef(
+                size=(6, 4),
+                pins={"out": PinDef(offset=(3, 0))},
+            )
+        },
+        sheets=[
+            Sheet(
+                name="main",
+                elements=[
+                    NodeComponent(
+                        ref="U1",
+                        kind=Kind.SUBCIRCUIT,
+                        symbol="subckt:opamp",
+                        at=(10, 0),
+                        pins={"out": (13, 0)},
+                    )
+                ],
+            )
+        ],
+    )
+    lines = emit_snippet(ir).splitlines()
+    assert not any(line.startswith("  \\draw (13,0) --") for line in lines)
+
+
+def test_unresolvable_symbol_falls_back_to_a_default_size_box():
+    ir = _sheet(
+        NodeComponent(
+            ref="U1", kind=Kind.GENERIC, symbol="nonesuch", at=(0, 0), pins={}
+        )
+    )
+    assert "\\draw (-1,-1) rectangle (1,1);" in emit_snippet(ir)
+
+
+# --- document assembly (§2.2 standalone wrapper) -----------------------------
+
+
+def test_standalone_wraps_the_snippet_in_a_compilable_document():
+    ir = SchematicIR(meta=SchematicMeta(), sheets=[Sheet(name="main", elements=[])])
+    text = emit_standalone(ir)
+    assert text.startswith("\\documentclass[tikz, border=2pt]{standalone}\n")
+    assert "\\usepackage{circuitikz}\n" in text
+    assert "\\usepackage{siunitx}\n" in text
+    assert "\\begin{document}\n" in text
+    assert text.rstrip("\n").endswith("\\end{document}")
+    assert "\\begin{circuitikz}" in text
+    assert "\\end{circuitikz}" in text
+
+
+def test_standalone_includes_extra_preamble_verbatim():
+    ir = SchematicIR(
+        meta=SchematicMeta(),
+        style=StyleDefaults(extra_preamble=["\\usetikzlibrary{fadings}"]),
+        sheets=[Sheet(name="main", elements=[])],
+    )
+    assert "\\usetikzlibrary{fadings}\n" in emit_standalone(ir)
+
+
+def test_emit_dispatches_on_the_standalone_flag():
+    ir = SchematicIR(meta=SchematicMeta(), sheets=[Sheet(name="main", elements=[])])
+    assert emit(ir) == emit_snippet(ir)
+    assert emit(ir, standalone=True) == emit_standalone(ir)

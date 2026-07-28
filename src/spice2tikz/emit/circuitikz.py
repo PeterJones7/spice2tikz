@@ -1,10 +1,9 @@
 r"""Schematic IR → CircuiTikZ emission (``docs/SPEC_IR.md`` §3, roadmap §2).
 
 The emitter is a pure function of the Schematic IR: given a document it
-renders a circuitikz snippet (design decision D13). It reads ``sheets[0]``
-only; multi-sheet composition is future work. Node components (``\node``
-placement, rotation/mirror translation) and the ``--standalone`` wrapper are
-added in roadmap 2.2.
+renders a circuitikz snippet (design decision D13), or a compilable
+standalone document when wrapped by :func:`emit_standalone`. It reads
+``sheets[0]`` only; multi-sheet composition is future work.
 
 Two kinds of text end up in the output: *derived* text (refdes labels, net
 names, unparseable values) is always escaped per D12, while the handful of
@@ -36,7 +35,7 @@ from ..schematic_ir import (
     StyleOverride,
     Wire,
 )
-from ..symbols import Point
+from ..symbols import Point, SymbolDef, lookup_symbol, rotated_size
 
 Coordinate = tuple[float, float]
 
@@ -111,6 +110,14 @@ _OPPOSITE_COMPASS: Final[dict[str, str]] = {
     "south": "north",
     "east": "west",
     "west": "east",
+}
+_NODE_LABEL_POSITION: Final[dict[str | None, str]] = {
+    None: "above",
+    "auto": "above",
+    "above": "above",
+    "below": "below",
+    "left": "left",
+    "right": "right",
 }
 _ROTATION_POSITION: Final[dict[int, str]] = {
     0: "right",
@@ -244,6 +251,15 @@ def _resolve_path_label(
     return _resolve_side(key, flip_key, side, a, b), text
 
 
+def _node_label_option(spec: LabelSpec | None, derived: str | None) -> str | None:
+    text = _resolve_label(spec, derived)
+    if text is None:
+        return None
+    side = spec.side if spec is not None else None
+    position = _NODE_LABEL_POSITION.get(side, "above")
+    return f"label={position}:{{{text}}}"
+
+
 def _style_options(style: StyleOverride | None) -> list[str]:
     if style is None:
         return []
@@ -309,13 +325,69 @@ def _emit_label(el: Label) -> list[str]:
     return [f"\\node{options} at ({_fmt_point(el.at)}) {{{el.text}}};"]
 
 
-def _emit_element(element: Element, style: StyleDefaults) -> list[str]:
+def _box_edge_point(pin: Point, at: Point, half_w: float, half_h: float) -> Coordinate:
+    """Return where a pin stub should meet a box of half-extents *half_w/h*."""
+    dx, dy = pin[0] - at[0], pin[1] - at[1]
+    horizontal_ratio = abs(dx) / half_w if half_w else float("inf")
+    vertical_ratio = abs(dy) / half_h if half_h else float("inf")
+    if horizontal_ratio >= vertical_ratio:
+        edge_x = at[0] + (half_w if dx >= 0 else -half_w)
+        return (edge_x, pin[1])
+    edge_y = at[1] + (half_h if dy >= 0 else -half_h)
+    return (pin[0], edge_y)
+
+
+def _emit_shape_node(el: NodeComponent, base: str, style: StyleDefaults) -> list[str]:
+    options = [base]
+    if el.mirror:
+        options.append("xscale=-1")
+    if el.rot:
+        options.append(f"rotate={el.rot}")
+    ref_derived = derive_ref_label(el.ref) if style.label_refs else None
+    label_opt = _node_label_option(el.label, ref_derived)
+    if label_opt is not None:
+        options.append(label_opt)
+    options.extend(_style_options(el.style))
+    return [f"\\node[{', '.join(options)}] at ({_fmt_point(el.at)}) {{}};"]
+
+
+def _emit_generic_box(
+    el: NodeComponent, symbol: SymbolDef | None, style: StyleDefaults
+) -> list[str]:
+    """Draw an unrecognized-shape node as a rectangle with pin stubs (DESIGN §6)."""
+    size = symbol.size if symbol is not None else (2, 2)
+    width, height = rotated_size(size, el.rot)
+    half_w, half_h = width / 2, height / 2
+    corner_a = (el.at[0] - half_w, el.at[1] - half_h)
+    corner_b = (el.at[0] + half_w, el.at[1] + half_h)
+    box_options = _style_options(el.style)
+    prefix = f"[{', '.join(box_options)}] " if box_options else " "
+    lines = [
+        f"\\draw{prefix}({_fmt_point(corner_a)}) rectangle ({_fmt_point(corner_b)});"
+    ]
+    for pin in el.pins.values():
+        edge = _box_edge_point(pin, el.at, half_w, half_h)
+        if edge != pin:
+            lines.append(f"\\draw ({_fmt_point(pin)}) -- ({_fmt_point(edge)});")
+    ref_derived = derive_ref_label(el.ref) if style.label_refs else None
+    label = _resolve_label(el.label, ref_derived)
+    if label is not None:
+        lines.append(f"\\node at ({_fmt_point(el.at)}) {{{label}}};")
+    return lines
+
+
+def _emit_node(el: NodeComponent, ir: SchematicIR, style: StyleDefaults) -> list[str]:
+    symbol = lookup_symbol(el.symbol, ir.symbols)
+    if symbol is not None and symbol.base is not None:
+        return _emit_shape_node(el, symbol.base, style)
+    return _emit_generic_box(el, symbol, style)
+
+
+def _emit_element(element: Element, ir: SchematicIR, style: StyleDefaults) -> list[str]:
     if isinstance(element, PathComponent):
         return _emit_path(element, style)
     if isinstance(element, NodeComponent):
-        raise NotImplementedError(
-            "node component emission is added in roadmap 2.2"
-        )
+        return _emit_node(element, ir, style)
     if isinstance(element, Wire):
         return _emit_wire(element)
     if isinstance(element, Junction):
@@ -352,6 +424,26 @@ def emit_snippet(ir: SchematicIR) -> str:
     lines = [f"\\begin{{circuitikz}}[scale={_format_number(ir.meta.grid.pitch)}]"]
     lines.extend(f"  {line}" for line in _variant_options(style))
     for element in sheet.elements:
-        lines.extend(f"  {line}" for line in _emit_element(element, style))
+        lines.extend(f"  {line}" for line in _emit_element(element, ir, style))
     lines.append("\\end{circuitikz}")
     return "\n".join(lines) + "\n"
+
+
+def emit_standalone(ir: SchematicIR) -> str:
+    """Wrap :func:`emit_snippet` in a compilable standalone document (D13)."""
+    style = ir.effective_style()
+    lines = [
+        "\\documentclass[tikz, border=2pt]{standalone}",
+        "\\usepackage{circuitikz}",
+        "\\usepackage{siunitx}",
+        *style.extra_preamble,
+        "\\begin{document}",
+        emit_snippet(ir).rstrip("\n"),
+        "\\end{document}",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def emit(ir: SchematicIR, *, standalone: bool = False) -> str:
+    """Render *ir*: a snippet by default, or a standalone document."""
+    return emit_standalone(ir) if standalone else emit_snippet(ir)
