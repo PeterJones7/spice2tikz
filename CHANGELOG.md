@@ -9,6 +9,26 @@ minor releases.
 
 ## [Unreleased]
 
+Roadmap section 2 (CircuiTikZ emitter) is complete through §2.3.
+
+### Added
+
+- `emit/circuitikz.py`: renders a Schematic IR sheet as a CircuiTikZ snippet —
+  path components, wires, junctions, net symbols, ports and labels, plus node
+  components (`\node[nmos, …]` with rotation/mirror, and generated subcircuit
+  boxes as rectangles with pin stubs). Derived-label formatting and LaTeX
+  escaping follow `docs/SPEC_IR.md` §3.
+- `--standalone`-style output via `emit_standalone()`: a compilable
+  `standalone` document loading `circuitikz` and `siunitx`.
+- Golden-file tests over a corpus of seven hand-written Schematic IR circuits
+  (RC low-pass, voltage divider, series RLC, bridge rectifier, common-source
+  amplifier, generic-box opamp placeholder, and a MOS orientation reference
+  sheet), each emitted in snippet and standalone form. The same corpus drives
+  validation, determinism and JSON round-trip tests. Regenerate goldens with
+  `pytest --update-golden`.
+- `tools/render_goldens.py`: compiles every standalone golden and renders it to
+  PNG for visual review.
+
 ### Changed
 
 - Canonical IR JSON now keeps coordinate arrays on one line
