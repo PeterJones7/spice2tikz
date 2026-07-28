@@ -99,7 +99,7 @@ Determinism test (emit twice, byte-equal).
 
 After regenerating goldens:
 
-```bash
+```bash/btw
 spice2tikz --update-golden
 python tools/render_goldens.py
 ```
