@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spice2tikz"
+description = "Convert SPICE netlists and LTspice schematics into CircuiTikZ LaTeX."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "spice2tikz contributors" }]
+keywords = ["spice", "ltspice", "circuitikz", "latex", "tikz", "schematic"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Topic :: Text Processing :: Markup :: LaTeX",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.urls]
+Homepage = "https://github.com/PeterJones7/spice2tikz"
+Repository = "https://github.com/PeterJones7/spice2tikz"
+Changelog = "https://github.com/PeterJones7/spice2tikz/blob/main/CHANGELOG.md"
+
+[project.scripts]
+spice2tikz = "spice2tikz.cli:main"
+
+[tool.hatch.version]
+path = "src/spice2tikz/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/spice2tikz"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "docs", "README.md", "LICENSE", "CHANGELOG.md"]
