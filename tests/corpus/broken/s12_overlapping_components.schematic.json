@@ -16,28 +16,16 @@
           "mode": "path",
           "ref": "R1",
           "kind": "resistor",
-          "a": [
-            0,
-            4
-          ],
-          "b": [
-            6,
-            4
-          ]
+          "a": [0, 4],
+          "b": [6, 4]
         },
         {
           "type": "component",
           "mode": "path",
           "ref": "R2",
           "kind": "resistor",
-          "a": [
-            2,
-            4
-          ],
-          "b": [
-            8,
-            4
-          ]
+          "a": [2, 4],
+          "b": [8, 4]
         }
       ]
     }

@@ -345,6 +345,15 @@ def test_corpus_file_redumps_byte_identically():
     assert dumps(load(RC_LOWPASS)).encode("utf-8") == RC_LOWPASS.read_bytes()
 
 
+def test_corpus_file_keeps_coordinates_on_one_line():
+    # Hand-editing coordinates is a headline workflow, so the canonical
+    # format keeps them compact (docs/SPEC_IR.md §0).
+    text = RC_LOWPASS.read_text(encoding="utf-8")
+    assert '"a": [0, 4],' in text
+    assert '"points": [[0, 0], [6, 0]]' in text
+    assert '"at": [3, 0]' in text
+
+
 def test_corpus_file_matches_the_spec_json():
     # The spec §5 schematic listing, verbatim apart from formatting.
     expected = json.loads("""

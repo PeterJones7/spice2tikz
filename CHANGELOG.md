@@ -9,6 +9,14 @@ minor releases.
 
 ## [Unreleased]
 
+### Changed
+
+- Canonical IR JSON now keeps coordinate arrays on one line
+  (`"a": [0, 4]`, `"points": [[0, 0], [6, 0]]`) instead of spreading every
+  number over its own line, while still writing one object field per line.
+  `docs/SPEC_IR.md` §0 is amended accordingly; field order and determinism are
+  unchanged, and existing files re-dump to the new format on load.
+
 ## [0.0.2] — 2026-07-28
 
 ### Added

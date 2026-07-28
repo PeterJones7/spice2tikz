@@ -17,10 +17,7 @@
           "ref": "M1",
           "kind": "nmos",
           "symbol": "mystery_fet",
-          "at": [
-            4,
-            4
-          ],
+          "at": [4, 4],
           "rot": 0,
           "mirror": false,
           "pins": {}

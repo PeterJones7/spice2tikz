@@ -9,9 +9,31 @@ only; unknown major → reject; unknown fields → warn, ignore.
 No timestamps anywhere (determinism).
 
 Types below use TypeScript-like notation. Implement as frozen-ish
-dataclasses with `to_json()` / `from_json()`; serialize with
-`json.dumps(..., indent=2, sort_keys=False)` using deliberate field
-order matching this spec.
+dataclasses with `to_json()` / `from_json()`.
+
+### Canonical serialization
+
+*Amended 2026-07-28; previously `json.dumps(..., indent=2,
+sort_keys=False)`, which put every coordinate on its own line and made
+hand-editing the Schematic IR unpleasant. Field order and determinism are
+unchanged.*
+
+Documents are written by one canonical printer
+(`_serde.dumps`), so the same content always yields byte-identical text:
+
+- Two-space indentation; UTF-8, no `\uXXXX` escaping of printable
+  characters; exactly one trailing newline; no trailing whitespace.
+- Deliberate field order matching this spec — **never** sorted keys.
+- Objects always put one field per line, so diffs stay line-oriented.
+- An array is written on **one line** when its elements are all scalars,
+  or all arrays of scalars, and the line fits within 88 columns
+  (counting indentation and the key). Otherwise one element per line.
+  Coordinate pairs (`"a": [0, 4]`) and short point lists
+  (`"points": [[0, 0], [6, 0]]`) therefore stay inline.
+
+The listings in §5 are illustrative and wrap more aggressively than the
+printer does; `tests/corpus/rc_lowpass.*.json` are the normative examples
+of the canonical format.
 
 ## 1. Netlist IR
 
