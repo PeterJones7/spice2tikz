@@ -324,28 +324,27 @@ def test_every_path_eligible_kind_has_a_bipole_name(kind: Kind):
     assert kind in BIPOLE_NAMES
 
 
-@pytest.mark.parametrize("variant", ["european", "american"])
-def test_capacitor_variant_does_not_change_the_symbol(variant: str):
-    # circuitikz has no American/European capacitor style, and its only other
-    # plate shape (cC) is documented as the *polarized* capacitor, which would
-    # change the component's meaning. So the variant is deliberately ignored
-    # rather than mistranslated -- see DECISIONS 2.3.
-    ir = SchematicIR(
-        meta=SchematicMeta(),
-        style=StyleDefaults(capacitor_variant=variant),  # type: ignore[arg-type]
-        sheets=[
-            Sheet(
-                name="main",
-                elements=[
-                    PathComponent(ref="C1", kind=Kind.CAPACITOR, a=(0, 0), b=(0, 4))
-                ],
-            )
-        ],
-    )
+def test_capacitors_have_no_style_variant():
+    # Both standards draw a non-polarized capacitor as two parallel plates, and
+    # circuitikz has no american/european capacitor key, so there is nothing to
+    # switch -- see DECISIONS 2.3.
+    ir = _sheet(PathComponent(ref="C1", kind=Kind.CAPACITOR, a=(0, 0), b=(0, 4)))
     text = emit_snippet(ir)
     assert "to[C=$C_1$]" in text
     assert "cC" not in text
     assert "capacitors" not in text  # never a bogus \ctikzset key
+
+
+@pytest.mark.parametrize("variant", ["american", "european", "cute"])
+def test_inductor_variant_is_always_declared(variant: str):
+    # circuitikz defaults to `cuteinductors`, so the chosen style must be stated
+    # or the rendering silently depends on the package default.
+    ir = SchematicIR(
+        meta=SchematicMeta(),
+        style=StyleDefaults(inductor_variant=variant),  # type: ignore[arg-type]
+        sheets=[Sheet(name="main", elements=[])],
+    )
+    assert f"\\ctikzset{{{variant} inductors}}" in emit_snippet(ir)
 
 
 def test_source_label_never_uses_the_bipole_shorthand():
@@ -500,6 +499,7 @@ def test_rc_lowpass_matches_the_normative_structure():
     assert emit_snippet(ir) == (
         "\\begin{circuitikz}[scale=0.5]\n"
         "  \\ctikzset{european resistors}\n"
+        "  \\ctikzset{cute inductors}\n"
         "  \\draw (0,4) to[american voltage source, l_=$V_1$] (0,0);\n"
         "  \\draw (0,4) to[R=$R_1$] (6,4);\n"
         "  \\draw (6,4) to[C=$C_1$] (6,0);\n"

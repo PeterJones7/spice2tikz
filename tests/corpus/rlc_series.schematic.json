@@ -9,7 +9,7 @@
   },
   "style": {
     "resistor_variant": "american",
-    "capacitor_variant": "american",
+    "inductor_variant": "american",
     "siunitx": true,
     "label_refs": true
   },

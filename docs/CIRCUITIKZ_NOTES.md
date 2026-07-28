@@ -538,9 +538,22 @@ variable capacitor vC
 Only geometry keys exist: `capacitors/width` (default 0.2),
 `capacitors/height` (default 0.6).
 
-Consequence: SPEC_IR's `capacitor_variant` has no faithful translation.
-`cC` is *polarized*, so using it for "american" would change the meaning of
-the component, not its style. The emitter therefore always emits `C`.
+Consequence: SPEC_IR's `capacitor_variant` was removed (DECISIONS 2.3). `cC`
+is *polarized*, so using it for "american" would change the meaning of the
+component, not its style; and neither standard distinguishes a non-polarized
+capacitor anyway. The emitter always emits `C`.
+
+Inductors, by contrast, do have three real styles, and `cuteinductors` is the
+package default:
+
+```latex
+\ctikzset{american inductors}   % classic coil
+\ctikzset{european inductors}   % rectangle
+\ctikzset{cute inductors}       % pig-tailed coil (package default)
+```
+
+so `inductor_variant` is the style field that was actually missing, and the
+emitter always declares it.
 
 ## Labels vs annotations, and the `_` / `^` suffixes
 

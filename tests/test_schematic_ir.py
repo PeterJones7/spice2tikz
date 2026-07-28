@@ -71,7 +71,7 @@ def rc_lowpass() -> SchematicIR:
 def test_defaults_follow_the_design_decisions():
     style = StyleDefaults()
     assert style.resistor_variant == "european"  # D11
-    assert style.capacitor_variant == "european"
+    assert style.inductor_variant == "cute"  # circuitikz's own default
     assert style.siunitx is True
     assert style.label_refs is True
     assert style.extra_preamble == []
@@ -135,7 +135,7 @@ def test_round_trip_of_every_element_type():
         ),
         style=StyleDefaults(
             resistor_variant="american",
-            capacitor_variant="american",
+            inductor_variant="american",
             siunitx=False,
             label_refs=False,
             extra_preamble=[r"\usepackage{amsmath}"],
@@ -360,7 +360,7 @@ def test_corpus_file_matches_the_spec_json():
     { "ir": "schematic", "version": "1.0",
       "meta": { "title": "RC low-pass", "grid": { "pitch": 0.5 } },
       "style": { "resistor_variant": "european",
-                 "capacitor_variant": "european",
+                 "inductor_variant": "cute",
                  "siunitx": true, "label_refs": true },
       "sheets": [ { "name": "main", "elements": [
         { "type": "component", "mode": "path", "ref": "V1", "kind": "vsource",

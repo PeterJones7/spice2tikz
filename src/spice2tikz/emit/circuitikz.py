@@ -316,11 +316,10 @@ def _style_options(style: StyleOverride | None) -> list[str]:
 def _bipole_name(kind: Kind) -> str:
     """Return the circuitikz bipole to draw *kind* with.
 
-    ``style.capacitor_variant`` is deliberately not consulted: circuitikz has no
-    American/European capacitor style, and its only alternative plate shape
-    (``cC``) is documented as the *polarized* capacitor, so honouring the IR
-    field would change what the symbol means rather than how it looks.  See
-    DECISIONS 2.3.
+    Capacitors have no style variant: circuitikz offers no American/European
+    capacitor (both standards draw two parallel plates), and its alternative
+    plate shapes are *polarized* devices, which is a component distinction
+    rather than a drawing style.  See DECISIONS 2.3.
     """
     return BIPOLE_NAMES.get(kind, "generic")
 
@@ -532,7 +531,10 @@ def _variant_options(style: StyleDefaults) -> list[str]:
     The capacitor variant has no equivalent style key in circuitikz and is
     handled per component by :func:`_bipole_name`.
     """
-    return [f"\\ctikzset{{{style.resistor_variant} resistors}}"]
+    return [
+        f"\\ctikzset{{{style.resistor_variant} resistors}}",
+        f"\\ctikzset{{{style.inductor_variant} inductors}}",
+    ]
 
 
 # --- document assembly -------------------------------------------------------

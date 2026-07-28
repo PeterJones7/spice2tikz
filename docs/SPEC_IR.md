@@ -150,11 +150,21 @@ LabelSpec { text?: string;    // absent → derive from ref/value;
             side?: "auto"|"above"|"below"|"left"|"right" }
 
 StyleDefaults { resistor_variant: "american"|"european";   // default european
-                capacitor_variant: "american"|"european";
+                inductor_variant: "american"|"european"|"cute";  // default cute
                 siunitx: boolean;                          // default true
                 label_refs: boolean;                       // default true
                 extra_preamble?: string[] }
 StyleOverride { circuitikz_options?: string; color?: string }
+
+// There is deliberately no capacitor variant: both the American and European
+// standards draw a non-polarized capacitor as two parallel plates, and
+// circuitikz has no american/european capacitor style. Polarized and
+// electrolytic capacitors are different *devices*, so they belong in the kind
+// taxonomy rather than here. (`capacitor_variant` existed in an earlier draft
+// of this spec; files that still carry it load with an unknown-field warning.)
+// Inductors, by contrast, have three genuinely different symbols, so the
+// emitter always states the chosen one rather than inheriting a package
+// default.
 
 SymbolLib { [name: string]: SymbolDef }
 SymbolDef {
@@ -240,7 +250,7 @@ Schematic IR:
 ```json
 { "ir": "schematic", "version": "1.0",
   "meta": { "title": "RC low-pass", "grid": { "pitch": 0.5 } },
-  "style": { "resistor_variant": "european", "capacitor_variant": "european",
+  "style": { "resistor_variant": "european", "inductor_variant": "cute",
              "siunitx": true, "label_refs": true },
   "sheets": [ { "name": "main", "elements": [
     { "type": "component", "mode": "path", "ref": "V1", "kind": "vsource",

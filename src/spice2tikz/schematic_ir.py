@@ -62,6 +62,10 @@ LABEL_ANCHORS: Final[tuple[str, ...]] = ("north", "south", "east", "west", "cent
 ComponentVariant = Literal["american", "european"]
 COMPONENT_VARIANTS: Final[tuple[str, ...]] = ("american", "european")
 
+InductorVariant = Literal["american", "european", "cute"]
+INDUCTOR_VARIANTS: Final[tuple[str, ...]] = ("american", "european", "cute")
+"""Inductors have three circuitikz styles, not two; ``cute`` is its default."""
+
 DEFAULT_GRID_PITCH: Final = 0.5
 """Centimetres per grid unit, unless a file says otherwise."""
 
@@ -160,7 +164,7 @@ class StyleDefaults:
     """Document-wide drawing style (defaults per D11 and D12)."""
 
     resistor_variant: ComponentVariant = "european"
-    capacitor_variant: ComponentVariant = "european"
+    inductor_variant: InductorVariant = "cute"
     siunitx: bool = True
     label_refs: bool = True
     extra_preamble: list[str] = field(default_factory=list)
@@ -169,7 +173,7 @@ class StyleDefaults:
         """Serialise; ``extra_preamble`` is omitted when empty."""
         data: dict[str, Any] = {
             "resistor_variant": self.resistor_variant,
-            "capacitor_variant": self.capacitor_variant,
+            "inductor_variant": self.inductor_variant,
             "siunitx": self.siunitx,
             "label_refs": self.label_refs,
         }
@@ -188,21 +192,29 @@ class StyleDefaults:
         mapping = require_mapping(data, location)
         known = (
             "resistor_variant",
-            "capacitor_variant",
+            "inductor_variant",
             "siunitx",
             "label_refs",
             "extra_preamble",
         )
         check_keys(mapping, known, location, warnings)
         style = cls()
-        for name in ("resistor_variant", "capacitor_variant"):
-            raw = optional_field(mapping, name, location)
-            if raw is not None:
-                variant = cast(
-                    ComponentVariant,
-                    require_choice(raw, COMPONENT_VARIANTS, f"{location}.{name}"),
-                )
-                setattr(style, name, variant)
+        raw_resistor = optional_field(mapping, "resistor_variant", location)
+        if raw_resistor is not None:
+            style.resistor_variant = cast(
+                ComponentVariant,
+                require_choice(
+                    raw_resistor, COMPONENT_VARIANTS, f"{location}.resistor_variant"
+                ),
+            )
+        raw_inductor = optional_field(mapping, "inductor_variant", location)
+        if raw_inductor is not None:
+            style.inductor_variant = cast(
+                InductorVariant,
+                require_choice(
+                    raw_inductor, INDUCTOR_VARIANTS, f"{location}.inductor_variant"
+                ),
+            )
         for name in ("siunitx", "label_refs"):
             raw = optional_field(mapping, name, location)
             if raw is not None:
