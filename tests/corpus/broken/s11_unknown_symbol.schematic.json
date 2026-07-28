@@ -1,0 +1,31 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "unknown symbol",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M1",
+          "kind": "nmos",
+          "symbol": "mystery_fet",
+          "at": [
+            4,
+            4
+          ],
+          "rot": 0,
+          "mirror": false,
+          "pins": {}
+        }
+      ]
+    }
+  ]
+}

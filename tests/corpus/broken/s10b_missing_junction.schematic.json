@@ -1,0 +1,73 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "missing junction",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [
+            0,
+            4
+          ],
+          "b": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [
+            3,
+            0
+          ],
+          "b": [
+            3,
+            4
+          ]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "C1",
+          "kind": "capacitor",
+          "a": [
+            6,
+            0
+          ],
+          "b": [
+            6,
+            4
+          ]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

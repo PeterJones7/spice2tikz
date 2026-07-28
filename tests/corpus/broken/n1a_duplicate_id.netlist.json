@@ -1,0 +1,81 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "duplicate component id",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "AC 1"
+        },
+        "raw": "V1 in 0 AC 1"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "out"
+        },
+        "value": {
+          "raw": "10k",
+          "value": 10000.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 in out 10k"
+      },
+      {
+        "id": "C1",
+        "kind": "capacitor",
+        "pins": {
+          "a": "out",
+          "b": "0"
+        },
+        "value": {
+          "raw": "100n",
+          "value": 1e-07,
+          "unit": "F"
+        },
+        "raw": "C1 out 0 100n"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "out"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 in out 1k"
+      }
+    ],
+    "nets": {
+      "in": {
+        "name": "in",
+        "class": "signal"
+      },
+      "out": {
+        "name": "out",
+        "class": "signal"
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      }
+    }
+  },
+  "subcircuits": {}
+}
