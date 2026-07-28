@@ -1,0 +1,88 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Resistive voltage divider",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "capacitor_variant": "european",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 6],
+          "b": [0, 0],
+          "label": {
+            "side": "left"
+          },
+          "value_label": {
+            "text": "\\SI{5}{\\volt}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [6, 6],
+          "b": [6, 3],
+          "value_label": {
+            "text": "\\SI{10}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [6, 3],
+          "b": [6, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[0, 6], [6, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [6, 0]]
+        },
+        {
+          "type": "junction",
+          "at": [3, 0]
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [3, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "mid",
+          "variant": "tap",
+          "at": [6, 3],
+          "rot": 0,
+          "text": "vout"
+        }
+      ]
+    }
+  ]
+}

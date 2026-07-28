@@ -35,7 +35,7 @@ from ..schematic_ir import (
     StyleOverride,
     Wire,
 )
-from ..symbols import Point, SymbolDef, lookup_symbol, rotated_size
+from ..symbols import Point, SymbolDef, lookup_symbol, pin_anchor, rotated_size
 
 Coordinate = tuple[float, float]
 
@@ -46,17 +46,34 @@ BIPOLE_NAMES: Final[dict[Kind, str]] = {
     Kind.DIODE: "D",
     Kind.VSOURCE: "vsource",
     Kind.ISOURCE: "isource",
-    Kind.VCVS: "vcontrolledsource",
-    Kind.CCVS: "vcontrolledsource",
-    Kind.VCCS: "cccs",
-    Kind.CCCS: "cccs",
+    Kind.VCVS: "cvsource",
+    Kind.CCVS: "cvsource",
+    Kind.VCCS: "cisource",
+    Kind.CCCS: "cisource",
     Kind.SWITCH: "switch",
     Kind.TLINE: "tline",
     Kind.GENERIC: "generic",
 }
-"""Best-effort ``kind`` → circuitikz bipole name; the controlled-source and
-switch mappings are unverified against a compiler and may be revisited when
-CI starts compiling goldens (roadmap 2.5)."""
+"""``kind`` → circuitikz bipole name. Every name here has been checked to
+compile against circuitikz 1.4.6; ``generic`` is the deliberate placeholder for
+kinds with no dedicated symbol (DESIGN §6)."""
+
+ACTIVE_KINDS: Final[frozenset[Kind]] = frozenset(
+    {
+        Kind.VSOURCE,
+        Kind.ISOURCE,
+        Kind.VCVS,
+        Kind.VCCS,
+        Kind.CCVS,
+        Kind.CCCS,
+    }
+)
+"""Kinds whose label must never use the ``to[<bipole>=text]`` shorthand.
+
+The CircuiTikZ manual §5.1.1 warns that for sources the shorthand sets the
+*voltage* or *current* property rather than the label, which renders as an
+annotated arrow instead of a name.  These kinds always get an explicit ``l=``.
+"""
 
 _ESCAPE_MAP: Final[dict[str, str]] = {
     "\\": "\\textbackslash{}",
@@ -111,14 +128,14 @@ _OPPOSITE_COMPASS: Final[dict[str, str]] = {
     "east": "west",
     "west": "east",
 }
-_NODE_LABEL_POSITION: Final[dict[str | None, str]] = {
-    None: "above",
-    "auto": "above",
+_NODE_LABEL_POSITION: Final[dict[str, str]] = {
     "above": "above",
     "below": "below",
     "left": "left",
     "right": "right",
 }
+"""Explicit ``LabelSpec.side`` → TikZ label position. ``auto`` is absent on
+purpose: it means "let the emitter choose" (see :func:`_free_node_side`)."""
 _ROTATION_POSITION: Final[dict[int, str]] = {
     0: "right",
     90: "above",
@@ -202,61 +219,74 @@ def _resolve_label(spec: LabelSpec | None, derived: str | None) -> str | None:
     return derived
 
 
-def _default_side(a: Point, b: Point) -> str:
-    """Return the compass side circuitikz's default label key (``l=``) uses.
+def _path_sides(a: Point, b: Point) -> tuple[str, str]:
+    """Return the ``(natural, opposite)`` compass sides of the path *a* → *b*.
 
-    circuitikz places the default label 90° counterclockwise from the
-    direction of travel from *a* to *b*.
+    ``natural`` is where circuitikz puts a plain ``l=`` label: 90°
+    counterclockwise from the direction of travel. ``a=`` annotations go on the
+    ``opposite`` side, and the underscore forms (``l_``, ``a_``) swap the two.
     """
     dx, dy = b[0] - a[0], b[1] - a[1]
     sx, sy = -dy, dx
     if abs(sx) >= abs(sy):
-        return "west" if sx < 0 else "east"
-    return "south" if sy < 0 else "north"
+        natural = "west" if sx < 0 else "east"
+    else:
+        natural = "south" if sy < 0 else "north"
+    return natural, _OPPOSITE_COMPASS[natural]
 
 
-def _resolve_side(
-    default_key: str, flipped_key: str, side: str | None, a: Point, b: Point
-) -> str:
-    """Return which of *default_key* / *flipped_key* matches *side*.
-
-    A *side* on the axis perpendicular to the path resolves to whichever key
-    matches; a *side* on the wrong axis (e.g. "above" on a vertical path)
-    falls back to *default_key*, since neither key can express it.
-    """
-    if side is None or side == "auto":
-        return default_key
-    compass = _SIDE_COMPASS[side]
-    default_compass = _default_side(a, b)
-    if compass == default_compass:
-        return default_key
-    if compass == _OPPOSITE_COMPASS[default_compass]:
-        return flipped_key
-    return default_key
+def _requested_compass(spec: LabelSpec | None) -> str | None:
+    """Return the compass side *spec* asks for, or ``None`` for "wherever"."""
+    if spec is None or spec.side is None or spec.side == "auto":
+        return None
+    return _SIDE_COMPASS[spec.side]
 
 
-def _resolve_path_label(
+def _place_path_label(
     spec: LabelSpec | None,
-    key: str,
-    flip_key: str,
-    a: Point,
-    b: Point,
     derived: str | None,
-) -> tuple[str, str] | None:
-    """Resolve a path-component label to its ``(option key, text)`` pair."""
+    keys: dict[str, str],
+    fallback: str,
+) -> tuple[str, str, str] | None:
+    """Resolve a path label to ``(option key, text, compass side)``.
+
+    *keys* maps each of the two possible compass sides to the circuitikz option
+    key that puts a label there. A requested side on the axis the path cannot
+    express (e.g. "above" on a horizontal path) falls back to *fallback*.
+    """
+    text = _resolve_label(spec, derived)
+    if text is None:
+        return None
+    requested = _requested_compass(spec)
+    compass = requested if requested in keys else fallback
+    return keys[compass], text, compass
+
+
+def _free_node_side(el: NodeComponent) -> str:
+    """Return the side of a node component that its pins leave clear.
+
+    The pins of a transistor fan out from the body on three sides, so the
+    quietest place for a label is opposite their centre of mass: right of an
+    unrotated MOS (whose body and gate sit to the left), and rotating with the
+    component. Falls back to "above" for a symbol with no usable pins.
+    """
+    total_x = sum(point[0] - el.at[0] for point in el.pins.values())
+    total_y = sum(point[1] - el.at[1] for point in el.pins.values())
+    if total_x == 0 and total_y == 0:
+        return "above"
+    if abs(total_x) >= abs(total_y):
+        return "left" if total_x > 0 else "right"
+    return "below" if total_y > 0 else "above"
+
+
+def _node_label_option(
+    spec: LabelSpec | None, derived: str | None, fallback: str
+) -> str | None:
     text = _resolve_label(spec, derived)
     if text is None:
         return None
     side = spec.side if spec is not None else None
-    return _resolve_side(key, flip_key, side, a, b), text
-
-
-def _node_label_option(spec: LabelSpec | None, derived: str | None) -> str | None:
-    text = _resolve_label(spec, derived)
-    if text is None:
-        return None
-    side = spec.side if spec is not None else None
-    position = _NODE_LABEL_POSITION.get(side, "above")
+    position = _NODE_LABEL_POSITION.get(side or "", fallback)
     return f"label={position}:{{{text}}}"
 
 
@@ -274,19 +304,47 @@ def _style_options(style: StyleOverride | None) -> list[str]:
 # --- element emission --------------------------------------------------------
 
 
+def _bipole_name(kind: Kind) -> str:
+    """Return the circuitikz bipole to draw *kind* with.
+
+    ``style.capacitor_variant`` is deliberately not consulted: circuitikz has no
+    American/European capacitor style, and its only alternative plate shape
+    (``cC``) is documented as the *polarized* capacitor, so honouring the IR
+    field would change what the symbol means rather than how it looks.  See
+    DECISIONS 2.3.
+    """
+    return BIPOLE_NAMES.get(kind, "generic")
+
+
 def _emit_path(el: PathComponent, style: StyleDefaults) -> list[str]:
-    bipole = BIPOLE_NAMES.get(el.kind, "generic")
+    bipole = _bipole_name(el.kind)
+    natural, opposite = _path_sides(el.a, el.b)
+
     ref_derived = derive_ref_label(el.ref) if style.label_refs else None
-    label = _resolve_path_label(el.label, "l", "l_", el.a, el.b, ref_derived)
-    if label is not None and label[0] == "l":
+    label = _place_path_label(
+        el.label, ref_derived, {natural: "l", opposite: "l_"}, natural
+    )
+    # `l` folds into the bipole slot (`to[R=$R_1$]`), but only for passive
+    # components: on a source that shorthand sets the voltage/current instead.
+    foldable = label is not None and label[0] == "l" and el.kind not in ACTIVE_KINDS
+    if foldable and label is not None:
         options = [f"{bipole}={label[1]}"]
     else:
         options = [bipole]
         if label is not None:
             options.append(f"{label[0]}={label[1]}")
-    value = _resolve_path_label(el.value_label, "a", "a_", el.a, el.b, None)
+
+    # The value goes on whichever side the ref label left free, so the two never
+    # collide. The annotation keys are NOT symmetric with the label keys: `a` and
+    # `a_` both sit opposite the *natural* label side, and only `a^` crosses over
+    # to it (verified by rendering against circuitikz 1.4.6).
+    free = _OPPOSITE_COMPASS[label[2]] if label is not None else opposite
+    value = _place_path_label(
+        el.value_label, None, {opposite: "a", natural: "a^"}, free
+    )
     if value is not None:
         options.append(f"{value[0]}={value[1]}")
+
     options.extend(_style_options(el.style))
     joined = ", ".join(options)
     return [f"\\draw ({_fmt_point(el.a)}) to[{joined}] ({_fmt_point(el.b)});"]
@@ -337,18 +395,68 @@ def _box_edge_point(pin: Point, at: Point, half_w: float, half_h: float) -> Coor
     return (pin[0], edge_y)
 
 
-def _emit_shape_node(el: NodeComponent, base: str, style: StyleDefaults) -> list[str]:
+def tikz_node_name(index: int) -> str:
+    """Return the TikZ node name used for the element at *index*.
+
+    Positional rather than derived from the refdes: a refdes may contain
+    characters TikZ will not accept in a node name, and the index is unique and
+    stable for a given document.
+    """
+    return f"s2t{index}"
+
+
+def _emit_shape_node(
+    el: NodeComponent, symbol: SymbolDef, base: str, index: int, style: StyleDefaults
+) -> list[str]:
+    """Place a circuitikz shape and wire its anchors out to the declared pins."""
     options = [base]
     if el.mirror:
         options.append("xscale=-1")
     if el.rot:
         options.append(f"rotate={el.rot}")
     ref_derived = derive_ref_label(el.ref) if style.label_refs else None
-    label_opt = _node_label_option(el.label, ref_derived)
+    label_opt = _node_label_option(el.label, ref_derived, _free_node_side(el))
     if label_opt is not None:
         options.append(label_opt)
     options.extend(_style_options(el.style))
-    return [f"\\node[{', '.join(options)}] at ({_fmt_point(el.at)}) {{}};"]
+    name = tikz_node_name(index)
+    lines = [
+        f"\\node[{', '.join(options)}] ({name}) at ({_fmt_point(el.at)}) {{}};",
+        *_emit_pin_leads(el, symbol, base, name),
+    ]
+    return lines
+
+
+def _emit_pin_leads(
+    el: NodeComponent, symbol: SymbolDef, base: str, name: str
+) -> list[str]:
+    """Draw a lead from each rendered terminal to its declared pin position.
+
+    circuitikz shapes are drawn at their own size, unaffected by the ``scale``
+    the grid pitch sets, so a terminal almost never lands exactly on the integer
+    grid point the IR declares for it.  Rather than pretend otherwise (which
+    leaves visibly unconnected components), each pin gets a short orthogonal
+    lead from the shape's documented anchor to the declared coordinate.  Anchors
+    are resolved by TeX after the node's own rotate/xscale, so this works for
+    every orientation.
+    """
+    leads = []
+    for pin, point in el.pins.items():
+        anchor = pin_anchor(base, pin)
+        definition = symbol.pins.get(pin)
+        if anchor is None or definition is None:
+            continue
+        if definition.offset == (0, 0):
+            # Pin sits on the node origin (a MOS bulk): the anchor is already
+            # there, so a lead would be zero length.
+            continue
+        # Leave the body along the axis the pin lies on, then turn. Use the
+        # placed direction, not the symbol's own offset, so that a rotated
+        # component leaves along its rotated axis.
+        dx, dy = point[0] - el.at[0], point[1] - el.at[1]
+        joint = "-|" if abs(dx) > abs(dy) else "|-"
+        leads.append(f"\\draw ({name}.{anchor}) {joint} ({_fmt_point(point)});")
+    return leads
 
 
 def _emit_generic_box(
@@ -376,18 +484,22 @@ def _emit_generic_box(
     return lines
 
 
-def _emit_node(el: NodeComponent, ir: SchematicIR, style: StyleDefaults) -> list[str]:
+def _emit_node(
+    el: NodeComponent, index: int, ir: SchematicIR, style: StyleDefaults
+) -> list[str]:
     symbol = lookup_symbol(el.symbol, ir.symbols)
     if symbol is not None and symbol.base is not None:
-        return _emit_shape_node(el, symbol.base, style)
+        return _emit_shape_node(el, symbol, symbol.base, index, style)
     return _emit_generic_box(el, symbol, style)
 
 
-def _emit_element(element: Element, ir: SchematicIR, style: StyleDefaults) -> list[str]:
+def _emit_element(
+    element: Element, index: int, ir: SchematicIR, style: StyleDefaults
+) -> list[str]:
     if isinstance(element, PathComponent):
         return _emit_path(element, style)
     if isinstance(element, NodeComponent):
-        return _emit_node(element, ir, style)
+        return _emit_node(element, index, ir, style)
     if isinstance(element, Wire):
         return _emit_wire(element)
     if isinstance(element, Junction):
@@ -400,18 +512,18 @@ def _emit_element(element: Element, ir: SchematicIR, style: StyleDefaults) -> li
 
 
 def _variant_options(style: StyleDefaults) -> list[str]:
-    r"""Return ``\ctikzset`` overrides for non-default variants (D11).
+    r"""Return the ``\ctikzset`` style declarations for this document (D11).
 
-    circuitikz's own default is the European resistor/capacitor style, which
-    is why the SPEC_IR §5 golden emission needs no override at all; only the
-    American variant needs an explicit switch.
+    The resistor variant is *always* declared, never left implicit: circuitikz's
+    own default is the American zigzag (``\newif\ifpgf@circuit@europeanresistor``
+    defaults false), so the IR's European default would silently render as
+    American if the emitter only spoke up for the non-default case. Declaring it
+    outright also means the rendering cannot drift with a circuitikz release.
+
+    The capacitor variant has no equivalent style key in circuitikz and is
+    handled per component by :func:`_bipole_name`.
     """
-    options = []
-    if style.resistor_variant == "american":
-        options.append("\\ctikzset{american resistors}")
-    if style.capacitor_variant == "american":
-        options.append("\\ctikzset{american capacitors}")
-    return options
+    return [f"\\ctikzset{{{style.resistor_variant} resistors}}"]
 
 
 # --- document assembly -------------------------------------------------------
@@ -423,8 +535,8 @@ def emit_snippet(ir: SchematicIR) -> str:
     sheet = ir.sheets[0] if ir.sheets else Sheet()
     lines = [f"\\begin{{circuitikz}}[scale={_format_number(ir.meta.grid.pitch)}]"]
     lines.extend(f"  {line}" for line in _variant_options(style))
-    for element in sheet.elements:
-        lines.extend(f"  {line}" for line in _emit_element(element, ir, style))
+    for index, element in enumerate(sheet.elements):
+        lines.extend(f"  {line}" for line in _emit_element(element, index, ir, style))
     lines.append("\\end{circuitikz}")
     return "\n".join(lines) + "\n"
 
@@ -433,7 +545,10 @@ def emit_standalone(ir: SchematicIR) -> str:
     """Wrap :func:`emit_snippet` in a compilable standalone document (D13)."""
     style = ir.effective_style()
     lines = [
-        "\\documentclass[tikz, border=2pt]{standalone}",
+        # `border` alone crops to the drawing; adding standalone's `tikz` class
+        # option defeats the cropping when circuitikz is loaded separately, and
+        # yields a full letter page.
+        "\\documentclass[border=2pt]{standalone}",
         "\\usepackage{circuitikz}",
         "\\usepackage{siunitx}",
         *style.extra_preamble,

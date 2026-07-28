@@ -1,0 +1,11 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \draw (0,6) to[vsource, l_=$V_1$, a^=\SI{5}{\volt}] (0,0);
+  \draw (6,6) to[R=$R_1$, a=\SI{10}{\kilo\ohm}] (6,3);
+  \draw (6,3) to[R=$R_2$, a=\SI{10}{\kilo\ohm}] (6,0);
+  \draw (0,6) -- (6,6);
+  \draw (0,0) -- (6,0);
+  \draw (3,0) node[circ]{};
+  \draw (3,0) node[ground]{};
+  \node[right] at (6,3) {vout};
+\end{circuitikz}

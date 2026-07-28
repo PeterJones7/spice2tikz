@@ -195,10 +195,10 @@ def _mos(base: str) -> SymbolDef:
     return SymbolDef(
         size=(4, 4),
         pins={
-            "d": PinDef(offset=(2, 2), label="D"),
+            "d": PinDef(offset=(0, 2), label="D"),
             "g": PinDef(offset=(-2, 0), label="G"),
-            "s": PinDef(offset=(2, -2), label="S"),
-            "b": PinDef(offset=(2, 0), label="B"),
+            "s": PinDef(offset=(0, -2), label="S"),
+            "b": PinDef(offset=(0, 0), label="B"),
         },
         base=base,
     )
@@ -209,9 +209,9 @@ def _bjt(base: str) -> SymbolDef:
     return SymbolDef(
         size=(4, 4),
         pins={
-            "c": PinDef(offset=(2, 2), label="C"),
+            "c": PinDef(offset=(0, 2), label="C"),
             "b": PinDef(offset=(-2, 0), label="B"),
-            "e": PinDef(offset=(2, -2), label="E"),
+            "e": PinDef(offset=(0, -2), label="E"),
         },
         base=base,
     )
@@ -225,11 +225,41 @@ BUILTIN_SYMBOLS: Final[dict[str, SymbolDef]] = {
 }
 """Symbols every schematic may reference without declaring them.
 
-Offsets follow the circuitikz transistor anchors: the control terminal on
-the left of the body, the two channel terminals above and below its right
-edge, and the MOS bulk on the channel midpoint.  Opamps and other shapes
-are deferred to a later roadmap section.
+Offsets follow the *directions* of the circuitikz transistor anchors, measured
+from the shapes themselves: the control terminal (G/B) due left of the origin,
+and the two channel terminals (D/S, C/E) directly above and below it, with the
+MOS bulk on the origin.  circuitikz places those anchors at non-integer grid
+distances (D sits 0.77 cm out, which is 1.54 units at the default 0.5 cm
+pitch), so the emitter draws a short lead from each anchor to the pin position
+declared here rather than pretending the two coincide.
+
+``size`` is a deliberately conservative box: the real shapes extend only to the
+left of the origin, but SPEC_IR §2 defines ``size`` as centred on it.
+
+Opamps and other shapes are deferred to a later roadmap section.
 """
+
+BASE_PIN_ANCHORS: Final[dict[str, dict[str, str]]] = {
+    "nmos": {"d": "D", "g": "G", "s": "S", "b": "bulk"},
+    "pmos": {"d": "D", "g": "G", "s": "S", "b": "bulk"},
+    "npn": {"c": "C", "b": "B", "e": "E"},
+    "pnp": {"c": "C", "b": "B", "e": "E"},
+}
+"""Pin name → circuitikz node anchor, per built-in ``base`` shape.
+
+Anchor names are the documented ones (CircuiTikZ manual §4.15.9: MOS devices
+expose ``base``/``gate``/``source``/``drain``, abbreviated ``B``/``G``/``S``/
+``D``, plus a ``bulk`` anchor; bipolars expose ``B``/``C``/``E``).  The emitter
+needs them to draw leads from the rendered terminal to the declared pin.
+"""
+
+
+def pin_anchor(base: str | None, pin: str) -> str | None:
+    """Return the circuitikz anchor for *pin* of shape *base*, if known."""
+    if base is None:
+        return None
+    return BASE_PIN_ANCHORS.get(base, {}).get(pin)
+
 
 SYMBOL_FOR_KIND: Final[dict[Kind, str]] = {
     Kind.NMOS: "nmos",

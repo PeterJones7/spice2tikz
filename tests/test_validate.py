@@ -442,7 +442,7 @@ def test_node_component_pins_may_not_be_missing_or_extra():
     assert validate_schematic(SchematicIR(sheets=[Sheet(elements=[node])])) == [
         Finding(
             ERROR,
-            "pin 'e' of symbol 'npn' is missing (expected at (6, 2))",
+            "pin 'e' of symbol 'npn' is missing (expected at (4, 2))",
             "sheets[0].elements[0] (Q1)",
         ),
         Finding(

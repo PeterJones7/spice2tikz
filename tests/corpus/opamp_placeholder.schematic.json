@@ -1,0 +1,122 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Opamp drawn as a generic subcircuit box",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "capacitor_variant": "european",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "symbols": {
+    "subckt:opamp": {
+      "size": [6, 4],
+      "pins": {
+        "in+": {
+          "offset": [-4, 1]
+        },
+        "in-": {
+          "offset": [-4, -1]
+        },
+        "out": {
+          "offset": [4, 0]
+        },
+        "vcc": {
+          "offset": [0, 3]
+        },
+        "vee": {
+          "offset": [0, -3]
+        }
+      }
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 7],
+          "b": [0, 0],
+          "label": {
+            "side": "left"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "U1",
+          "kind": "subcircuit",
+          "symbol": "subckt:opamp",
+          "at": [8, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "in+": [4, 7],
+            "in-": [4, 5],
+            "out": [12, 6],
+            "vcc": [8, 9],
+            "vee": [8, 3]
+          }
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[0, 7], [4, 7]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[4, 5], [4, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[12, 6], [16, 6]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "vcc",
+          "variant": "vcc",
+          "at": [8, 9],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "vee",
+          "variant": "vee",
+          "at": [8, 3],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [4, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [0, 0],
+          "rot": 0
+        },
+        {
+          "type": "port",
+          "name": "out",
+          "at": [16, 6],
+          "direction": "right"
+        }
+      ]
+    }
+  ]
+}

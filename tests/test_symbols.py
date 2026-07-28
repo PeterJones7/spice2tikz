@@ -22,18 +22,20 @@ from spice2tikz.symbols import (
 NMOS = BUILTIN_SYMBOLS["nmos"]
 
 # Hand-computed pin positions for all eight orientations of the built-in nmos
-# symbol, whose unrotated offsets are d(2,2) g(-2,0) s(2,-2) b(2,0).
+# symbol, whose unrotated offsets are d(0,2) g(-2,0) s(0,-2) b(0,0) — the
+# channel terminals directly above and below the origin, the gate due left, and
+# the bulk on the origin, matching the directions of the circuitikz anchors.
 # Mirror negates x first, then the rotation turns counterclockwise (y-up):
 # 90° maps (x,y)→(-y,x); 180° maps (x,y)→(-x,-y); 270° maps (x,y)→(y,-x).
 NMOS_ORIENTATIONS = {
-    (0, False): {"d": (2, 2), "g": (-2, 0), "s": (2, -2), "b": (2, 0)},
-    (90, False): {"d": (-2, 2), "g": (0, -2), "s": (2, 2), "b": (0, 2)},
-    (180, False): {"d": (-2, -2), "g": (2, 0), "s": (-2, 2), "b": (-2, 0)},
-    (270, False): {"d": (2, -2), "g": (0, 2), "s": (-2, -2), "b": (0, -2)},
-    (0, True): {"d": (-2, 2), "g": (2, 0), "s": (-2, -2), "b": (-2, 0)},
-    (90, True): {"d": (-2, -2), "g": (0, 2), "s": (2, -2), "b": (0, -2)},
-    (180, True): {"d": (2, -2), "g": (-2, 0), "s": (2, 2), "b": (2, 0)},
-    (270, True): {"d": (2, 2), "g": (0, -2), "s": (-2, 2), "b": (0, 2)},
+    (0, False): {"d": (0, 2), "g": (-2, 0), "s": (0, -2), "b": (0, 0)},
+    (90, False): {"d": (-2, 0), "g": (0, -2), "s": (2, 0), "b": (0, 0)},
+    (180, False): {"d": (0, -2), "g": (2, 0), "s": (0, 2), "b": (0, 0)},
+    (270, False): {"d": (2, 0), "g": (0, 2), "s": (-2, 0), "b": (0, 0)},
+    (0, True): {"d": (0, 2), "g": (2, 0), "s": (0, -2), "b": (0, 0)},
+    (90, True): {"d": (-2, 0), "g": (0, 2), "s": (2, 0), "b": (0, 0)},
+    (180, True): {"d": (0, -2), "g": (-2, 0), "s": (0, 2), "b": (0, 0)},
+    (270, True): {"d": (2, 0), "g": (0, -2), "s": (-2, 0), "b": (0, 0)},
 }
 
 

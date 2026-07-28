@@ -1,0 +1,122 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Full-wave bridge rectifier",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "capacitor_variant": "european",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D3",
+          "kind": "diode",
+          "a": [4, 2],
+          "b": [4, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D1",
+          "kind": "diode",
+          "a": [4, 6],
+          "b": [4, 10]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D4",
+          "kind": "diode",
+          "a": [10, 2],
+          "b": [10, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D2",
+          "kind": "diode",
+          "a": [10, 6],
+          "b": [10, 10]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [4, 6],
+          "b": [10, 6],
+          "label": {
+            "side": "below"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RL",
+          "kind": "resistor",
+          "a": [14, 10],
+          "b": [14, 2],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "outp",
+          "points": [[4, 10], [14, 10]]
+        },
+        {
+          "type": "wire",
+          "net": "outn",
+          "points": [[4, 2], [14, 2]]
+        },
+        {
+          "type": "junction",
+          "at": [4, 6]
+        },
+        {
+          "type": "junction",
+          "at": [10, 6]
+        },
+        {
+          "type": "junction",
+          "at": [10, 10]
+        },
+        {
+          "type": "junction",
+          "at": [10, 2]
+        },
+        {
+          "type": "junction",
+          "at": [7, 2]
+        },
+        {
+          "type": "net_symbol",
+          "net": "outn",
+          "variant": "ground",
+          "at": [7, 2],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "outp",
+          "variant": "tap",
+          "at": [14, 10],
+          "rot": 0,
+          "text": "vout"
+        }
+      ]
+    }
+  ]
+}

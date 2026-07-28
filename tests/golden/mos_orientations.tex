@@ -1,0 +1,28 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \node[nmos, label=right:{$M_1$}] (s2t0) at (4,6) {};
+  \draw (s2t0.D) |- (4,8);
+  \draw (s2t0.G) -| (2,6);
+  \draw (s2t0.S) |- (4,4);
+  \node[nmos, rotate=90, label=above:{$M_2$}] (s2t1) at (12,6) {};
+  \draw (s2t1.D) -| (10,6);
+  \draw (s2t1.G) |- (12,4);
+  \draw (s2t1.S) -| (14,6);
+  \node[nmos, rotate=180, label=left:{$M_3$}] (s2t2) at (20,6) {};
+  \draw (s2t2.D) |- (20,4);
+  \draw (s2t2.G) -| (22,6);
+  \draw (s2t2.S) |- (20,8);
+  \node[nmos, rotate=270, label=below:{$M_4$}] (s2t3) at (28,6) {};
+  \draw (s2t3.D) -| (30,6);
+  \draw (s2t3.G) |- (28,8);
+  \draw (s2t3.S) -| (26,6);
+  \node[pmos, xscale=-1, rotate=180, label=right:{$M_5$}] (s2t4) at (36,6) {};
+  \draw (s2t4.D) |- (36,4);
+  \draw (s2t4.G) -| (34,6);
+  \draw (s2t4.S) |- (36,8);
+  \node[anchor=north] at (4,1) {$0^{\circ}$};
+  \node[anchor=north] at (12,1) {$90^{\circ}$};
+  \node[anchor=north] at (20,1) {$180^{\circ}$};
+  \node[anchor=north] at (28,1) {$270^{\circ}$};
+  \node[anchor=north] at (36,1) {pmos $180^{\circ}$ mirrored};
+\end{circuitikz}

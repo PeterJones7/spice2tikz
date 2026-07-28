@@ -1,0 +1,133 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "MOS symbol orientations",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "capacitor_variant": "european",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M1",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [4, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [4, 8],
+            "g": [2, 6],
+            "s": [4, 4],
+            "b": [4, 6]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M2",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [12, 6],
+          "rot": 90,
+          "mirror": false,
+          "pins": {
+            "d": [10, 6],
+            "g": [12, 4],
+            "s": [14, 6],
+            "b": [12, 6]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M3",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [20, 6],
+          "rot": 180,
+          "mirror": false,
+          "pins": {
+            "d": [20, 4],
+            "g": [22, 6],
+            "s": [20, 8],
+            "b": [20, 6]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M4",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [28, 6],
+          "rot": 270,
+          "mirror": false,
+          "pins": {
+            "d": [30, 6],
+            "g": [28, 8],
+            "s": [26, 6],
+            "b": [28, 6]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M5",
+          "kind": "pmos",
+          "symbol": "pmos",
+          "at": [36, 6],
+          "rot": 180,
+          "mirror": true,
+          "pins": {
+            "d": [36, 4],
+            "g": [34, 6],
+            "s": [36, 8],
+            "b": [36, 6]
+          }
+        },
+        {
+          "type": "label",
+          "at": [4, 1],
+          "text": "$0^{\\circ}$",
+          "anchor": "north"
+        },
+        {
+          "type": "label",
+          "at": [12, 1],
+          "text": "$90^{\\circ}$",
+          "anchor": "north"
+        },
+        {
+          "type": "label",
+          "at": [20, 1],
+          "text": "$180^{\\circ}$",
+          "anchor": "north"
+        },
+        {
+          "type": "label",
+          "at": [28, 1],
+          "text": "$270^{\\circ}$",
+          "anchor": "north"
+        },
+        {
+          "type": "label",
+          "at": [36, 1],
+          "text": "pmos $180^{\\circ}$ mirrored",
+          "anchor": "north"
+        }
+      ]
+    }
+  ]
+}

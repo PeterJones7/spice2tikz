@@ -1,0 +1,24 @@
+\documentclass[border=2pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{siunitx}
+\begin{document}
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \draw (0,7) to[vsource, l_=$V_1$] (0,0);
+  \draw (5,4) rectangle (11,8);
+  \draw (4,7) -- (5,7);
+  \draw (4,5) -- (5,5);
+  \draw (12,6) -- (11,6);
+  \draw (8,9) -- (8,8);
+  \draw (8,3) -- (8,4);
+  \node at (8,6) {$U_1$};
+  \draw (0,7) -- (4,7);
+  \draw (4,5) -- (4,0);
+  \draw (12,6) -- (16,6);
+  \draw (8,9) node[vcc]{};
+  \draw (8,3) node[vee]{};
+  \draw (4,0) node[ground]{};
+  \draw (0,0) node[ground]{};
+  \node[right] at (16,6) {out};
+\end{circuitikz}
+\end{document}

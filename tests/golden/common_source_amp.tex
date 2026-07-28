@@ -1,0 +1,18 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \draw (10,14) to[R=$\mathrm{RD}$, a=\SI{4.7}{\kilo\ohm}] (10,8);
+  \node[nmos, label=right:{$M_1$}] (s2t1) at (10,6) {};
+  \draw (s2t1.D) |- (10,8);
+  \draw (s2t1.G) -| (8,6);
+  \draw (s2t1.S) |- (10,4);
+  \draw (0,6) to[vsource, l_=$V_1$] (0,0);
+  \draw (10,14) -- (10,16);
+  \draw (0,6) -- (8,6);
+  \draw (10,8) -- (14,8);
+  \draw (10,4) -- (10,0);
+  \draw (10,8) node[circ]{};
+  \draw (10,16) node[vcc]{};
+  \draw (10,0) node[ground]{};
+  \draw (0,0) node[ground]{};
+  \node[right] at (14,8) {vout};
+\end{circuitikz}

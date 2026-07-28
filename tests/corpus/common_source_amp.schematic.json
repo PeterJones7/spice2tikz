@@ -1,0 +1,114 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "NMOS common-source amplifier",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "capacitor_variant": "european",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RD",
+          "kind": "resistor",
+          "a": [10, 14],
+          "b": [10, 8],
+          "value_label": {
+            "text": "\\SI{4.7}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M1",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [10, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [10, 8],
+            "g": [8, 6],
+            "s": [10, 4],
+            "b": [10, 6]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 6],
+          "b": [0, 0],
+          "label": {
+            "side": "left"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "vdd",
+          "points": [[10, 14], [10, 16]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[0, 6], [8, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[10, 8], [14, 8]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[10, 4], [10, 0]]
+        },
+        {
+          "type": "junction",
+          "at": [10, 8]
+        },
+        {
+          "type": "net_symbol",
+          "net": "vdd",
+          "variant": "vcc",
+          "at": [10, 16],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [10, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [0, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "out",
+          "variant": "tap",
+          "at": [14, 8],
+          "rot": 0,
+          "text": "vout"
+        }
+      ]
+    }
+  ]
+}
