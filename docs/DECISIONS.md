@@ -21,3 +21,7 @@ Format: `YYYY-MM-DD | roadmap § | decision — rationale`
 - 2026-07-28 | 1.1 | Text left over after the suffix that is not purely alphabetic (`1k*2`, `1k 2`) makes the value unparseable → `Quantity(raw=...)` only, rather than silently dropping the remainder.
 - 2026-07-28 | 1.1 | Scale suffixes are stored as powers of ten and applied through a float literal (`100n` → `float("100e-9")`) — exact decimal scaling, so values match the spec examples bit-for-bit.
 - 2026-07-28 | 1.1 | Suffix set is exactly the roadmap list (f p n u µ/μ m k meg g t); `mil` is not a suffix (its unit text is ignored instead).
+- 2026-07-28 | 1.2 | `Kind` is a `str`-subclass `Enum` with `__str__` returning its value — comparisons and f-strings behave like the JSON text on every supported Python version, while typos are caught at load time.
+- 2026-07-28 | 1.2 | `ir` and `version` are `ClassVar`s, not dataclass fields — they are properties of the format, not of a document, and this keeps round-trip equality about content.
+- 2026-07-28 | 1.2 | `SubcktDef` serialises as `ports`, `params?`, `components`, `nets` (declaration order of "extends Scope"); `subcircuits` is always emitted (spec §5 shows `{}`) while empty `models` is omitted, being optional.
+- 2026-07-28 | 1.2 | Net dictionaries and component lists keep insertion order rather than being sorted — determinism comes from preserving source order, which also keeps diffs readable (D9).
