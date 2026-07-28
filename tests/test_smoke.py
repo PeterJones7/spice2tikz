@@ -17,11 +17,13 @@ def test_package_exposes_version():
     assert spice2tikz.__version__.count(".") == 2
 
 
-def test_main_with_no_arguments_prints_version(capsys: pytest.CaptureFixture[str]):
-    assert cli.main([]) == 0
+def test_main_with_no_arguments_asks_for_an_input_file(
+    capsys: pytest.CaptureFixture[str],
+):
+    assert cli.main([]) == cli.EXIT_INPUT_ERROR
     captured = capsys.readouterr()
-    assert captured.out == f"spice2tikz {spice2tikz.__version__}\n"
-    assert captured.err == ""
+    assert captured.out == ""
+    assert "usage: spice2tikz" in captured.err
 
 
 def test_version_flag_exits_zero(capsys: pytest.CaptureFixture[str]):
