@@ -57,10 +57,18 @@ def find_converter() -> tuple[str, str] | None:
         ("pdftocairo", "poppler"),
         ("magick", "imagemagick"),
         ("convert", "imagemagick"),
+        ("gs", "ghostscript"),
+        ("gswin64c", "ghostscript"),
     ):
         if shutil.which(command):
             return command, kind
     return None
+
+
+def golden_name(tex: Path) -> str:
+    """Return a golden's name, keeping any subdirectory (``asc/rc_lowpass``)."""
+    relative = tex.relative_to(GOLDEN_DIR)
+    return relative.as_posix()[: -len(STANDALONE_SUFFIX)]
 
 
 def run(command: Sequence[str], cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -102,6 +110,22 @@ def convert_to_png(
             return (result.stderr or "conversion failed").strip().splitlines()[0]
         shutil.move(str(produced), str(png))
         return None
+    if kind == "ghostscript":
+        args = [
+            command,
+            "-q",
+            "-dNOPAUSE",
+            "-dBATCH",
+            "-dSAFER",
+            "-sDEVICE=pngalpha",
+            f"-r{dpi}",
+            f"-sOutputFile={png}",
+            str(pdf),
+        ]
+        result = run(args, work)
+        if result.returncode != 0 or not png.exists():
+            return (result.stderr or "conversion failed").strip().splitlines()[0]
+        return None
     args = [command, "-density", str(dpi), str(pdf), "-quality", "92", str(png)]
     result = run(args, work)
     if result.returncode != 0 or not png.exists():
@@ -118,9 +142,9 @@ def render(
     keep_pdf: bool,
 ) -> str | None:
     """Compile and render one golden. Return an error message, or ``None``."""
-    name = tex.name[: -len(STANDALONE_SUFFIX)]
+    name = golden_name(tex)
     command, args = latex
-    with tempfile.TemporaryDirectory(prefix=f"s2t-{name}-") as tmp:
+    with tempfile.TemporaryDirectory(prefix=f"s2t-{name.replace('/', '-')}-") as tmp:
         work = Path(tmp)
         shutil.copy2(tex, work / tex.name)
         result = run([command, *args, tex.name], work)
@@ -128,7 +152,9 @@ def render(
         pdf = (work / tex.name).with_suffix(".pdf")
         if result.returncode != 0 or not pdf.exists():
             return latex_error(pdf.with_suffix(".log"))
-        error = convert_to_png(pdf, outdir / f"{name}.png", converter, dpi, work)
+        png = outdir / f"{name}.png"
+        png.parent.mkdir(parents=True, exist_ok=True)
+        error = convert_to_png(pdf, png, converter, dpi, work)
         if error is not None:
             return error
         if keep_pdf:
@@ -175,7 +201,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if latex is None:
             missing.append("a LaTeX toolchain (latexmk or pdflatex)")
         if converter is None:
-            missing.append("a PDF→PNG converter (pdftoppm, pdftocairo, or magick)")
+            missing.append("a PDF→PNG converter (pdftoppm, pdftocairo, magick, or gs)")
         print(f"render_goldens: missing {' and '.join(missing)}", file=sys.stderr)
         print(
             "render_goldens: on Debian/Ubuntu install: latexmk texlive-latex-base "
@@ -184,11 +210,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return EXIT_NO_TOOLS
 
-    available = sorted(GOLDEN_DIR.glob(f"*{STANDALONE_SUFFIX}"))
+    # ** so that goldens grouped in subdirectories (asc/, layout/) are found too.
+    available = sorted(GOLDEN_DIR.glob(f"**/*{STANDALONE_SUFFIX}"))
     if args.names:
         wanted = set(args.names)
-        selected = [t for t in available if t.name[: -len(STANDALONE_SUFFIX)] in wanted]
-        unknown = wanted - {t.name[: -len(STANDALONE_SUFFIX)] for t in available}
+        selected = [t for t in available if golden_name(t) in wanted]
+        unknown = wanted - {golden_name(t) for t in available}
         for name in sorted(unknown):
             print(f"render_goldens: no such golden: {name}", file=sys.stderr)
         if unknown:
@@ -210,7 +237,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     failures = 0
     for tex in selected:
-        name = tex.name[: -len(STANDALONE_SUFFIX)]
+        name = golden_name(tex)
         print(f"  {name:24} ", end="", flush=True)
         error = render(tex, args.outdir, latex, converter, args.dpi, args.keep_pdf)
         if error is None:

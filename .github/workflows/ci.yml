@@ -47,3 +47,23 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: pytest
         run: pytest
+
+  compile:
+    name: compile goldens (TeX Live)
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3 python3-pip python3-venv
+      - name: Install package with dev extras
+        run: |
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/python -m pip install --upgrade pip
+          /tmp/venv/bin/python -m pip install -e ".[dev]"
+      - name: Check the toolchain is really present
+        run: latexmk --version
+      - name: Compile every standalone golden
+        run: /tmp/venv/bin/python -m pytest tests/test_compile.py -v
