@@ -21,6 +21,7 @@ worse alignment than it has today (``docs/DESIGN.md`` §5).
 from __future__ import annotations
 
 import json
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
@@ -54,6 +55,9 @@ from spice2tikz.schematic_ir import (
 )
 from spice2tikz.symbols import Point
 from spice2tikz.validate import Severity, format_finding, validate
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+import cross_validate
 
 CORPUS = Path(__file__).parent / "corpus" / "spice"
 GOLDEN = Path(__file__).parent / "golden"
@@ -549,3 +553,35 @@ def test_metrics_json_round_trips():
         "bbox_area": 5,
         "alignment": 0.5,
     }
+
+
+# --- §5.6 cross-validation against the human .asc layouts -------------------
+
+
+def test_some_circuits_exist_in_both_corpora():
+    """Without an overlap there is nothing to compare auto layout against."""
+    assert cross_validate.shared_circuits()
+
+
+def test_cross_validation_reports_a_comparison(capsys: pytest.CaptureFixture[str]):
+    """Report, do not assert (roadmap §5.6).
+
+    The engine is not expected to match a hand layout, and on circuits this
+    small the numbers are noisy. What matters is that the comparison keeps
+    working, so the gap can be watched over releases and so a future layout v2
+    has ground truth to be evaluated against. Run
+    ``python tools/cross_validate.py`` to read it.
+    """
+    assert cross_validate.main([]) == 0
+    printed = capsys.readouterr().out
+    for name in cross_validate.shared_circuits():
+        assert name in printed
+    assert "wire_length" in printed
+
+
+@pytest.mark.parametrize("name", cross_validate.shared_circuits())
+def test_cross_validation_measures_both_sides(name: str):
+    pair = cross_validate.compare(name)
+    assert set(pair) == {"human", "auto"}
+    for side in pair.values():
+        assert side["components"] > 0
