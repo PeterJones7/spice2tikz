@@ -856,7 +856,10 @@ def load(path: Path, warnings: list[str] | None = None) -> SchematicIR:
 
 def dump(ir: SchematicIR, path: Path) -> None:
     """Write *ir* to *path* as canonical JSON text."""
-    path.write_text(dumps(ir), encoding="utf-8")
+    # newline="\n" keeps the bytes identical on every platform: without
+    # it Python translates "\n" to the OS line ending, and determinism
+    # (CLAUDE.md working rule 4) would hold only on POSIX.
+    path.write_text(dumps(ir), encoding="utf-8", newline="\n")
 
 
 def _require_kind(data: dict[str, Any], location: str) -> Kind:
