@@ -624,7 +624,7 @@ def _place_path(
         inner = (
             rail_y - SUPPLY_DROP
             if vertical.band == "supply"
-            else row_y(_ground_row(rows, vertical.x))
+            else _ground_inner(placement, rows, vertical)
         )
         ends = {
             vertical.rail: (vertical.x, rail_y),
@@ -659,18 +659,32 @@ def _place_path(
     placement.add_pin(second, b)
 
 
-def _ground_row(rows: _RowAllocator, x: int) -> int:
-    """Return the row a ground-side component's top terminal should sit on.
+def _ground_inner(
+    placement: Placement, rows: _RowAllocator, vertical: _Vertical
+) -> int:
+    """Return the y of a ground-side component's upper terminal.
 
-    Row zero unless something already crosses this column there, in which case
-    the component reaches one row higher rather than have a wire pass through
-    its terminal.
+    Where the net already reaches a device terminal — a transistor emitter or
+    source, which sits below the row its body is on — the component reaches up
+    to *that* height. Otherwise the wire joining them would have to climb the
+    column the component itself occupies, and be drawn straight down the middle
+    of the part: a connection to the body of a resistor, which means nothing.
+
+    With no device to meet, the component tops out on the lowest row that has
+    nothing crossing this column, so no wire passes through its terminal.
     """
+    reached = [
+        point[1]
+        for point in placement.net_pins.get(vertical.signal, [])
+        if point[1] > placement.rail_y[vertical.rail] + 1
+    ]
+    if reached:
+        return min(reached)
     row = 0
-    while not rows.fits(row, (x, x)):
+    while not rows.fits(row, (vertical.x, vertical.x)):
         row += 1
-    rows.block_point(row, x)
-    return row
+    rows.block_point(row, vertical.x)
+    return row_y(row)
 
 
 def _value_label(component: Component, siunitx: bool) -> LabelSpec | None:

@@ -9,6 +9,34 @@ minor releases.
 
 ## [Unreleased]
 
+### Fixed
+
+- The layout engine drew a net's column wire *through* a rail-connected
+  component when the net also reached a device terminal below the component's
+  row — a resistor with a wire down the middle of it, which reads as a
+  connection to the body of the part. Rail-connected components now reach the
+  terminal they actually serve, and the router treats two-terminal components
+  as obstacles so no wire can be drawn along one again.
+- A wire could end on another net's terminal: the obstacle check exempted a
+  foreign terminal when it was the segment's own endpoint, which is the worst
+  case rather than a safe one.
+- Supply glyphs sat in the middle of their rail, where they became a third
+  conductor and earned a junction dot, so the arrow, the dot and the voltage
+  label printed on top of each other. They now sit just past the end of the
+  rail, where no dot is needed.
+- Tap labels are placed on whichever side of their terminal is free, instead
+  of always above — the output net's label was being printed across a
+  transistor.
+
+### Added
+
+- `tests/test_end_to_end.py`: SPICE text in, CircuiTikZ out, with no fixtures
+  in between — and, most importantly, a test that reads the finished drawing
+  back as a person would and checks the recovered connectivity against the
+  netlist it came from. Nothing else in the suite asks whether the figure is
+  the same circuit; a sheet that shorts two nodes satisfies all thirteen IR
+  invariants. Two sabotage tests keep the check honest.
+
 ## [0.3.0] — 2026-08-29
 
 Public-release polish (roadmap section 6). No behaviour changes to the

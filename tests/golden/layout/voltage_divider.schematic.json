@@ -51,14 +51,14 @@
         {
           "type": "wire",
           "net": "in",
-          "points": [[0, 10], [8, 10]]
+          "points": [[0, 10], [10, 10]]
         },
         {
           "type": "net_symbol",
           "net": "mid",
           "variant": "tap",
           "at": [8, 6],
-          "rot": 90,
+          "rot": 0,
           "text": "mid"
         },
         {
@@ -72,7 +72,7 @@
           "type": "net_symbol",
           "net": "in",
           "variant": "vcc",
-          "at": [4, 10],
+          "at": [10, 10],
           "rot": 0,
           "text": "in = 5"
         },
@@ -82,7 +82,7 @@
         },
         {
           "type": "junction",
-          "at": [4, 10]
+          "at": [8, 10]
         }
       ]
     }

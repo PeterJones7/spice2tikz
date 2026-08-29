@@ -35,7 +35,7 @@ from ..schematic_ir import (
     PathComponent,
     Wire,
 )
-from ..symbols import Point
+from ..symbols import Point, Rotation
 from .place import Placement
 
 MIN_JUNCTION_CONDUCTORS: Final = 3
@@ -58,15 +58,22 @@ class _Obstacles:
     pins: dict[Point, set[str]] = field(default_factory=dict)
     bodies: list[Box] = field(default_factory=list)
     drawn: list[tuple[Segment, str]] = field(default_factory=list)
+    paths: list[Segment] = field(default_factory=list)
 
     def blocked(self, net: str, start: Point, end: Point) -> bool:
         """Return ``True`` when a wire of *net* may not run from *start* to *end*."""
         for point, owners in self.pins.items():
-            if point in (start, end):
+            # Our own terminals are exactly what a wire is for; anyone else's
+            # are forbidden anywhere on the segment, its ends included — a wire
+            # *ending* on a foreign terminal is the worst case of all, since it
+            # is a short that looks deliberate.
+            if net in owners:
                 continue
-            if net not in owners and _on_segment(point, start, end):
+            if _on_segment(point, start, end):
                 return True
         if any(_crosses_box(start, end, box) for box in self.bodies):
+            return True
+        if any(_runs_along(segment, (start, end)) for segment in self.paths):
             return True
         return any(
             other != net and _overlaps(segment, (start, end))
@@ -83,12 +90,16 @@ def route(placement: Placement) -> list[Element]:
         points = _unique(placement.net_pins.get(net, []))
         if not points:
             continue
-        net_wires = _wire_net(placement, obstacles, net, points)
+        # A supply glyph is drawn just past the end of its rail, so extend the
+        # rail to reach it before the wires are built.
+        stub = _supply_marker(placement, net, points)
+        wired = [*points, stub] if stub is not None else points
+        net_wires = _wire_net(placement, obstacles, net, wired)
         for wire in net_wires:
             for segment in wire.segments():
                 obstacles.drawn.append((segment, net))
         wires.extend(net_wires)
-        symbols.extend(_net_symbols(placement, net, points))
+        symbols.extend(_net_symbols(placement, net, points, stub))
     elements: list[Element] = [*placement.components, *wires, *symbols]
     elements.extend(_junctions(elements))
     return elements
@@ -104,6 +115,7 @@ def _collect_obstacles(placement: Placement) -> _Obstacles:
             nets = graph.component_nets(element.ref)
             for point, net in zip((element.a, element.b), nets, strict=False):
                 obstacles.pins.setdefault(point, set()).add(net)
+            obstacles.paths.append((element.a, element.b))
             continue
         for pin, point in element.pins.items():
             owner = component.pins.get(pin) if component is not None else None
@@ -205,19 +217,41 @@ def _route_to_spine(
     if (pin[1] if horizontal else pin[0]) == spine_at:
         return [pin]
     straight = _perpendicular(pin, spine_at, horizontal)
-    if not obstacles.blocked(net, pin, straight):
+    if _clear(obstacles, net, [pin, straight]):
         return [pin, straight]
     for step in _detours():
         # Slide along the spine's own axis first, then cross: a stub to a
         # horizontal rail steps sideways, a stub to a vertical column steps up
         # or down.
         via = (pin[0] + step, pin[1]) if horizontal else (pin[0], pin[1] + step)
-        landing = _perpendicular(via, spine_at, horizontal)
-        if not obstacles.blocked(net, pin, via) and not obstacles.blocked(
-            net, via, landing
-        ):
-            return [pin, via, landing]
+        route = [pin, via, _perpendicular(via, spine_at, horizontal)]
+        if _clear(obstacles, net, route):
+            return route
+    # Still nothing: leave the terminal *away* from the spine first, so the
+    # first leg clears whatever sits against it, then cross and land.  This is
+    # what a device terminal needs when its own body blocks every direct route.
+    for aside in _detours():
+        for step in _detours():
+            corner = (
+                (pin[0], pin[1] + aside) if horizontal else (pin[0] + aside, pin[1])
+            )
+            via = (
+                (corner[0] + step, corner[1])
+                if horizontal
+                else (corner[0], corner[1] + step)
+            )
+            route = [pin, corner, via, _perpendicular(via, spine_at, horizontal)]
+            if _clear(obstacles, net, route):
+                return route
     return [pin, straight]
+
+
+def _clear(obstacles: _Obstacles, net: str, route: list[Point]) -> bool:
+    """Return ``True`` when every leg of *route* may be drawn, and none is empty."""
+    legs = list(pairwise(route))
+    if any(start == end for start, end in legs):
+        return False
+    return not any(obstacles.blocked(net, start, end) for start, end in legs)
 
 
 def _detours() -> list[int]:
@@ -281,6 +315,21 @@ def _span_overlap(first: tuple[int, int], second: tuple[int, int]) -> int:
     return min(max(first), max(second)) - max(min(first), min(second))
 
 
+def _runs_along(component: Segment, wire: Segment) -> bool:
+    """Return ``True`` when a wire would be drawn on top of a path component.
+
+    circuitikz draws a two-terminal component *along* its segment, so a wire
+    sharing any of that segment is drawn through the body of the part — it
+    reads as a connection to the middle of a resistor, which means nothing.
+    A wire ending strictly inside the segment is just as wrong, and so is a
+    wire whose end lands there. Crossing the component at right angles is left
+    alone: it is an ordinary wire crossing, and the metrics count it.
+    """
+    if _overlaps(component, wire):
+        return True
+    return any(_strictly_inside(end, *component) for end in wire)
+
+
 def _overlaps(first: Segment, second: Segment) -> bool:
     """Return ``True`` when two segments lie along each other, not merely cross."""
     (a1, a2), (b1, b2) = first, second
@@ -295,7 +344,10 @@ def _overlaps(first: Segment, second: Segment) -> bool:
 
 
 def _net_symbols(
-    placement: Placement, net: str, points: list[Point]
+    placement: Placement,
+    net: str,
+    points: list[Point],
+    supply_marker: Point | None = None,
 ) -> list[NetSymbol]:
     """Return the ground, supply, or tap markers this net carries (D7)."""
     graph = placement.graph
@@ -306,29 +358,115 @@ def _net_symbols(
             )
         ]
     if net in graph.supply_nets:
+        marker = supply_marker or _rail_marker(placement, net, points)
         return [
             NetSymbol(
                 net=net,
                 variant="vcc",
-                at=_rail_marker(placement, net, points),
+                at=marker,
                 text=_supply_text(placement, net),
             )
         ]
     if net in (placement.input_net, placement.output_net):
         top = max(points, key=lambda point: (point[1], point[0]))
-        # rot 90 puts the emitter's text above the point rather than beside it,
-        # where it would sit on top of the wire arriving from the left.
-        return [NetSymbol(net=net, variant="tap", at=top, rot=90, text=net)]
+        return [
+            NetSymbol(
+                net=net,
+                variant="tap",
+                at=top,
+                rot=_free_direction(placement, top),
+                text=net,
+            )
+        ]
     return []
 
 
+LABEL_REACH: Final = 4
+"""How far a label needs to be clear of anything before it is worth putting there."""
+
+_DIRECTIONS: Final[tuple[tuple[Rotation, tuple[int, int]], ...]] = (
+    (90, (0, 1)),
+    (0, (1, 0)),
+    (270, (0, -1)),
+    (180, (-1, 0)),
+)
+"""Rotations the emitter turns into above / right / below / left, best first."""
+
+
+def _free_direction(placement: Placement, at: Point) -> Rotation:
+    """Return the rotation whose side of *at* has room for a label.
+
+    A tap sits on a terminal, and a terminal usually has a component on one
+    side and a wire on another. Dropping the text on whichever side is empty is
+    the difference between a readable label and one printed over a transistor.
+    """
+    for rot, (dx, dy) in _DIRECTIONS:
+        probes = [
+            (at[0] + dx * step, at[1] + dy * step) for step in range(1, LABEL_REACH + 1)
+        ]
+        if not any(_occupied(placement, probe) for probe in probes):
+            return rot
+    return 90
+
+
+def _occupied(placement: Placement, point: Point) -> bool:
+    """Return ``True`` when something is drawn at *point*."""
+    for element in placement.components:
+        if isinstance(element, PathComponent):
+            if _on_segment(point, element.a, element.b):
+                return True
+            continue
+        size = placement.symbol(element.symbol).size
+        half_w, half_h = size[0] / 2, size[1] / 2
+        if (
+            abs(point[0] - element.at[0]) <= half_w
+            and abs(point[1] - element.at[1]) <= half_h
+        ):
+            return True
+    return False
+
+
+SUPPLY_STUB: Final = 2
+"""How far past the last terminal a supply glyph sits, in grid units."""
+
+
+def _supply_marker(placement: Placement, net: str, points: list[Point]) -> Point | None:
+    """Return where a supply arrow goes: just past the right end of its rail.
+
+    Not in the middle. A glyph placed between two terminals is a third
+    conductor meeting there, so it earns a junction dot, and the arrow, the dot
+    and the voltage label end up printed on top of each other. Past the last
+    terminal only the rail's own end meets it — two conductors, no dot — which
+    is how a supply rail is drawn by hand.
+    """
+    rail_y = placement.rail_y.get(net)
+    if rail_y is None or net not in placement.graph.supply_nets:
+        return None
+    on_rail = [point[0] for point in points if point[1] == rail_y]
+    if not on_rail:
+        return None
+    return (max(on_rail) + SUPPLY_STUB, rail_y)
+
+
 def _rail_marker(placement: Placement, net: str, points: list[Point]) -> Point:
-    """Return where a rail's symbol goes: the middle of the rail."""
+    """Return where a rail's symbol goes: near the middle, but clear of things.
+
+    The exact midpoint is often a terminal, and a ground or supply glyph drawn
+    on top of one collides with the junction dot and with the label. Search
+    outwards from the middle for a spot on the rail that nothing else occupies.
+    """
     rail_y = placement.rail_y[net]
     on_rail = [point[0] for point in points if point[1] == rail_y] or [
         point[0] for point in points
     ]
-    return ((min(on_rail) + max(on_rail)) // 2, rail_y)
+    low, high = min(on_rail), max(on_rail)
+    middle = (low + high) // 2
+    taken = {point[0] for point in points if point[1] == rail_y}
+    for offset in range(0, (high - low) // 2 + 1):
+        for candidate in (middle - offset, middle + offset):
+            if low <= candidate <= high and candidate not in taken:
+                return (candidate, rail_y)
+    return (middle, rail_y)
 
 
 def _supply_text(placement: Placement, net: str) -> str:

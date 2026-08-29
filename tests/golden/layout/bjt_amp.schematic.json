@@ -78,7 +78,7 @@
           "mode": "path",
           "ref": "RE1",
           "kind": "resistor",
-          "a": [56, 6],
+          "a": [56, 4],
           "b": [56, 0],
           "value_label": {
             "text": "\\SI{1}{\\kilo\\ohm}"
@@ -89,7 +89,7 @@
           "mode": "path",
           "ref": "CE",
           "kind": "capacitor",
-          "a": [62, 6],
+          "a": [62, 4],
           "b": [62, 0],
           "value_label": {
             "text": "\\SI{10}{\\micro\\farad}"
@@ -100,7 +100,7 @@
           "mode": "path",
           "ref": "RC2",
           "kind": "resistor",
-          "a": [70, 6],
+          "a": [70, 10],
           "b": [70, 0],
           "value_label": {
             "text": "\\SI{2.2}{\\kilo\\ohm}"
@@ -164,22 +164,12 @@
         {
           "type": "wire",
           "net": "e1",
-          "points": [[56, 4], [56, 6]]
-        },
-        {
-          "type": "wire",
-          "net": "e1",
           "points": [[39, 4], [56, 4]]
         },
         {
           "type": "wire",
           "net": "e1",
-          "points": [[62, 6], [56, 6]]
-        },
-        {
-          "type": "wire",
-          "net": "c2",
-          "points": [[70, 6], [70, 10]]
+          "points": [[62, 4], [56, 4]]
         },
         {
           "type": "wire",
@@ -213,7 +203,7 @@
           "type": "net_symbol",
           "net": "c2",
           "variant": "tap",
-          "at": [67, 10],
+          "at": [70, 10],
           "rot": 90,
           "text": "c2"
         },
@@ -228,17 +218,13 @@
           "type": "net_symbol",
           "net": "vcc",
           "variant": "vcc",
-          "at": [21, 18],
+          "at": [44, 18],
           "rot": 0,
           "text": "vcc = 12"
         },
         {
           "type": "junction",
           "at": [14, 0]
-        },
-        {
-          "type": "junction",
-          "at": [21, 18]
         },
         {
           "type": "junction",
@@ -266,11 +252,15 @@
         },
         {
           "type": "junction",
+          "at": [44, 18]
+        },
+        {
+          "type": "junction",
           "at": [56, 0]
         },
         {
           "type": "junction",
-          "at": [56, 6]
+          "at": [56, 4]
         },
         {
           "type": "junction",

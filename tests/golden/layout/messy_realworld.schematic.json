@@ -110,7 +110,7 @@
           "net": "out",
           "variant": "tap",
           "at": [3, 13],
-          "rot": 90,
+          "rot": 180,
           "text": "out"
         },
         {

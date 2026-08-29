@@ -94,7 +94,7 @@
           "mode": "path",
           "ref": "V1",
           "kind": "vsource",
-          "a": [0, 6],
+          "a": [0, 13],
           "b": [0, 0]
         },
         {
@@ -102,7 +102,7 @@
           "mode": "path",
           "ref": "R1",
           "kind": "resistor",
-          "a": [6, 6],
+          "a": [6, 13],
           "b": [6, 0],
           "value_label": {
             "text": "\\SI{1}{\\kilo\\ohm}"
@@ -124,7 +124,7 @@
           "mode": "path",
           "ref": "VS",
           "kind": "vsource",
-          "a": [42, 6],
+          "a": [42, 12],
           "b": [42, 0]
         },
         {
@@ -132,7 +132,7 @@
           "mode": "path",
           "ref": "R3",
           "kind": "resistor",
-          "a": [28, 6],
+          "a": [28, 19],
           "b": [28, 0],
           "value_label": {
             "text": "\\SI{1}{\\kilo\\ohm}"
@@ -185,7 +185,7 @@
         {
           "type": "wire",
           "net": "in",
-          "points": [[0, 6], [0, 21]]
+          "points": [[0, 13], [0, 21]]
         },
         {
           "type": "wire",
@@ -200,7 +200,7 @@
         {
           "type": "wire",
           "net": "in",
-          "points": [[6, 6], [0, 6]]
+          "points": [[6, 13], [0, 13]]
         },
         {
           "type": "wire",
@@ -214,13 +214,8 @@
         },
         {
           "type": "wire",
-          "net": "sense",
-          "points": [[42, 6], [42, 12]]
-        },
-        {
-          "type": "wire",
           "net": "gm",
-          "points": [[28, 6], [28, 23]]
+          "points": [[28, 19], [28, 23]]
         },
         {
           "type": "wire",
@@ -287,7 +282,7 @@
         },
         {
           "type": "junction",
-          "at": [0, 6]
+          "at": [0, 13]
         },
         {
           "type": "junction",

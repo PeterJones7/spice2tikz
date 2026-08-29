@@ -99,12 +99,16 @@
           "type": "net_symbol",
           "net": "0",
           "variant": "ground",
-          "at": [8, 0],
+          "at": [7, 0],
           "rot": 0
         },
         {
           "type": "junction",
           "at": [0, 6]
+        },
+        {
+          "type": "junction",
+          "at": [7, 0]
         },
         {
           "type": "junction",

@@ -69,7 +69,7 @@
           "mode": "path",
           "ref": "CL",
           "kind": "capacitor",
-          "a": [16, 6],
+          "a": [16, 4],
           "b": [16, 0],
           "value_label": {
             "text": "\\SI{10}{\\femto\\farad}"
@@ -139,7 +139,7 @@
         {
           "type": "wire",
           "net": "vdd",
-          "points": [[0, 18], [24, 18]]
+          "points": [[0, 18], [26, 18]]
         },
         {
           "type": "wire",
@@ -151,7 +151,7 @@
           "net": "in",
           "variant": "tap",
           "at": [11, 12],
-          "rot": 90,
+          "rot": 180,
           "text": "in"
         },
         {
@@ -173,7 +173,7 @@
           "type": "net_symbol",
           "net": "vdd",
           "variant": "vcc",
-          "at": [12, 18],
+          "at": [26, 18],
           "rot": 0,
           "text": "vdd = 3.3"
         },
@@ -191,10 +191,6 @@
         },
         {
           "type": "junction",
-          "at": [12, 18]
-        },
-        {
-          "type": "junction",
           "at": [15, 0]
         },
         {
@@ -203,11 +199,15 @@
         },
         {
           "type": "junction",
-          "at": [16, 6]
+          "at": [16, 4]
         },
         {
           "type": "junction",
           "at": [17, 18]
+        },
+        {
+          "type": "junction",
+          "at": [24, 18]
         }
       ]
     }

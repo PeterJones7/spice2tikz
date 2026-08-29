@@ -15,7 +15,7 @@
   \draw (s2t1.S) |- (13,10);
   \draw (8,6) to[american voltage source, l=$\mathrm{VIN}$] (8,0);
   \draw (24,6) to[R=$\mathrm{RBIAS}$, a=\SI{10}{\kilo\ohm}] (24,0);
-  \draw (16,6) to[C=$\mathrm{CL}$, a=\SI{10}{\femto\farad}] (16,0);
+  \draw (16,4) to[C=$\mathrm{CL}$, a=\SI{10}{\femto\farad}] (16,0);
   \draw (0,18) to[american voltage source, l=$\mathrm{VDD}$] (0,0);
   \draw (24,18) to[american current source, l=$\mathrm{IBIAS}$] (24,14);
   \draw (8,6) -- (8,12);
@@ -27,19 +27,19 @@
   \draw (24,6) -- (24,14);
   \draw (0,0) -- (24,0);
   \draw (13,10) -- (15,10) -- (15,0);
-  \draw (0,18) -- (24,18);
+  \draw (0,18) -- (26,18);
   \draw (13,8) -- (17,8) -- (17,18);
-  \node[above] at (11,12) {in};
+  \node[left] at (11,12) {in};
   \node[above] at (13,14) {out};
   \draw (12,0) node[ground]{};
-  \draw (12,18) node[vcc]{} node[right]{vdd = 3.3};
+  \draw (26,18) node[vcc]{} node[right]{vdd = 3.3};
   \draw (8,0) node[circ]{};
   \draw (8,6) node[circ]{};
   \draw (12,0) node[circ]{};
-  \draw (12,18) node[circ]{};
   \draw (15,0) node[circ]{};
   \draw (16,0) node[circ]{};
-  \draw (16,6) node[circ]{};
+  \draw (16,4) node[circ]{};
   \draw (17,18) node[circ]{};
+  \draw (24,18) node[circ]{};
 \end{circuitikz}
 \end{document}
