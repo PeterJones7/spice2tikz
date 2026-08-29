@@ -1,0 +1,8 @@
+# Determinism is a core promise (CLAUDE.md working rule 4): generated files are
+# compared byte-for-byte, so every text file in this repository is stored and
+# checked out with LF endings on every platform.
+* text=auto eol=lf
+
+# Binary assets must never be touched.
+*.png binary
+*.pdf binary

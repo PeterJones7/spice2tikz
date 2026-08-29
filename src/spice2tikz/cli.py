@@ -26,7 +26,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Final
 
-from . import __version__, _serde, _toml, netlist_ir, schematic_ir
+from . import __version__, _serde, _toml, netlist_ir, schematic_ir, spice_parser
 from ._serde import IRError
 from .emit.circuitikz import emit
 from .netlist_ir import NetlistIR
@@ -57,7 +57,6 @@ IR_FORMATS: Final[dict[str, str]] = {
     "schematic": "schematic-ir",
 }
 NOT_YET_IMPLEMENTED: Final[dict[str, str]] = {
-    "spice": "SPICE netlist parsing is not implemented yet (roadmap section 4)",
     "asc": "LTspice .asc import is not implemented yet (roadmap section 3)",
 }
 NO_LAYOUT_ENGINE: Final = (
@@ -201,13 +200,14 @@ def _run(args: Namespace) -> int:
     overrides = _style_overrides(args)
 
     warnings: list[str] = []
-    text = path.read_text(encoding="utf-8")
     netlist: NetlistIR | None = None
     schematic: SchematicIR | None = None
-    if input_format == "netlist-ir":
-        netlist = netlist_ir.loads(text, warnings)
+    if input_format == "spice":
+        netlist = spice_parser.load_spice(path, warnings)
+    elif input_format == "netlist-ir":
+        netlist = netlist_ir.loads(path.read_text(encoding="utf-8"), warnings)
     else:
-        schematic = schematic_ir.loads(text, warnings)
+        schematic = schematic_ir.loads(path.read_text(encoding="utf-8"), warnings)
 
     if not args.quiet:
         for warning in warnings:

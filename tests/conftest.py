@@ -46,7 +46,11 @@ def golden(update_golden: bool) -> Callable[[str, str], None]:
         if update_golden:
             path.parent.mkdir(parents=True, exist_ok=True)
             if not path.exists() or path.read_text(encoding="utf-8") != text:
-                path.write_text(text, encoding="utf-8")
+                # newline="\n" so that regenerating on Windows does not write
+                # CRLF: goldens are compared byte-for-byte elsewhere (the CLI
+                # writes LF on every platform) and a CRLF golden would make the
+                # same content differ between contributors.
+                path.write_text(text, encoding="utf-8", newline="\n")
             return
         if not path.exists():
             pytest.fail(f"missing golden file {path}; run: pytest --update-golden")

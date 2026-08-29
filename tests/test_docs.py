@@ -59,3 +59,60 @@ def test_readme_links_to_local_docs_that_exist():
     text = README.read_text(encoding="utf-8")
     for match in re.finditer(r"`(docs/[A-Za-z_]+\.md)`", text):
         assert (REPO_ROOT / match.group(1)).is_file(), f"{match.group(1)} is missing"
+
+
+# --- repository hygiene -----------------------------------------------------
+
+
+TEXT_SUFFIXES = frozenset(
+    {".py", ".json", ".tex", ".md", ".toml", ".yml", ".yaml", ".sp", ".asc", ".cfg"}
+)
+SKIP_DIRS = frozenset(
+    {
+        ".git",
+        ".venv",
+        ".mypy_cache",
+        ".pytest_cache",
+        "__pycache__",
+        ".ruff_cache",
+        "build",
+        "dist",
+    }
+)
+# The circuitikz manual is a verbatim PDF extraction, kept exactly as received.
+EXEMPT = frozenset({Path("docs/circuitikz_manual.MD")})
+
+
+def text_files() -> list[Path]:
+    """Return every repository text file whose line endings we control."""
+    found = []
+    for path in REPO_ROOT.rglob("*"):
+        if not path.is_file() or SKIP_DIRS & set(path.relative_to(REPO_ROOT).parts):
+            continue
+        if path.suffix.lower() not in TEXT_SUFFIXES:
+            continue
+        if path.relative_to(REPO_ROOT) in EXEMPT:
+            continue
+        found.append(path)
+    return found
+
+
+def test_no_text_file_uses_crlf():
+    """Byte-for-byte golden comparison only works if line endings are stable."""
+    offenders = [
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in text_files()
+        if b"\r\n" in path.read_bytes()
+    ]
+    assert not offenders, f"CRLF line endings in: {offenders}"
+
+
+def test_every_golden_ends_with_exactly_one_newline():
+    offenders = []
+    for path in (REPO_ROOT / "tests" / "golden").rglob("*"):
+        if not path.is_file():
+            continue
+        data = path.read_bytes()
+        if not data.endswith(b"\n") or data.endswith(b"\n\n"):
+            offenders.append(path.relative_to(REPO_ROOT).as_posix())
+    assert not offenders, f"goldens with odd trailing newlines: {offenders}"

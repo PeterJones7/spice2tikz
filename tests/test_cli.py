@@ -15,6 +15,7 @@ CORPUS = Path(__file__).parent / "corpus"
 BROKEN = CORPUS / "broken"
 NETLIST = CORPUS / "rc_lowpass.netlist.json"
 SCHEMATIC = CORPUS / "rc_lowpass.schematic.json"
+SPICE_DECK = CORPUS / "spice" / "rc_lowpass.sp"
 
 
 def run(capsys: pytest.CaptureFixture[str], *argv: str) -> tuple[int, str, str]:
@@ -138,23 +139,73 @@ def test_unknown_from_value_is_rejected_by_argparse():
         cli.main([str(SCHEMATIC), "--from", "vhdl"])
 
 
-@pytest.mark.parametrize(
-    ("name", "fragment"),
-    [
-        ("circuit.sp", "roadmap section 4"),
-        ("circuit.cir", "roadmap section 4"),
-        ("circuit.net", "roadmap section 4"),
-        ("circuit.asc", "roadmap section 3"),
-    ],
-)
 def test_not_yet_implemented_formats_say_so(
-    capsys: pytest.CaptureFixture[str], tmp_path: Path, name: str, fragment: str
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
 ):
-    path = tmp_path / name
+    path = tmp_path / "circuit.asc"
     path.write_text("* placeholder\n", encoding="utf-8")
     code, _, err = run(capsys, str(path))
     assert code == cli.EXIT_INPUT_ERROR
-    assert fragment in err
+    assert "roadmap section 3" in err
+
+
+# --- the SPICE path (§4.4) --------------------------------------------------
+
+
+@pytest.mark.parametrize("suffix", [".sp", ".cir", ".net"])
+def test_spice_extensions_are_autodetected(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path, suffix: str
+):
+    path = tmp_path / f"circuit{suffix}"
+    path.write_text(SPICE_DECK.read_text(encoding="utf-8"), encoding="utf-8")
+    code, _, err = run(
+        capsys, str(path), "--dump-netlist", str(tmp_path / "n.json"), "-v"
+    )
+    assert code == cli.EXIT_OK
+    assert "as spice" in err
+
+
+def test_spice_without_a_dump_says_the_layout_engine_is_missing(
+    capsys: pytest.CaptureFixture[str],
+):
+    code, out, err = run(capsys, str(SPICE_DECK))
+    assert code == cli.EXIT_INPUT_ERROR
+    assert out == ""
+    assert "layout not yet implemented" in err
+    assert "--dump-netlist" in err
+
+
+def test_spice_dump_netlist_exits_zero_and_matches_the_golden(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    target = tmp_path / "rc_lowpass.netlist.json"
+    code, out, _ = run(capsys, str(SPICE_DECK), "--dump-netlist", str(target))
+    assert code == cli.EXIT_OK
+    assert out == ""
+    golden = Path(__file__).parent / "golden" / "spice" / "rc_lowpass.netlist.json"
+    assert target.read_bytes() == golden.read_bytes()
+
+
+def test_spice_parse_warnings_reach_stderr(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    deck = tmp_path / "odd.sp"
+    deck.write_text("odd deck\nZ1 a b 1\nR1 a 0 1k\n.end\n", encoding="utf-8")
+    code, _, err = run(capsys, str(deck), "--dump-netlist", str(tmp_path / "n.json"))
+    assert code == cli.EXIT_OK
+    assert "warning:" in err
+
+
+def test_from_spice_forces_the_parser(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    path = tmp_path / "deck.txt"
+    path.write_text(SPICE_DECK.read_text(encoding="utf-8"), encoding="utf-8")
+    code, _, err = run(
+        capsys, str(path), "--from", "spice", "--dump-netlist", str(tmp_path / "n.json")
+    )
+    assert code == cli.EXIT_OK
+    assert "0 error(s)" in err
 
 
 def test_unknown_extension_asks_for_from(
