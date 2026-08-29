@@ -1,0 +1,110 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Messy hand-written deck",
+    "source": "messy_realworld.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 0  AC 1 SIN(0 1 1k)"
+        },
+        "params": {
+          "dc": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "ac": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          },
+          "sin_offset": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "sin_amplitude": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          },
+          "sin_freq": {
+            "raw": "1k",
+            "value": 1000.0,
+            "unit": "Hz"
+          }
+        },
+        "raw": "V1  IN   0   DC 0  AC 1 SIN(0 1 1k)"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "out"
+        },
+        "value": {
+          "raw": "10K",
+          "value": 10000.0,
+          "unit": "ohm"
+        },
+        "raw": "R1   IN    Out   10K"
+      },
+      {
+        "id": "CLoad",
+        "kind": "capacitor",
+        "pins": {
+          "a": "out",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1u",
+          "value": 1e-06,
+          "unit": "F"
+        },
+        "raw": "CLoad    Out  0   1u"
+      },
+      {
+        "id": "Zq1",
+        "kind": "generic",
+        "pins": {
+          "1": "out",
+          "2": "0",
+          "3": "weird"
+        },
+        "raw": "Zq1  Out 0 weird"
+      }
+    ],
+    "nets": {
+      "in": {
+        "name": "in",
+        "class": "signal"
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "out": {
+        "name": "out",
+        "class": "signal"
+      },
+      "weird": {
+        "name": "weird",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {}
+}

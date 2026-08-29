@@ -1,0 +1,212 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Controlled source showcase (E/F/G/H)",
+    "source": "controlled_sources.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "AC 1"
+        },
+        "params": {
+          "ac": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V1 in 0 AC 1"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 in 0 1k"
+      },
+      {
+        "id": "E1",
+        "kind": "vcvs",
+        "pins": {
+          "p": "amp",
+          "n": "0",
+          "cp": "in",
+          "cn": "0"
+        },
+        "value": {
+          "raw": "10",
+          "value": 10.0
+        },
+        "raw": "E1 amp 0 in 0 10"
+      },
+      {
+        "id": "R2",
+        "kind": "resistor",
+        "pins": {
+          "a": "amp",
+          "b": "sense"
+        },
+        "value": {
+          "raw": "100",
+          "value": 100.0,
+          "unit": "ohm"
+        },
+        "raw": "R2 amp sense 100"
+      },
+      {
+        "id": "VS",
+        "kind": "vsource",
+        "pins": {
+          "p": "sense",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 0"
+        },
+        "params": {
+          "dc": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          }
+        },
+        "raw": "VS sense 0 DC 0"
+      },
+      {
+        "id": "G1",
+        "kind": "vccs",
+        "pins": {
+          "p": "gm",
+          "n": "0",
+          "cp": "in",
+          "cn": "0"
+        },
+        "value": {
+          "raw": "1m",
+          "value": 0.001
+        },
+        "raw": "G1 gm 0 in 0 1m"
+      },
+      {
+        "id": "R3",
+        "kind": "resistor",
+        "pins": {
+          "a": "gm",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R3 gm 0 1k"
+      },
+      {
+        "id": "H1",
+        "kind": "ccvs",
+        "pins": {
+          "p": "hout",
+          "n": "0"
+        },
+        "value": {
+          "raw": "50",
+          "value": 50.0,
+          "unit": "ohm"
+        },
+        "control": "VS",
+        "raw": "H1 hout 0 VS 50"
+      },
+      {
+        "id": "R4",
+        "kind": "resistor",
+        "pins": {
+          "a": "hout",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R4 hout 0 1k"
+      },
+      {
+        "id": "F1",
+        "kind": "cccs",
+        "pins": {
+          "p": "0",
+          "n": "fout"
+        },
+        "value": {
+          "raw": "2",
+          "value": 2.0
+        },
+        "control": "VS",
+        "raw": "F1 0 fout VS 2"
+      },
+      {
+        "id": "R5",
+        "kind": "resistor",
+        "pins": {
+          "a": "fout",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R5 fout 0 1k"
+      }
+    ],
+    "nets": {
+      "in": {
+        "name": "in",
+        "class": "signal"
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "amp": {
+        "name": "amp",
+        "class": "signal"
+      },
+      "sense": {
+        "name": "sense",
+        "class": "signal"
+      },
+      "gm": {
+        "name": "gm",
+        "class": "signal"
+      },
+      "hout": {
+        "name": "hout",
+        "class": "signal"
+      },
+      "fout": {
+        "name": "fout",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {}
+}

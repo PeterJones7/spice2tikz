@@ -1,0 +1,136 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Full-wave bridge rectifier",
+    "source": "bridge_rectifier.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "acp",
+          "n": "acn"
+        },
+        "value": {
+          "raw": "SIN(0 12 50)"
+        },
+        "params": {
+          "sin_offset": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "sin_amplitude": {
+            "raw": "12",
+            "value": 12.0,
+            "unit": "V"
+          },
+          "sin_freq": {
+            "raw": "50",
+            "value": 50.0,
+            "unit": "Hz"
+          }
+        },
+        "raw": "V1 acp acn SIN(0 12 50)"
+      },
+      {
+        "id": "D1",
+        "kind": "diode",
+        "pins": {
+          "a": "acp",
+          "k": "outp"
+        },
+        "model": "dbridge",
+        "raw": "D1 acp outp DBRIDGE"
+      },
+      {
+        "id": "D2",
+        "kind": "diode",
+        "pins": {
+          "a": "acn",
+          "k": "outp"
+        },
+        "model": "dbridge",
+        "raw": "D2 acn outp DBRIDGE"
+      },
+      {
+        "id": "D3",
+        "kind": "diode",
+        "pins": {
+          "a": "0",
+          "k": "acp"
+        },
+        "model": "dbridge",
+        "raw": "D3 0 acp DBRIDGE"
+      },
+      {
+        "id": "D4",
+        "kind": "diode",
+        "pins": {
+          "a": "0",
+          "k": "acn"
+        },
+        "model": "dbridge",
+        "raw": "D4 0 acn DBRIDGE"
+      },
+      {
+        "id": "RL",
+        "kind": "resistor",
+        "pins": {
+          "a": "outp",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "RL outp 0 1k"
+      }
+    ],
+    "nets": {
+      "acp": {
+        "name": "acp",
+        "class": "signal"
+      },
+      "acn": {
+        "name": "acn",
+        "class": "signal"
+      },
+      "outp": {
+        "name": "outp",
+        "class": "signal"
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      }
+    }
+  },
+  "subcircuits": {},
+  "models": {
+    "dbridge": {
+      "type": "d",
+      "params": {
+        "is": {
+          "raw": "1e-14",
+          "value": 1e-14
+        },
+        "n": {
+          "raw": "1.8",
+          "value": 1.8
+        },
+        "rs": {
+          "raw": "0.1",
+          "value": 0.1
+        }
+      },
+      "raw": ".model DBRIDGE D (IS=1e-14 N=1.8 RS=0.1)"
+    }
+  }
+}

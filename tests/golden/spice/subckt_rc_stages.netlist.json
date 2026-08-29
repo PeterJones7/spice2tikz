@@ -1,0 +1,195 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Cascaded RC stages with a nested subcircuit",
+    "source": "subckt_rc_stages.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "src",
+          "n": "0"
+        },
+        "value": {
+          "raw": "AC 1"
+        },
+        "params": {
+          "ac": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V1 src 0 AC 1"
+      },
+      {
+        "id": "X1",
+        "kind": "subcircuit",
+        "pins": {
+          "in": "src",
+          "out": "outa"
+        },
+        "subckt": "rcstage",
+        "raw": "X1 src outa rcstage"
+      },
+      {
+        "id": "X2",
+        "kind": "subcircuit",
+        "pins": {
+          "in": "outa",
+          "out": "outb"
+        },
+        "subckt": "rcstage",
+        "raw": "X2 outa outb rcstage"
+      },
+      {
+        "id": "RL",
+        "kind": "resistor",
+        "pins": {
+          "a": "outb",
+          "b": "0"
+        },
+        "value": {
+          "raw": "100k",
+          "value": 100000.0,
+          "unit": "ohm"
+        },
+        "raw": "RL outb 0 100k"
+      }
+    ],
+    "nets": {
+      "src": {
+        "name": "src",
+        "class": "signal"
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "outa": {
+        "name": "outa",
+        "class": "signal"
+      },
+      "outb": {
+        "name": "outb",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {
+    "rcstage": {
+      "ports": ["in", "out"],
+      "components": [
+        {
+          "id": "Rs",
+          "kind": "resistor",
+          "pins": {
+            "a": "in",
+            "b": "mid"
+          },
+          "value": {
+            "raw": "1k",
+            "value": 1000.0,
+            "unit": "ohm"
+          },
+          "raw": "Rs in mid 1k"
+        },
+        {
+          "id": "Cs",
+          "kind": "capacitor",
+          "pins": {
+            "a": "mid",
+            "b": "0"
+          },
+          "value": {
+            "raw": "10n",
+            "value": 1e-08,
+            "unit": "F"
+          },
+          "raw": "Cs mid 0 10n"
+        },
+        {
+          "id": "Xtail",
+          "kind": "subcircuit",
+          "pins": {
+            "a": "mid",
+            "b": "out"
+          },
+          "subckt": "rctail",
+          "raw": "Xtail mid out rctail"
+        }
+      ],
+      "nets": {
+        "in": {
+          "name": "in",
+          "class": "signal"
+        },
+        "out": {
+          "name": "out",
+          "class": "signal"
+        },
+        "mid": {
+          "name": "mid",
+          "class": "signal"
+        },
+        "0": {
+          "name": "0",
+          "class": "ground"
+        }
+      }
+    },
+    "rctail": {
+      "ports": ["a", "b"],
+      "components": [
+        {
+          "id": "Rt",
+          "kind": "resistor",
+          "pins": {
+            "a": "a",
+            "b": "b"
+          },
+          "value": {
+            "raw": "2k",
+            "value": 2000.0,
+            "unit": "ohm"
+          },
+          "raw": "Rt a b 2k"
+        },
+        {
+          "id": "Ct",
+          "kind": "capacitor",
+          "pins": {
+            "a": "b",
+            "b": "0"
+          },
+          "value": {
+            "raw": "10n",
+            "value": 1e-08,
+            "unit": "F"
+          },
+          "raw": "Ct b 0 10n"
+        }
+      ],
+      "nets": {
+        "a": {
+          "name": "a",
+          "class": "signal"
+        },
+        "b": {
+          "name": "b",
+          "class": "signal"
+        },
+        "0": {
+          "name": "0",
+          "class": "ground"
+        }
+      }
+    }
+  }
+}

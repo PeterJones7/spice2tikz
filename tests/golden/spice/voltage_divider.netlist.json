@@ -1,0 +1,81 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Resistive voltage divider",
+    "source": "voltage_divider.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 5"
+        },
+        "params": {
+          "dc": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V1 in 0 DC 5"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "mid"
+        },
+        "value": {
+          "raw": "10k",
+          "value": 10000.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 in mid 10k"
+      },
+      {
+        "id": "R2",
+        "kind": "resistor",
+        "pins": {
+          "a": "mid",
+          "b": "0"
+        },
+        "value": {
+          "raw": "10k",
+          "value": 10000.0,
+          "unit": "ohm"
+        },
+        "raw": "R2 mid 0 10k"
+      }
+    ],
+    "nets": {
+      "in": {
+        "name": "in",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "5",
+          "value": 5.0,
+          "unit": "V"
+        }
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "mid": {
+        "name": "mid",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {}
+}

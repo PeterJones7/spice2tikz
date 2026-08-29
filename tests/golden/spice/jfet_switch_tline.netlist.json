@@ -1,0 +1,338 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "JFET buffer driving a switched transmission line",
+    "source": "jfet_switch_tline.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "VDD",
+        "kind": "vsource",
+        "pins": {
+          "p": "vdd",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 15"
+        },
+        "params": {
+          "dc": {
+            "raw": "15",
+            "value": 15.0,
+            "unit": "V"
+          }
+        },
+        "raw": "VDD vdd 0 DC 15"
+      },
+      {
+        "id": "VEE",
+        "kind": "vsource",
+        "pins": {
+          "p": "0",
+          "n": "vee"
+        },
+        "value": {
+          "raw": "DC 5"
+        },
+        "params": {
+          "dc": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          }
+        },
+        "raw": "VEE 0 vee DC 5"
+      },
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "SIN(0 100m 1MEG)"
+        },
+        "params": {
+          "sin_offset": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "sin_amplitude": {
+            "raw": "100m",
+            "value": 0.1,
+            "unit": "V"
+          },
+          "sin_freq": {
+            "raw": "1MEG",
+            "value": 1000000.0,
+            "unit": "Hz"
+          }
+        },
+        "raw": "V1 in 0 SIN(0 100m 1MEG)"
+      },
+      {
+        "id": "J1",
+        "kind": "njfet",
+        "pins": {
+          "d": "vdd",
+          "g": "in",
+          "s": "src"
+        },
+        "model": "jfetn",
+        "raw": "J1 vdd in src JFETN"
+      },
+      {
+        "id": "RS",
+        "kind": "resistor",
+        "pins": {
+          "a": "src",
+          "b": "0"
+        },
+        "value": {
+          "raw": "2.2k",
+          "value": 2200.0,
+          "unit": "ohm"
+        },
+        "raw": "RS src 0 2.2k"
+      },
+      {
+        "id": "J2",
+        "kind": "pjfet",
+        "pins": {
+          "d": "vee",
+          "g": "src",
+          "s": "pout"
+        },
+        "model": "pjfetp",
+        "raw": "J2 vee src pout PJFETP"
+      },
+      {
+        "id": "RP",
+        "kind": "resistor",
+        "pins": {
+          "a": "pout",
+          "b": "vee"
+        },
+        "value": {
+          "raw": "2.2k",
+          "value": 2200.0,
+          "unit": "ohm"
+        },
+        "raw": "RP pout vee 2.2k"
+      },
+      {
+        "id": "SW1",
+        "kind": "switch",
+        "pins": {
+          "p": "src",
+          "n": "tap",
+          "cp": "ctrl",
+          "cn": "0"
+        },
+        "model": "swmod",
+        "raw": "SW1 src tap ctrl 0 SWMOD"
+      },
+      {
+        "id": "VC",
+        "kind": "vsource",
+        "pins": {
+          "p": "ctrl",
+          "n": "0"
+        },
+        "value": {
+          "raw": "PULSE(0 5 0 1n 1n 1u 2u)"
+        },
+        "params": {
+          "pulse_initial": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "pulse_pulsed": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          },
+          "pulse_delay": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "s"
+          },
+          "pulse_rise": {
+            "raw": "1n",
+            "value": 1e-09,
+            "unit": "s"
+          },
+          "pulse_fall": {
+            "raw": "1n",
+            "value": 1e-09,
+            "unit": "s"
+          },
+          "pulse_width": {
+            "raw": "1u",
+            "value": 1e-06,
+            "unit": "s"
+          },
+          "pulse_period": {
+            "raw": "2u",
+            "value": 2e-06,
+            "unit": "s"
+          }
+        },
+        "raw": "VC ctrl 0 PULSE(0 5 0 1n 1n 1u 2u)"
+      },
+      {
+        "id": "T1",
+        "kind": "tline",
+        "pins": {
+          "p1a": "tap",
+          "p1b": "0",
+          "p2a": "out",
+          "p2b": "0"
+        },
+        "params": {
+          "z0": {
+            "raw": "50",
+            "value": 50.0,
+            "unit": "ohm"
+          },
+          "td": {
+            "raw": "10n",
+            "value": 1e-08,
+            "unit": "s"
+          }
+        },
+        "raw": "T1 tap 0 out 0 Z0=50 TD=10n"
+      },
+      {
+        "id": "RT",
+        "kind": "resistor",
+        "pins": {
+          "a": "out",
+          "b": "0"
+        },
+        "value": {
+          "raw": "50",
+          "value": 50.0,
+          "unit": "ohm"
+        },
+        "raw": "RT out 0 50"
+      }
+    ],
+    "nets": {
+      "vdd": {
+        "name": "vdd",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "15",
+          "value": 15.0,
+          "unit": "V"
+        }
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "vee": {
+        "name": "vee",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "-5",
+          "value": -5.0,
+          "unit": "V"
+        }
+      },
+      "in": {
+        "name": "in",
+        "class": "signal"
+      },
+      "src": {
+        "name": "src",
+        "class": "signal"
+      },
+      "pout": {
+        "name": "pout",
+        "class": "signal"
+      },
+      "tap": {
+        "name": "tap",
+        "class": "signal"
+      },
+      "ctrl": {
+        "name": "ctrl",
+        "class": "signal"
+      },
+      "out": {
+        "name": "out",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {},
+  "models": {
+    "jfetn": {
+      "type": "njf",
+      "params": {
+        "vto": {
+          "raw": "-2",
+          "value": -2.0
+        },
+        "beta": {
+          "raw": "1m",
+          "value": 0.001
+        },
+        "lambda": {
+          "raw": "0.01",
+          "value": 0.01
+        }
+      },
+      "raw": ".model JFETN NJF (VTO=-2 BETA=1m LAMBDA=0.01)"
+    },
+    "pjfetp": {
+      "type": "pjf",
+      "params": {
+        "vto": {
+          "raw": "2",
+          "value": 2.0
+        },
+        "beta": {
+          "raw": "1m",
+          "value": 0.001
+        },
+        "lambda": {
+          "raw": "0.01",
+          "value": 0.01
+        }
+      },
+      "raw": ".model PJFETP PJF (VTO=2 BETA=1m LAMBDA=0.01)"
+    },
+    "swmod": {
+      "type": "sw",
+      "params": {
+        "ron": {
+          "raw": "1",
+          "value": 1.0
+        },
+        "roff": {
+          "raw": "1MEG",
+          "value": 1000000.0
+        },
+        "vt": {
+          "raw": "2.5",
+          "value": 2.5
+        },
+        "vh": {
+          "raw": "0.2",
+          "value": 0.2
+        }
+      },
+      "raw": ".model SWMOD SW (RON=1 ROFF=1MEG VT=2.5 VH=0.2)"
+    }
+  }
+}

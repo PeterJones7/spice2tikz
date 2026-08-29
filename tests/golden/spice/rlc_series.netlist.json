@@ -1,0 +1,104 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Series RLC network",
+    "source": "rlc_series.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "SIN(0 1 1k)"
+        },
+        "params": {
+          "sin_offset": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "sin_amplitude": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          },
+          "sin_freq": {
+            "raw": "1k",
+            "value": 1000.0,
+            "unit": "Hz"
+          }
+        },
+        "raw": "V1 in 0 SIN(0 1 1k)"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "mid"
+        },
+        "value": {
+          "raw": "100",
+          "value": 100.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 in mid 100"
+      },
+      {
+        "id": "L1",
+        "kind": "inductor",
+        "pins": {
+          "a": "mid",
+          "b": "vc"
+        },
+        "value": {
+          "raw": "10m",
+          "value": 0.01,
+          "unit": "H"
+        },
+        "raw": "L1 mid vc 10m"
+      },
+      {
+        "id": "C1",
+        "kind": "capacitor",
+        "pins": {
+          "a": "vc",
+          "b": "0"
+        },
+        "value": {
+          "raw": "100n",
+          "value": 1e-07,
+          "unit": "F"
+        },
+        "raw": "C1 vc 0 100n"
+      }
+    ],
+    "nets": {
+      "in": {
+        "name": "in",
+        "class": "signal"
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "mid": {
+        "name": "mid",
+        "class": "signal"
+      },
+      "vc": {
+        "name": "vc",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {}
+}

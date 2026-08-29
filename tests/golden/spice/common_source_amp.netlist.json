@@ -1,0 +1,147 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "NMOS common-source amplifier",
+    "source": "common_source_amp.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "VDD",
+        "kind": "vsource",
+        "pins": {
+          "p": "vdd",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 5"
+        },
+        "params": {
+          "dc": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          }
+        },
+        "raw": "VDD vdd 0 DC 5"
+      },
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "AC 1 SIN(0 10m 1k)"
+        },
+        "params": {
+          "ac": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          },
+          "sin_offset": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "sin_amplitude": {
+            "raw": "10m",
+            "value": 0.01,
+            "unit": "V"
+          },
+          "sin_freq": {
+            "raw": "1k",
+            "value": 1000.0,
+            "unit": "Hz"
+          }
+        },
+        "raw": "V1 in 0 AC 1 SIN(0 10m 1k)"
+      },
+      {
+        "id": "RD",
+        "kind": "resistor",
+        "pins": {
+          "a": "vdd",
+          "b": "out"
+        },
+        "value": {
+          "raw": "4.7k",
+          "value": 4700.0,
+          "unit": "ohm"
+        },
+        "raw": "RD vdd out 4.7k"
+      },
+      {
+        "id": "M1",
+        "kind": "nmos",
+        "pins": {
+          "d": "out",
+          "g": "in",
+          "s": "0",
+          "b": "0"
+        },
+        "model": "nmosmod",
+        "params": {
+          "l": {
+            "raw": "1u",
+            "value": 1e-06
+          },
+          "w": {
+            "raw": "10u",
+            "value": 1e-05
+          }
+        },
+        "raw": "M1 out in 0 0 NMOSMOD L=1u W=10u"
+      }
+    ],
+    "nets": {
+      "vdd": {
+        "name": "vdd",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "5",
+          "value": 5.0,
+          "unit": "V"
+        }
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "in": {
+        "name": "in",
+        "class": "signal"
+      },
+      "out": {
+        "name": "out",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {},
+  "models": {
+    "nmosmod": {
+      "type": "nmos",
+      "params": {
+        "vto": {
+          "raw": "0.7",
+          "value": 0.7
+        },
+        "kp": {
+          "raw": "120u",
+          "value": 0.00012
+        },
+        "lambda": {
+          "raw": "0.02",
+          "value": 0.02
+        }
+      },
+      "raw": ".model NMOSMOD NMOS (VTO=0.7 KP=120u LAMBDA=0.02)"
+    }
+  }
+}
