@@ -1,0 +1,282 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Two-stage BJT amplifier (npn and pnp)",
+    "source_netlist": "bjt_amp.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "Q1",
+          "kind": "bjt_npn",
+          "symbol": "npn",
+          "at": [39, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "c": [39, 8],
+            "b": [37, 6],
+            "e": [39, 4]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "Q2",
+          "kind": "bjt_pnp",
+          "symbol": "pnp",
+          "at": [67, 12],
+          "rot": 180,
+          "mirror": true,
+          "pins": {
+            "c": [67, 10],
+            "b": [65, 12],
+            "e": [67, 14]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [14, 6],
+          "b": [14, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "CIN",
+          "kind": "capacitor",
+          "a": [14, 6],
+          "b": [28, 6],
+          "value_label": {
+            "text": "\\SI{1}{\\micro\\farad}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RB2",
+          "kind": "resistor",
+          "a": [28, 6],
+          "b": [28, 0],
+          "value_label": {
+            "text": "\\SI{100}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RE1",
+          "kind": "resistor",
+          "a": [56, 6],
+          "b": [56, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "CE",
+          "kind": "capacitor",
+          "a": [62, 6],
+          "b": [62, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\micro\\farad}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RC2",
+          "kind": "resistor",
+          "a": [70, 6],
+          "b": [70, 0],
+          "value_label": {
+            "text": "\\SI{2.2}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "VCC",
+          "kind": "vsource",
+          "a": [0, 18],
+          "b": [0, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RB1",
+          "kind": "resistor",
+          "a": [28, 18],
+          "b": [28, 14],
+          "value_label": {
+            "text": "\\SI{470}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RC1",
+          "kind": "resistor",
+          "a": [42, 18],
+          "b": [42, 14],
+          "value_label": {
+            "text": "\\SI{4.7}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "b1",
+          "points": [[28, 6], [28, 14]]
+        },
+        {
+          "type": "wire",
+          "net": "b1",
+          "points": [[37, 6], [28, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "c1",
+          "points": [[42, 8], [42, 14]]
+        },
+        {
+          "type": "wire",
+          "net": "c1",
+          "points": [[39, 8], [42, 8]]
+        },
+        {
+          "type": "wire",
+          "net": "c1",
+          "points": [[65, 12], [42, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "e1",
+          "points": [[56, 4], [56, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "e1",
+          "points": [[39, 4], [56, 4]]
+        },
+        {
+          "type": "wire",
+          "net": "e1",
+          "points": [[62, 6], [56, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "c2",
+          "points": [[70, 6], [70, 10]]
+        },
+        {
+          "type": "wire",
+          "net": "c2",
+          "points": [[67, 10], [70, 10]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [70, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "vcc",
+          "points": [[0, 18], [67, 18]]
+        },
+        {
+          "type": "wire",
+          "net": "vcc",
+          "points": [[67, 14], [67, 18]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "tap",
+          "at": [14, 6],
+          "rot": 90,
+          "text": "in"
+        },
+        {
+          "type": "net_symbol",
+          "net": "c2",
+          "variant": "tap",
+          "at": [67, 10],
+          "rot": 90,
+          "text": "c2"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [35, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "vcc",
+          "variant": "vcc",
+          "at": [21, 18],
+          "rot": 0,
+          "text": "vcc = 12"
+        },
+        {
+          "type": "junction",
+          "at": [14, 0]
+        },
+        {
+          "type": "junction",
+          "at": [21, 18]
+        },
+        {
+          "type": "junction",
+          "at": [28, 0]
+        },
+        {
+          "type": "junction",
+          "at": [28, 6]
+        },
+        {
+          "type": "junction",
+          "at": [28, 18]
+        },
+        {
+          "type": "junction",
+          "at": [35, 0]
+        },
+        {
+          "type": "junction",
+          "at": [42, 12]
+        },
+        {
+          "type": "junction",
+          "at": [42, 18]
+        },
+        {
+          "type": "junction",
+          "at": [56, 0]
+        },
+        {
+          "type": "junction",
+          "at": [56, 6]
+        },
+        {
+          "type": "junction",
+          "at": [62, 0]
+        }
+      ]
+    }
+  ]
+}

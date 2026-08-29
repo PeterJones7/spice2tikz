@@ -1,0 +1,23 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \node[nmos, label=right:{$M_1$}] (s2t0) at (13,6) {};
+  \draw (s2t0.D) |- (13,8);
+  \draw (s2t0.G) -| (11,6);
+  \draw (s2t0.S) |- (13,4);
+  \draw (8,6) to[american voltage source, l=$V_1$] (8,0);
+  \draw (0,12) to[american voltage source, l=$\mathrm{VDD}$] (0,0);
+  \draw (16,12) to[R=$\mathrm{RD}$, a=\SI{4.7}{\kilo\ohm}] (16,8);
+  \draw (11,6) -- (8,6);
+  \draw (13,8) -- (16,8);
+  \draw (0,0) -- (13,0);
+  \draw (13,4) -- (13,0);
+  \draw (0,12) -- (16,12);
+  \node[above] at (11,6) {in};
+  \node[above] at (16,8) {out};
+  \draw (4,0) node[ground]{};
+  \draw (8,12) node[vcc]{} node[right]{vdd = 5};
+  \draw (4,0) node[circ]{};
+  \draw (8,0) node[circ]{};
+  \draw (8,12) node[circ]{};
+\end{circuitikz}

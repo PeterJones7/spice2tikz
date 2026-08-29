@@ -1,0 +1,387 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "JFET buffer driving a switched transmission line",
+    "source_netlist": "jfet_switch_tline.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "symbols": {
+    "box:switch": {
+      "size": [4, 6],
+      "pins": {
+        "p": {
+          "offset": [-2, 1],
+          "label": "p"
+        },
+        "n": {
+          "offset": [-2, -1],
+          "label": "n"
+        },
+        "cp": {
+          "offset": [2, 1],
+          "label": "cp"
+        },
+        "cn": {
+          "offset": [2, -1],
+          "label": "cn"
+        }
+      }
+    },
+    "box:tline": {
+      "size": [4, 6],
+      "pins": {
+        "p1a": {
+          "offset": [-2, 1],
+          "label": "p1a"
+        },
+        "p1b": {
+          "offset": [-2, -1],
+          "label": "p1b"
+        },
+        "p2a": {
+          "offset": [2, 1],
+          "label": "p2a"
+        },
+        "p2b": {
+          "offset": [2, -1],
+          "label": "p2b"
+        }
+      }
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "J1",
+          "kind": "njfet",
+          "symbol": "njfet",
+          "at": [21, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [21, 8],
+            "g": [19, 6],
+            "s": [21, 4]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "J2",
+          "kind": "pjfet",
+          "symbol": "pjfet",
+          "at": [29, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [29, 8],
+            "g": [27, 6],
+            "s": [29, 4]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "SW1",
+          "kind": "switch",
+          "symbol": "box:switch",
+          "at": [21, 12],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "p": [19, 13],
+            "n": [19, 11],
+            "cp": [23, 13],
+            "cn": [23, 11]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "T1",
+          "kind": "tline",
+          "symbol": "box:tline",
+          "at": [37, 18],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "p1a": [35, 19],
+            "p1b": [35, 17],
+            "p2a": [39, 19],
+            "p2b": [39, 17]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [16, 6],
+          "b": [16, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RS",
+          "kind": "resistor",
+          "a": [24, 6],
+          "b": [24, 0],
+          "value_label": {
+            "text": "\\SI{2.2}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "VC",
+          "kind": "vsource",
+          "a": [48, 6],
+          "b": [48, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RT",
+          "kind": "resistor",
+          "a": [56, 6],
+          "b": [56, 0],
+          "value_label": {
+            "text": "\\SI{50}{\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "VDD",
+          "kind": "vsource",
+          "a": [8, 25],
+          "b": [8, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "VEE",
+          "kind": "vsource",
+          "a": [0, 0],
+          "b": [0, 31]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RP",
+          "kind": "resistor",
+          "a": [32, 27],
+          "b": [32, 31],
+          "value_label": {
+            "text": "\\SI{2.2}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[19, 6], [16, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "src",
+          "points": [[24, 4], [24, 15]]
+        },
+        {
+          "type": "wire",
+          "net": "src",
+          "points": [[21, 4], [24, 4]]
+        },
+        {
+          "type": "wire",
+          "net": "src",
+          "points": [[27, 6], [24, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "src",
+          "points": [[19, 13], [19, 15], [24, 15]]
+        },
+        {
+          "type": "wire",
+          "net": "pout",
+          "points": [[32, 4], [32, 27]]
+        },
+        {
+          "type": "wire",
+          "net": "pout",
+          "points": [[29, 4], [32, 4]]
+        },
+        {
+          "type": "wire",
+          "net": "tap",
+          "points": [[40, 9], [40, 21]]
+        },
+        {
+          "type": "wire",
+          "net": "tap",
+          "points": [[19, 11], [19, 9], [40, 9]]
+        },
+        {
+          "type": "wire",
+          "net": "tap",
+          "points": [[35, 19], [35, 21], [40, 21]]
+        },
+        {
+          "type": "wire",
+          "net": "ctrl",
+          "points": [[48, 6], [48, 13]]
+        },
+        {
+          "type": "wire",
+          "net": "ctrl",
+          "points": [[23, 13], [48, 13]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[56, 6], [56, 19]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[39, 19], [56, 19]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [56, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[23, 11], [23, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[35, 17], [35, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[39, 17], [39, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "vdd",
+          "points": [[8, 25], [25, 25]]
+        },
+        {
+          "type": "wire",
+          "net": "vdd",
+          "points": [[21, 8], [25, 8], [25, 25]]
+        },
+        {
+          "type": "wire",
+          "net": "vee",
+          "points": [[0, 31], [32, 31]]
+        },
+        {
+          "type": "wire",
+          "net": "vee",
+          "points": [[29, 8], [29, 31]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "tap",
+          "at": [19, 6],
+          "rot": 90,
+          "text": "in"
+        },
+        {
+          "type": "net_symbol",
+          "net": "out",
+          "variant": "tap",
+          "at": [39, 19],
+          "rot": 90,
+          "text": "out"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [28, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "vdd",
+          "variant": "vcc",
+          "at": [8, 25],
+          "rot": 0,
+          "text": "vdd = 15"
+        },
+        {
+          "type": "net_symbol",
+          "net": "vee",
+          "variant": "vcc",
+          "at": [16, 31],
+          "rot": 0,
+          "text": "vee = -5"
+        },
+        {
+          "type": "junction",
+          "at": [8, 0]
+        },
+        {
+          "type": "junction",
+          "at": [8, 25]
+        },
+        {
+          "type": "junction",
+          "at": [16, 0]
+        },
+        {
+          "type": "junction",
+          "at": [16, 31]
+        },
+        {
+          "type": "junction",
+          "at": [23, 0]
+        },
+        {
+          "type": "junction",
+          "at": [24, 0]
+        },
+        {
+          "type": "junction",
+          "at": [24, 6]
+        },
+        {
+          "type": "junction",
+          "at": [28, 0]
+        },
+        {
+          "type": "junction",
+          "at": [29, 31]
+        },
+        {
+          "type": "junction",
+          "at": [35, 0]
+        },
+        {
+          "type": "junction",
+          "at": [39, 0]
+        },
+        {
+          "type": "junction",
+          "at": [48, 0]
+        }
+      ]
+    }
+  ]
+}

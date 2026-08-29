@@ -26,9 +26,19 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Final
 
-from . import __version__, _serde, _toml, netlist_ir, schematic_ir, spice_parser
+from . import (
+    __version__,
+    _serde,
+    _toml,
+    asc_importer,
+    netlist_ir,
+    schematic_ir,
+    spice_parser,
+)
 from ._serde import IRError
 from .emit.circuitikz import emit
+from .layout import layout, measure
+from .layout.metrics import format_metrics
 from .netlist_ir import NetlistIR
 from .schematic_ir import (
     COMPONENT_VARIANTS,
@@ -56,13 +66,6 @@ IR_FORMATS: Final[dict[str, str]] = {
     "netlist": "netlist-ir",
     "schematic": "schematic-ir",
 }
-NOT_YET_IMPLEMENTED: Final[dict[str, str]] = {
-    "asc": "LTspice .asc import is not implemented yet (roadmap section 3)",
-}
-NO_LAYOUT_ENGINE: Final = (
-    "layout not yet implemented (roadmap section 5); use --dump-netlist to write "
-    "the Netlist IR instead"
-)
 
 BOOL_WORDS: Final[dict[str, bool]] = {
     "true": True,
@@ -191,9 +194,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _run(args: Namespace) -> int:
     path = Path(args.input)
     input_format = _resolve_format(path, args.from_format)
-    if input_format in NOT_YET_IMPLEMENTED:
-        _report(f"{PROG}: {NOT_YET_IMPLEMENTED[input_format]}")
-        return EXIT_INPUT_ERROR
     if args.verbose:
         _report(f"{PROG}: reading {path} as {input_format}")
 
@@ -204,6 +204,8 @@ def _run(args: Namespace) -> int:
     schematic: SchematicIR | None = None
     if input_format == "spice":
         netlist = spice_parser.load_spice(path, warnings)
+    elif input_format == "asc":
+        schematic = asc_importer.load_asc(path, warnings)
     elif input_format == "netlist-ir":
         netlist = netlist_ir.loads(path.read_text(encoding="utf-8"), warnings)
     else:
@@ -215,9 +217,9 @@ def _run(args: Namespace) -> int:
 
     if args.dump_netlist and netlist is None:
         raise UsageError("--dump-netlist: this input has no Netlist IR stage")
-    if args.dump_layout and schematic is None and netlist is not None:
-        raise UsageError(f"--dump-layout: {NO_LAYOUT_ENGINE}")
 
+    errors = 0
+    warning_count = 0
     if netlist is not None:
         # Dumps are written before validation on purpose: when a document *is*
         # broken, the dump is exactly what the user wants to open and fix.
@@ -228,18 +230,15 @@ def _run(args: Namespace) -> int:
         if args.verbose:
             _report(f"{PROG}: {_describe(netlist)}")
         errors, warning_count = _validate_and_report(netlist, args)
-        if not args.quiet:
-            _report(_summary(path, errors, warning_count + len(warnings)))
         if errors:
+            # A netlist that breaks its own invariants cannot be laid out
+            # meaningfully; stop before inventing geometry for it.
+            if not args.quiet:
+                _report(_summary(path, errors, warning_count + len(warnings)))
             return EXIT_VALIDATION_ERROR
-        # The layout engine (roadmap §5) is what would turn this into a
-        # Schematic IR; until it exists a requested dump is the whole job.
-        if args.dump_netlist:
-            return EXIT_OK
-        _report(f"{PROG}: {NO_LAYOUT_ENGINE}")
-        return EXIT_INPUT_ERROR
+        schematic = layout(netlist, warnings=warnings if args.verbose else None)
 
-    # Exactly one of the two is set by the loader above; this narrows the type.
+    # Exactly one path above always produces a schematic; this narrows the type.
     assert schematic is not None
     if overrides is not None:
         schematic.style = _merge_style(schematic.effective_style(), overrides)
@@ -250,7 +249,11 @@ def _run(args: Namespace) -> int:
     if args.verbose:
         _report(f"{PROG}: {_describe(schematic)}")
 
-    errors, warning_count = _validate_and_report(schematic, args)
+    schematic_errors, schematic_warnings = _validate_and_report(schematic, args)
+    errors += schematic_errors
+    warning_count += schematic_warnings
+    if args.verbose:
+        _report(f"{PROG}: {format_metrics('layout', measure(schematic))}")
     if not args.quiet:
         _report(_summary(path, errors, warning_count + len(warnings)))
     if errors:

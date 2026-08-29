@@ -1,0 +1,124 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Full-wave bridge rectifier",
+    "source_netlist": "bridge_rectifier.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 6],
+          "b": [8, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D1",
+          "kind": "diode",
+          "a": [0, 12],
+          "b": [16, 12]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D2",
+          "kind": "diode",
+          "a": [8, 6],
+          "b": [16, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D3",
+          "kind": "diode",
+          "a": [0, 0],
+          "b": [0, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D4",
+          "kind": "diode",
+          "a": [8, 0],
+          "b": [8, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RL",
+          "kind": "resistor",
+          "a": [16, 6],
+          "b": [16, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "acp",
+          "points": [[0, 6], [0, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "outp",
+          "points": [[16, 6], [16, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [16, 0]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "acp",
+          "variant": "tap",
+          "at": [0, 12],
+          "rot": 90,
+          "text": "acp"
+        },
+        {
+          "type": "net_symbol",
+          "net": "outp",
+          "variant": "tap",
+          "at": [16, 12],
+          "rot": 90,
+          "text": "outp"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [8, 0],
+          "rot": 0
+        },
+        {
+          "type": "junction",
+          "at": [0, 6]
+        },
+        {
+          "type": "junction",
+          "at": [8, 0]
+        },
+        {
+          "type": "junction",
+          "at": [8, 6]
+        },
+        {
+          "type": "junction",
+          "at": [16, 6]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "bjt_amp": {
+    "alignment": 0.808,
+    "bbox_area": 1260,
+    "components": 11,
+    "crossings": 0,
+    "wire_length": 222,
+    "wires": 13
+  },
+  "bridge_rectifier": {
+    "alignment": 1.0,
+    "bbox_area": 192,
+    "components": 6,
+    "crossings": 0,
+    "wire_length": 28,
+    "wires": 3
+  },
+  "cmos_inverter": {
+    "alignment": 1.0,
+    "bbox_area": 432,
+    "components": 7,
+    "crossings": 3,
+    "wire_length": 110,
+    "wires": 11
+  },
+  "common_source_amp": {
+    "alignment": 0.909,
+    "bbox_area": 192,
+    "components": 4,
+    "crossings": 0,
+    "wire_length": 39,
+    "wires": 5
+  },
+  "controlled_sources": {
+    "alignment": 0.679,
+    "bbox_area": 1748,
+    "components": 11,
+    "crossings": 2,
+    "wire_length": 255,
+    "wires": 16
+  },
+  "jfet_switch_tline": {
+    "alignment": 0.719,
+    "bbox_area": 1736,
+    "components": 11,
+    "crossings": 18,
+    "wire_length": 351,
+    "wires": 22
+  },
+  "messy_realworld": {
+    "alignment": 0.6,
+    "bbox_area": 120,
+    "components": 4,
+    "crossings": 0,
+    "wire_length": 35,
+    "wires": 4
+  },
+  "rc_lowpass": {
+    "alignment": 1.0,
+    "bbox_area": 48,
+    "components": 3,
+    "crossings": 0,
+    "wire_length": 8,
+    "wires": 1
+  },
+  "rlc_series": {
+    "alignment": 1.0,
+    "bbox_area": 96,
+    "components": 4,
+    "crossings": 0,
+    "wire_length": 16,
+    "wires": 1
+  },
+  "subckt_rc_stages": {
+    "alignment": 0.7,
+    "bbox_area": 294,
+    "components": 4,
+    "crossings": 1,
+    "wire_length": 60,
+    "wires": 7
+  },
+  "voltage_divider": {
+    "alignment": 1.0,
+    "bbox_area": 80,
+    "components": 3,
+    "crossings": 0,
+    "wire_length": 16,
+    "wires": 2
+  }
+}

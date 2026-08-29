@@ -1,0 +1,90 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Resistive voltage divider",
+    "source_netlist": "voltage_divider.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [8, 6],
+          "b": [8, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 10],
+          "b": [0, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [8, 10],
+          "b": [8, 6],
+          "value_label": {
+            "text": "\\SI{10}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [8, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[0, 10], [8, 10]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "mid",
+          "variant": "tap",
+          "at": [8, 6],
+          "rot": 90,
+          "text": "mid"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [4, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "vcc",
+          "at": [4, 10],
+          "rot": 0,
+          "text": "in = 5"
+        },
+        {
+          "type": "junction",
+          "at": [4, 0]
+        },
+        {
+          "type": "junction",
+          "at": [4, 10]
+        }
+      ]
+    }
+  ]
+}

@@ -123,7 +123,14 @@ def test_rotated_size_swaps_axes_for_quarter_turns():
 
 
 def test_builtins_cover_the_promised_symbols():
-    assert set(BUILTIN_SYMBOLS) == {"nmos", "pmos", "npn", "pnp"}
+    assert set(BUILTIN_SYMBOLS) == {
+        "nmos",
+        "pmos",
+        "npn",
+        "pnp",
+        "njfet",
+        "pjfet",
+    }
 
 
 def test_builtin_pin_names_match_the_kind_taxonomy():
@@ -132,6 +139,8 @@ def test_builtin_pin_names_match_the_kind_taxonomy():
         Kind.PMOS: "pmos",
         Kind.BJT_NPN: "npn",
         Kind.BJT_PNP: "pnp",
+        Kind.NJFET: "njfet",
+        Kind.PJFET: "pjfet",
     }
     for kind, symbol_name in SYMBOL_FOR_KIND.items():
         symbol = BUILTIN_SYMBOLS[symbol_name]

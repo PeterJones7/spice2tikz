@@ -1,0 +1,215 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "CMOS inverter with a current-source bias",
+    "source_netlist": "cmos_inverter.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "MP",
+          "kind": "pmos",
+          "symbol": "pmos",
+          "at": [13, 6],
+          "rot": 180,
+          "mirror": true,
+          "pins": {
+            "d": [13, 4],
+            "g": [11, 6],
+            "s": [13, 8],
+            "b": [13, 6]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "MN",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [13, 12],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [13, 14],
+            "g": [11, 12],
+            "s": [13, 10],
+            "b": [13, 12]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "VIN",
+          "kind": "vsource",
+          "a": [8, 6],
+          "b": [8, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RBIAS",
+          "kind": "resistor",
+          "a": [24, 6],
+          "b": [24, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "CL",
+          "kind": "capacitor",
+          "a": [16, 6],
+          "b": [16, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\femto\\farad}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "VDD",
+          "kind": "vsource",
+          "a": [0, 18],
+          "b": [0, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "IBIAS",
+          "kind": "isource",
+          "a": [24, 18],
+          "b": [24, 14]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[8, 6], [8, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[11, 6], [8, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[11, 12], [8, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[16, 4], [16, 14]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[13, 4], [16, 4]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[13, 14], [16, 14]]
+        },
+        {
+          "type": "wire",
+          "net": "bias",
+          "points": [[24, 6], [24, 14]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [24, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[13, 10], [15, 10], [15, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "vdd",
+          "points": [[0, 18], [24, 18]]
+        },
+        {
+          "type": "wire",
+          "net": "vdd",
+          "points": [[13, 8], [17, 8], [17, 18]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "tap",
+          "at": [11, 12],
+          "rot": 90,
+          "text": "in"
+        },
+        {
+          "type": "net_symbol",
+          "net": "out",
+          "variant": "tap",
+          "at": [13, 14],
+          "rot": 90,
+          "text": "out"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [12, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "vdd",
+          "variant": "vcc",
+          "at": [12, 18],
+          "rot": 0,
+          "text": "vdd = 3.3"
+        },
+        {
+          "type": "junction",
+          "at": [8, 0]
+        },
+        {
+          "type": "junction",
+          "at": [8, 6]
+        },
+        {
+          "type": "junction",
+          "at": [12, 0]
+        },
+        {
+          "type": "junction",
+          "at": [12, 18]
+        },
+        {
+          "type": "junction",
+          "at": [15, 0]
+        },
+        {
+          "type": "junction",
+          "at": [16, 0]
+        },
+        {
+          "type": "junction",
+          "at": [16, 6]
+        },
+        {
+          "type": "junction",
+          "at": [17, 18]
+        }
+      ]
+    }
+  ]
+}

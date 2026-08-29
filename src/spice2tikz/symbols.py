@@ -217,11 +217,26 @@ def _bjt(base: str) -> SymbolDef:
     )
 
 
+def _jfet(base: str) -> SymbolDef:
+    """Build a three-terminal JFET symbol: gate left, drain up, source down."""
+    return SymbolDef(
+        size=(4, 4),
+        pins={
+            "d": PinDef(offset=(0, 2), label="D"),
+            "g": PinDef(offset=(-2, 0), label="G"),
+            "s": PinDef(offset=(0, -2), label="S"),
+        },
+        base=base,
+    )
+
+
 BUILTIN_SYMBOLS: Final[dict[str, SymbolDef]] = {
     "nmos": _mos("nmos"),
     "pmos": _mos("pmos"),
     "npn": _bjt("npn"),
     "pnp": _bjt("pnp"),
+    "njfet": _jfet("njfet"),
+    "pjfet": _jfet("pjfet"),
 }
 """Symbols every schematic may reference without declaring them.
 
@@ -244,6 +259,8 @@ BASE_PIN_ANCHORS: Final[dict[str, dict[str, str]]] = {
     "pmos": {"d": "D", "g": "G", "s": "S", "b": "bulk"},
     "npn": {"c": "C", "b": "B", "e": "E"},
     "pnp": {"c": "C", "b": "B", "e": "E"},
+    "njfet": {"d": "D", "g": "G", "s": "S"},
+    "pjfet": {"d": "D", "g": "G", "s": "S"},
 }
 """Pin name → circuitikz node anchor, per built-in ``base`` shape.
 
@@ -266,5 +283,7 @@ SYMBOL_FOR_KIND: Final[dict[Kind, str]] = {
     Kind.PMOS: "pmos",
     Kind.BJT_NPN: "npn",
     Kind.BJT_PNP: "pnp",
+    Kind.NJFET: "njfet",
+    Kind.PJFET: "pjfet",
 }
 """Default built-in symbol for the kinds that have one."""

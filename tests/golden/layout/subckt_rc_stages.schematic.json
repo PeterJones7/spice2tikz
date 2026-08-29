@@ -1,0 +1,143 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Cascaded RC stages with a nested subcircuit",
+    "source_netlist": "subckt_rc_stages.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "symbols": {
+    "subckt:rcstage": {
+      "size": [4, 4],
+      "pins": {
+        "in": {
+          "offset": [-2, 0],
+          "label": "in"
+        },
+        "out": {
+          "offset": [2, 0],
+          "label": "out"
+        }
+      }
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "X1",
+          "kind": "subcircuit",
+          "symbol": "subckt:rcstage",
+          "at": [2, 12],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "in": [0, 12],
+            "out": [4, 12]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "X2",
+          "kind": "subcircuit",
+          "symbol": "subckt:rcstage",
+          "at": [10, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "in": [8, 6],
+            "out": [12, 6]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [5, 6],
+          "b": [5, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "RL",
+          "kind": "resistor",
+          "a": [21, 6],
+          "b": [21, 0],
+          "value_label": {
+            "text": "\\SI{100}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "src",
+          "points": [[5, 6], [5, 14]]
+        },
+        {
+          "type": "wire",
+          "net": "src",
+          "points": [[0, 12], [0, 14], [5, 14]]
+        },
+        {
+          "type": "wire",
+          "net": "outa",
+          "points": [[13, 8], [13, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "outa",
+          "points": [[4, 12], [13, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "outa",
+          "points": [[8, 6], [8, 8], [13, 8]]
+        },
+        {
+          "type": "wire",
+          "net": "outb",
+          "points": [[12, 6], [21, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[5, 0], [21, 0]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "src",
+          "variant": "tap",
+          "at": [0, 12],
+          "rot": 90,
+          "text": "src"
+        },
+        {
+          "type": "net_symbol",
+          "net": "outa",
+          "variant": "tap",
+          "at": [4, 12],
+          "rot": 90,
+          "text": "outa"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [13, 0],
+          "rot": 0
+        },
+        {
+          "type": "junction",
+          "at": [13, 0]
+        }
+      ]
+    }
+  ]
+}

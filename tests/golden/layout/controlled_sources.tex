@@ -1,0 +1,49 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (9,9) rectangle (13,15);
+  \node at (11,12) {$E_1$};
+  \draw (23,15) rectangle (27,21);
+  \node at (25,18) {$G_1$};
+  \draw (0,6) to[american voltage source, l=$V_1$] (0,0);
+  \draw (6,6) to[R=$R_1$, a=\SI{1}{\kilo\ohm}] (6,0);
+  \draw (14,12) to[R=$R_2$, a=\SI{100}{\ohm}] (42,12);
+  \draw (42,6) to[american voltage source, l=$\mathrm{VS}$] (42,0);
+  \draw (28,6) to[R=$R_3$, a=\SI{1}{\kilo\ohm}] (28,0);
+  \draw (56,6) to[american controlled voltage source, l=$H_1$, a=\SI{50}{\ohm}] (56,0);
+  \draw (62,6) to[R=$R_4$, a=\SI{1}{\kilo\ohm}] (62,0);
+  \draw (70,0) to[american controlled current source, l=$F_1$, a=2] (70,6);
+  \draw (76,6) to[R=$R_5$, a=\SI{1}{\kilo\ohm}] (76,0);
+  \draw (0,6) -- (0,21);
+  \draw (13,13) -- (13,15) -- (0,15);
+  \draw (27,19) -- (27,21) -- (0,21);
+  \draw (6,6) -- (0,6);
+  \draw (14,12) -- (14,17);
+  \draw (9,13) -- (9,17) -- (14,17);
+  \draw (42,6) -- (42,12);
+  \draw (28,6) -- (28,23);
+  \draw (23,19) -- (23,23) -- (28,23);
+  \draw (62,6) -- (56,6);
+  \draw (76,6) -- (70,6);
+  \draw (0,0) -- (76,0);
+  \draw (9,11) -- (9,0);
+  \draw (13,11) -- (13,0);
+  \draw (23,17) -- (23,0);
+  \draw (27,17) -- (27,0);
+  \node[above] at (27,19) {in};
+  \node[above] at (76,6) {fout};
+  \draw (38,0) node[ground]{};
+  \draw (0,6) node[circ]{};
+  \draw (0,15) node[circ]{};
+  \draw (6,0) node[circ]{};
+  \draw (9,0) node[circ]{};
+  \draw (13,0) node[circ]{};
+  \draw (23,0) node[circ]{};
+  \draw (27,0) node[circ]{};
+  \draw (28,0) node[circ]{};
+  \draw (38,0) node[circ]{};
+  \draw (42,0) node[circ]{};
+  \draw (56,0) node[circ]{};
+  \draw (62,0) node[circ]{};
+  \draw (70,0) node[circ]{};
+\end{circuitikz}

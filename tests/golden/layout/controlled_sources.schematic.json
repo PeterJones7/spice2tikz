@@ -1,0 +1,343 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Controlled source showcase (E/F/G/H)",
+    "source_netlist": "controlled_sources.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "symbols": {
+    "box:vcvs": {
+      "size": [4, 6],
+      "pins": {
+        "p": {
+          "offset": [-2, 1],
+          "label": "p"
+        },
+        "n": {
+          "offset": [-2, -1],
+          "label": "n"
+        },
+        "cp": {
+          "offset": [2, 1],
+          "label": "cp"
+        },
+        "cn": {
+          "offset": [2, -1],
+          "label": "cn"
+        }
+      }
+    },
+    "box:vccs": {
+      "size": [4, 6],
+      "pins": {
+        "p": {
+          "offset": [-2, 1],
+          "label": "p"
+        },
+        "n": {
+          "offset": [-2, -1],
+          "label": "n"
+        },
+        "cp": {
+          "offset": [2, 1],
+          "label": "cp"
+        },
+        "cn": {
+          "offset": [2, -1],
+          "label": "cn"
+        }
+      }
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "E1",
+          "kind": "vcvs",
+          "symbol": "box:vcvs",
+          "at": [11, 12],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "p": [9, 13],
+            "n": [9, 11],
+            "cp": [13, 13],
+            "cn": [13, 11]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "G1",
+          "kind": "vccs",
+          "symbol": "box:vccs",
+          "at": [25, 18],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "p": [23, 19],
+            "n": [23, 17],
+            "cp": [27, 19],
+            "cn": [27, 17]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 6],
+          "b": [0, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [6, 6],
+          "b": [6, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [14, 12],
+          "b": [42, 12],
+          "value_label": {
+            "text": "\\SI{100}{\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "VS",
+          "kind": "vsource",
+          "a": [42, 6],
+          "b": [42, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R3",
+          "kind": "resistor",
+          "a": [28, 6],
+          "b": [28, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "H1",
+          "kind": "ccvs",
+          "a": [56, 6],
+          "b": [56, 0],
+          "value_label": {
+            "text": "\\SI{50}{\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R4",
+          "kind": "resistor",
+          "a": [62, 6],
+          "b": [62, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "F1",
+          "kind": "cccs",
+          "a": [70, 0],
+          "b": [70, 6],
+          "value_label": {
+            "text": "2"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R5",
+          "kind": "resistor",
+          "a": [76, 6],
+          "b": [76, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[0, 6], [0, 21]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[13, 13], [13, 15], [0, 15]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[27, 19], [27, 21], [0, 21]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[6, 6], [0, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "amp",
+          "points": [[14, 12], [14, 17]]
+        },
+        {
+          "type": "wire",
+          "net": "amp",
+          "points": [[9, 13], [9, 17], [14, 17]]
+        },
+        {
+          "type": "wire",
+          "net": "sense",
+          "points": [[42, 6], [42, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "gm",
+          "points": [[28, 6], [28, 23]]
+        },
+        {
+          "type": "wire",
+          "net": "gm",
+          "points": [[23, 19], [23, 23], [28, 23]]
+        },
+        {
+          "type": "wire",
+          "net": "hout",
+          "points": [[62, 6], [56, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "fout",
+          "points": [[76, 6], [70, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [76, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[9, 11], [9, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[13, 11], [13, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[23, 17], [23, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[27, 17], [27, 0]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "tap",
+          "at": [27, 19],
+          "rot": 90,
+          "text": "in"
+        },
+        {
+          "type": "net_symbol",
+          "net": "fout",
+          "variant": "tap",
+          "at": [76, 6],
+          "rot": 90,
+          "text": "fout"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [38, 0],
+          "rot": 0
+        },
+        {
+          "type": "junction",
+          "at": [0, 6]
+        },
+        {
+          "type": "junction",
+          "at": [0, 15]
+        },
+        {
+          "type": "junction",
+          "at": [6, 0]
+        },
+        {
+          "type": "junction",
+          "at": [9, 0]
+        },
+        {
+          "type": "junction",
+          "at": [13, 0]
+        },
+        {
+          "type": "junction",
+          "at": [23, 0]
+        },
+        {
+          "type": "junction",
+          "at": [27, 0]
+        },
+        {
+          "type": "junction",
+          "at": [28, 0]
+        },
+        {
+          "type": "junction",
+          "at": [38, 0]
+        },
+        {
+          "type": "junction",
+          "at": [42, 0]
+        },
+        {
+          "type": "junction",
+          "at": [56, 0]
+        },
+        {
+          "type": "junction",
+          "at": [62, 0]
+        },
+        {
+          "type": "junction",
+          "at": [70, 0]
+        }
+      ]
+    }
+  ]
+}

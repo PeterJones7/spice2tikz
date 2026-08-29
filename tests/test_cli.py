@@ -34,15 +34,11 @@ def test_valid_schematic_emits_to_stdout(capsys: pytest.CaptureFixture[str]):
     ]
 
 
-def test_valid_netlist_has_nowhere_to_go_without_a_layout_engine(
-    capsys: pytest.CaptureFixture[str],
-):
+def test_valid_netlist_is_laid_out_and_emitted(capsys: pytest.CaptureFixture[str]):
     code, out, err = run(capsys, str(NETLIST))
-    assert code == cli.EXIT_INPUT_ERROR
-    assert out == ""
+    assert code == cli.EXIT_OK
+    assert out.startswith(r"\begin{circuitikz}")
     assert "0 error(s), 0 warning(s)" in err
-    assert "layout not yet implemented" in err
-    assert "--dump-netlist" in err
 
 
 def test_diagnostics_go_to_stderr_never_stdout(capsys: pytest.CaptureFixture[str]):
@@ -79,7 +75,7 @@ def test_quiet_suppresses_warnings_and_the_summary(
         str(dump),
     )
     assert code == cli.EXIT_OK
-    assert out == ""
+    assert out.startswith(r"\begin{circuitikz}")
     assert err == ""
     assert dump.exists()
 
@@ -139,14 +135,14 @@ def test_unknown_from_value_is_rejected_by_argparse():
         cli.main([str(SCHEMATIC), "--from", "vhdl"])
 
 
-def test_not_yet_implemented_formats_say_so(
+def test_an_unreadable_asc_is_an_input_error(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ):
     path = tmp_path / "circuit.asc"
-    path.write_text("* placeholder\n", encoding="utf-8")
-    code, _, err = run(capsys, str(path))
+    path.write_text("nothing an LTspice file would contain\n", encoding="utf-8")
+    code, out, _ = run(capsys, str(path))
     assert code == cli.EXIT_INPUT_ERROR
-    assert "roadmap section 3" in err
+    assert out == ""
 
 
 # --- the SPICE path (§4.4) --------------------------------------------------
@@ -165,23 +161,20 @@ def test_spice_extensions_are_autodetected(
     assert "as spice" in err
 
 
-def test_spice_without_a_dump_says_the_layout_engine_is_missing(
-    capsys: pytest.CaptureFixture[str],
-):
+def test_spice_converts_end_to_end(capsys: pytest.CaptureFixture[str]):
     code, out, err = run(capsys, str(SPICE_DECK))
-    assert code == cli.EXIT_INPUT_ERROR
-    assert out == ""
-    assert "layout not yet implemented" in err
-    assert "--dump-netlist" in err
+    assert code == cli.EXIT_OK
+    assert out.startswith(r"\begin{circuitikz}")
+    assert "0 error(s), 0 warning(s)" in err
 
 
-def test_spice_dump_netlist_exits_zero_and_matches_the_golden(
+def test_spice_dump_netlist_matches_the_golden(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ):
     target = tmp_path / "rc_lowpass.netlist.json"
     code, out, _ = run(capsys, str(SPICE_DECK), "--dump-netlist", str(target))
     assert code == cli.EXIT_OK
-    assert out == ""
+    assert out.startswith(r"\begin{circuitikz}")
     golden = Path(__file__).parent / "golden" / "spice" / "rc_lowpass.netlist.json"
     assert target.read_bytes() == golden.read_bytes()
 
@@ -360,12 +353,15 @@ def test_dump_netlist_on_a_schematic_is_a_usage_error(
     assert "no Netlist IR stage" in err
 
 
-def test_dump_layout_on_a_netlist_needs_the_layout_engine(
+def test_dump_layout_on_a_netlist_writes_the_generated_schematic(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ):
-    code, _, err = run(capsys, str(NETLIST), "--dump-layout", str(tmp_path / "s.json"))
-    assert code == cli.EXIT_INPUT_ERROR
-    assert "layout not yet implemented" in err
+    target = tmp_path / "s.json"
+    code, out, _ = run(capsys, str(NETLIST), "--dump-layout", str(target))
+    assert code == cli.EXIT_OK
+    assert out.startswith(r"\begin{circuitikz}")
+    reloaded = schematic_ir.load(target)
+    assert emit_snippet(reloaded) == out
 
 
 def test_dump_netlist_round_trips_the_input(
@@ -374,7 +370,7 @@ def test_dump_netlist_round_trips_the_input(
     target = tmp_path / "n.json"
     code, out, _ = run(capsys, str(NETLIST), "--dump-netlist", str(target))
     assert code == cli.EXIT_OK
-    assert out == ""
+    assert out.startswith(r"\begin{circuitikz}")
     assert target.read_bytes() == NETLIST.read_bytes()
 
 
@@ -522,3 +518,69 @@ def test_shell_redirection_is_standalone_compilable_text(tmp_path: Path):
     assert result.returncode == cli.EXIT_OK
     golden = Path(__file__).parent / "golden" / "rc_lowpass.standalone.tex"
     assert target.read_bytes() == golden.read_bytes()
+
+
+# --- the .asc path (§3.4) and the hand-tweak re-entry workflow --------------
+
+
+ASC_DECK = CORPUS / "asc" / "rc_lowpass.asc"
+
+
+def test_asc_is_autodetected_and_converted(capsys: pytest.CaptureFixture[str]):
+    code, out, err = run(capsys, str(ASC_DECK), "-v")
+    assert code == cli.EXIT_OK
+    assert out.startswith(r"\begin{circuitikz}")
+    assert "as asc" in err
+
+
+def test_asc_matches_the_golden(capsys: pytest.CaptureFixture[str]):
+    _, out, _ = run(capsys, str(ASC_DECK))
+    golden = Path(__file__).parent / "golden" / "asc" / "rc_lowpass.tex"
+    assert out == golden.read_text(encoding="utf-8")
+
+
+def test_asc_dump_layout_matches_the_golden(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    target = tmp_path / "layout.json"
+    code, _, _ = run(capsys, str(ASC_DECK), "--dump-layout", str(target))
+    assert code == cli.EXIT_OK
+    golden = Path(__file__).parent / "golden" / "asc" / "rc_lowpass.schematic.json"
+    assert target.read_bytes() == golden.read_bytes()
+
+
+def test_the_hand_tweak_round_trip(capsys: pytest.CaptureFixture[str], tmp_path: Path):
+    """The ``asc`` → JSON → edit → tex workflow ``docs/DESIGN.md`` §2 exists for."""
+    dumped = tmp_path / "layout.json"
+    code, direct, _ = run(capsys, str(ASC_DECK), "--dump-layout", str(dumped))
+    assert code == cli.EXIT_OK
+
+    # Re-emitting the dump unchanged must reproduce the original output byte
+    # for byte, or the escape hatch is not one.
+    code, again, _ = run(capsys, str(dumped))
+    assert code == cli.EXIT_OK
+    assert again == direct
+
+    # Now hand-edit it, the way a user would, and check the edit shows up.
+    edited = dumped.read_text(encoding="utf-8").replace('"ref": "R1"', '"ref": "R9"')
+    dumped.write_text(edited, encoding="utf-8", newline="\n")
+    code, tweaked, _ = run(capsys, str(dumped))
+    assert code == cli.EXIT_OK
+    assert "$R_9$" in tweaked
+    assert "$R_1$" not in tweaked
+
+
+def test_dump_netlist_on_an_asc_is_a_usage_error(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    code, _, err = run(
+        capsys, str(ASC_DECK), "--dump-netlist", str(tmp_path / "n.json")
+    )
+    assert code == cli.EXIT_INPUT_ERROR
+    assert "no Netlist IR stage" in err
+
+
+def test_verbose_reports_layout_metrics(capsys: pytest.CaptureFixture[str]):
+    _, _, err = run(capsys, str(SPICE_DECK), "-v")
+    assert "layout:" in err
+    assert "crossing(s)" in err
