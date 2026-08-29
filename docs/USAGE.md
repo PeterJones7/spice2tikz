@@ -13,15 +13,20 @@ For what the generated LaTeX looks like and how to restyle it, see
 
 Python ≥ 3.10 and nothing else — the package has no runtime dependencies.
 
+It is not on PyPI yet, so install it from the repository:
+
 ```sh
-python -m pip install spice2tikz
+python -m pip install git+https://github.com/PeterJones7/spice2tikz
 ```
 
 or, for an isolated command without touching your Python environment:
 
 ```sh
-pipx install spice2tikz
+pipx install git+https://github.com/PeterJones7/spice2tikz
 ```
+
+Once the first release is published, `pip install spice2tikz` and
+`pipx install spice2tikz` will work as well.
 
 From a clone, for development:
 

@@ -1,9 +1,13 @@
 # spice2tikz
 
 [![CI](https://github.com/PeterJones7/spice2tikz/actions/workflows/ci.yml/badge.svg)](https://github.com/PeterJones7/spice2tikz/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/spice2tikz.svg)](https://pypi.org/project/spice2tikz/)
-[![Python](https://img.shields.io/pypi/pyversions/spice2tikz.svg)](https://pypi.org/project/spice2tikz/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<!-- Add these back with the first PyPI release; until the package is published
+     they render as a red "package or version not found":
+[![PyPI](https://img.shields.io/pypi/v/spice2tikz.svg)](https://pypi.org/project/spice2tikz/)
+[![Downloads](https://img.shields.io/pypi/dm/spice2tikz.svg)](https://pypi.org/project/spice2tikz/)
+-->
 
 **Turn a SPICE netlist or an LTspice schematic into a CircuiTikZ figure, from
 the command line.** The circuit is already in a file; you should not have to
@@ -56,9 +60,16 @@ Three properties are worth caring about:
 
 ## Install
 
+Not on PyPI yet — install from the repository:
+
 ```sh
-pipx install spice2tikz          # isolated command
-python -m pip install spice2tikz # or into your current environment
+pipx install git+https://github.com/PeterJones7/spice2tikz
+```
+
+or into your current environment:
+
+```sh
+python -m pip install git+https://github.com/PeterJones7/spice2tikz
 ```
 
 Python ≥ 3.10, and nothing else — the package has **no runtime dependencies**.
