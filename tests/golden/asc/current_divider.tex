@@ -1,0 +1,13 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (0,5) to[american current source, l=$I_1$, a=\SI{1}{\milli\ampere}] (0,0);
+  \draw (5,5) to[R=$R_1$, a=\SI{1}{\kilo\ohm}] (5,0);
+  \draw (10,5) to[R=$R_2$, a=\SI{2.2}{\kilo\ohm}] (10,0);
+  \draw (0,5) -- (10,5);
+  \draw (0,0) -- (10,0);
+  \node[right] at (5,5) {mid};
+  \draw (5,0) node[ground]{};
+  \draw (5,0) node[circ]{};
+  \draw (5,5) node[circ]{};
+\end{circuitikz}

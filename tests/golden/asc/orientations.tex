@@ -1,0 +1,20 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (1,-1) to[R=$R_1$] (1,-6);
+  \draw (15,-1) to[R=$R_2$] (10,-1);
+  \draw (31,1) to[R=$R_3$] (31,6);
+  \draw (49,1) to[R=$R_4$] (54,1);
+  \draw (63,-1) to[R=$R_5$] (63,-6);
+  \draw (81,-1) to[R=$R_6$] (86,-1);
+  \draw (97,1) to[R=$R_7$] (97,6);
+  \draw (111,1) to[R=$R_8$] (106,1);
+  \node[nmos, rotate=270, label=below:{$M_1$}] (s2t8) at (13,-19) {};
+  \draw (s2t8.D) -| (15,-19);
+  \draw (s2t8.G) |- (13,-17);
+  \draw (s2t8.S) -| (11,-19);
+  \node[pnp, xscale=-1, rotate=270, label=above:{$Q_1$}] (s2t9) at (45,-12) {};
+  \draw (s2t9.C) -| (47,-12);
+  \draw (s2t9.B) |- (45,-14);
+  \draw (s2t9.E) -| (43,-12);
+\end{circuitikz}

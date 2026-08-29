@@ -1,0 +1,94 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "rlc_series.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 5],
+          "b": [0, 0],
+          "value_label": {
+            "text": "{SINE(0 1 1k)}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [0, 10],
+          "b": [5, 10],
+          "value_label": {
+            "text": "\\SI{100}{\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "L1",
+          "kind": "inductor",
+          "a": [5, 10],
+          "b": [10, 10],
+          "value_label": {
+            "text": "\\SI{10}{\\milli\\henry}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "C1",
+          "kind": "capacitor",
+          "a": [10, 10],
+          "b": [14, 10],
+          "value_label": {
+            "text": "\\SI{1}{\\micro\\farad}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "N001",
+          "points": [[0, 10], [0, 5]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[14, 10], [14, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [14, 0]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [7, 0],
+          "rot": 0
+        },
+        {
+          "type": "junction",
+          "at": [7, 0]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+\documentclass[border=2pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{siunitx}
+\begin{document}
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (0,5) to[american voltage source, l=$V_1$, a=AC 1] (0,0);
+  \draw (0,5) to[R=$R_1$, a=\SI{10}{\kilo\ohm}] (5,5);
+  \draw (5,4) to[C=$C_1$, a=\SI{100}{\nano\farad}] (5,0);
+  \draw (5,5) -- (5,4);
+  \draw (0,0) -- (5,0);
+  \draw (3,0) node[ground]{};
+  \draw (3,0) node[circ]{};
+\end{circuitikz}
+\end{document}

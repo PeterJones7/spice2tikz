@@ -1,0 +1,16 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (1,0) to[R=$R_1$, a=4k7] (1,-4);
+  \draw (17,0) to[C=$C_1$, a=\SI{10}{\micro\farad}] (17,-4);
+  \draw (33,-1) to[L=$L_1$, a=\SI{100}{\milli\henry}] (33,-6);
+  \draw (49,0) to[D=$D_1$, a=5.1] (49,-4);
+  \node[nmos, label=right:{$M_1$ NMOS}] (s2t4) at (67,-3) {};
+  \draw (s2t4.D) |- (67,-1);
+  \draw (s2t4.G) -| (65,-3);
+  \draw (s2t4.S) |- (67,-5);
+  \node[pmos, label=right:{$M_2$ PMOS}] (s2t5) at (83,-3) {};
+  \draw (s2t5.D) |- (83,-1);
+  \draw (s2t5.G) -| (81,-3);
+  \draw (s2t5.S) |- (83,-5);
+\end{circuitikz}

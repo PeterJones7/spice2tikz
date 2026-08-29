@@ -1,0 +1,151 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "cmos_inverter.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M1",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [11, 3],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [11, 5],
+            "g": [9, 3],
+            "s": [11, 1],
+            "b": [11, 3]
+          },
+          "label": {
+            "text": "$M_1$ NMOS"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M2",
+          "kind": "pmos",
+          "symbol": "pmos",
+          "at": [11, 15],
+          "rot": 180,
+          "mirror": true,
+          "pins": {
+            "d": [11, 13],
+            "g": [9, 15],
+            "s": [11, 17],
+            "b": [11, 15]
+          },
+          "label": {
+            "text": "$M_2$ PMOS"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[8, 17], [8, 1]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[4, 9], [8, 9]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[11, 12], [11, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[11, 9], [15, 9]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[11, 5], [11, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[9, 3], [9, 1], [8, 1]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[11, 1], [11, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[11, 13], [11, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[9, 15], [9, 17], [8, 17]]
+        },
+        {
+          "type": "wire",
+          "net": "vdd",
+          "points": [[11, 17], [11, 18]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "tap",
+          "at": [4, 9],
+          "rot": 0,
+          "text": "in"
+        },
+        {
+          "type": "net_symbol",
+          "net": "out",
+          "variant": "tap",
+          "at": [15, 9],
+          "rot": 0,
+          "text": "out"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [11, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "vdd",
+          "variant": "tap",
+          "at": [11, 18],
+          "rot": 0,
+          "text": "vdd"
+        },
+        {
+          "type": "junction",
+          "at": [8, 9]
+        },
+        {
+          "type": "junction",
+          "at": [11, 9]
+        }
+      ]
+    }
+  ]
+}

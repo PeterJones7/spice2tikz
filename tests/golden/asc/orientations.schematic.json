@@ -1,0 +1,119 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "orientations.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [1, -1],
+          "b": [1, -6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [15, -1],
+          "b": [10, -1]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R3",
+          "kind": "resistor",
+          "a": [31, 1],
+          "b": [31, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R4",
+          "kind": "resistor",
+          "a": [49, 1],
+          "b": [54, 1]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R5",
+          "kind": "resistor",
+          "a": [63, -1],
+          "b": [63, -6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R6",
+          "kind": "resistor",
+          "a": [81, -1],
+          "b": [86, -1]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R7",
+          "kind": "resistor",
+          "a": [97, 1],
+          "b": [97, 6]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R8",
+          "kind": "resistor",
+          "a": [111, 1],
+          "b": [106, 1]
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M1",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [13, -19],
+          "rot": 270,
+          "mirror": false,
+          "pins": {
+            "d": [15, -19],
+            "g": [13, -17],
+            "s": [11, -19],
+            "b": [13, -19]
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "Q1",
+          "kind": "bjt_pnp",
+          "symbol": "pnp",
+          "at": [45, -12],
+          "rot": 270,
+          "mirror": true,
+          "pins": {
+            "c": [47, -12],
+            "b": [45, -14],
+            "e": [43, -12]
+          }
+        }
+      ]
+    }
+  ]
+}

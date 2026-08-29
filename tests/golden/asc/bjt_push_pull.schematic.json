@@ -1,0 +1,145 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "bjt_push_pull.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "Q1",
+          "kind": "bjt_npn",
+          "symbol": "npn",
+          "at": [12, 15],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "c": [12, 17],
+            "b": [10, 15],
+            "e": [12, 13]
+          },
+          "label": {
+            "text": "$Q_1$ 2N2222"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "Q2",
+          "kind": "bjt_pnp",
+          "symbol": "pnp",
+          "at": [12, 9],
+          "rot": 180,
+          "mirror": true,
+          "pins": {
+            "c": [12, 7],
+            "b": [10, 9],
+            "e": [12, 11]
+          },
+          "label": {
+            "text": "$Q_2$ 2N2907"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[8, 15], [8, 9]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[4, 12], [8, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[12, 12], [16, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "vcc",
+          "points": [[12, 17], [12, 18]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[10, 15], [8, 15]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[12, 13], [12, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "vee",
+          "points": [[12, 7], [12, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[10, 9], [8, 9]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[12, 11], [12, 12]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "tap",
+          "at": [4, 12],
+          "rot": 0,
+          "text": "in"
+        },
+        {
+          "type": "net_symbol",
+          "net": "out",
+          "variant": "tap",
+          "at": [16, 12],
+          "rot": 0,
+          "text": "out"
+        },
+        {
+          "type": "net_symbol",
+          "net": "vcc",
+          "variant": "tap",
+          "at": [12, 18],
+          "rot": 0,
+          "text": "vcc"
+        },
+        {
+          "type": "net_symbol",
+          "net": "vee",
+          "variant": "tap",
+          "at": [12, 6],
+          "rot": 0,
+          "text": "vee"
+        },
+        {
+          "type": "junction",
+          "at": [8, 12]
+        },
+        {
+          "type": "junction",
+          "at": [12, 12]
+        }
+      ]
+    }
+  ]
+}

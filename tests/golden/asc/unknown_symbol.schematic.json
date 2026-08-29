@@ -1,0 +1,97 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "unknown_symbol.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "symbols": {
+    "subckt:universalopamp2": {
+      "size": [6, 2],
+      "pins": {
+        "1": {
+          "offset": [-2, 1]
+        },
+        "2": {
+          "offset": [3, 0]
+        },
+        "3": {
+          "offset": [-2, -1]
+        }
+      }
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "U1",
+          "kind": "subcircuit",
+          "symbol": "subckt:universalopamp2",
+          "at": [8, 10],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "1": [6, 11],
+            "2": [11, 10],
+            "3": [6, 9]
+          },
+          "label": {
+            "text": "$U_1$ level.2"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "inp",
+          "points": [[2, 11], [6, 11]]
+        },
+        {
+          "type": "wire",
+          "net": "inm",
+          "points": [[2, 9], [6, 9]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[11, 10], [15, 10]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "inp",
+          "variant": "tap",
+          "at": [2, 11],
+          "rot": 0,
+          "text": "inp"
+        },
+        {
+          "type": "net_symbol",
+          "net": "inm",
+          "variant": "tap",
+          "at": [2, 9],
+          "rot": 0,
+          "text": "inm"
+        },
+        {
+          "type": "net_symbol",
+          "net": "out",
+          "variant": "tap",
+          "at": [15, 10],
+          "rot": 0,
+          "text": "out"
+        }
+      ]
+    }
+  ]
+}

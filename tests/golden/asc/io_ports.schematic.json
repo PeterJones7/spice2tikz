@@ -1,0 +1,96 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "io_ports.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [0, 4],
+          "b": [5, 4],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "C1",
+          "kind": "capacitor",
+          "a": [5, 4],
+          "b": [5, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\nano\\farad}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [10, 4],
+          "b": [15, 4],
+          "value_label": {
+            "text": "\\SI{2}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "bus",
+          "points": [[5, 4], [10, 4]]
+        },
+        {
+          "type": "wire",
+          "net": "bus",
+          "points": [[5, 8], [5, 4]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [5, 0],
+          "rot": 0
+        },
+        {
+          "type": "port",
+          "name": "in",
+          "at": [0, 4],
+          "direction": "left"
+        },
+        {
+          "type": "port",
+          "name": "out",
+          "at": [15, 4],
+          "direction": "right"
+        },
+        {
+          "type": "port",
+          "name": "bus",
+          "at": [5, 8],
+          "direction": "right"
+        },
+        {
+          "type": "junction",
+          "at": [5, 4]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "symbol_gallery.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [1, 0],
+          "b": [1, -4],
+          "value_label": {
+            "text": "4k7"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "C1",
+          "kind": "capacitor",
+          "a": [17, 0],
+          "b": [17, -4],
+          "value_label": {
+            "text": "\\SI{10}{\\micro\\farad}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "L1",
+          "kind": "inductor",
+          "a": [33, -1],
+          "b": [33, -6],
+          "value_label": {
+            "text": "\\SI{100}{\\milli\\henry}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D1",
+          "kind": "diode",
+          "a": [49, 0],
+          "b": [49, -4],
+          "value_label": {
+            "text": "5.1"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M1",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [67, -3],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [67, -1],
+            "g": [65, -3],
+            "s": [67, -5],
+            "b": [67, -3]
+          },
+          "label": {
+            "text": "$M_1$ NMOS"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M2",
+          "kind": "pmos",
+          "symbol": "pmos",
+          "at": [83, -3],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [83, -1],
+            "g": [81, -3],
+            "s": [83, -5],
+            "b": [83, -3]
+          },
+          "label": {
+            "text": "$M_2$ PMOS"
+          }
+        }
+      ]
+    }
+  ]
+}

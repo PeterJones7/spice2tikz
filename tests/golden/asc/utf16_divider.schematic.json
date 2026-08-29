@@ -1,0 +1,99 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "utf16_divider.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 10],
+          "b": [0, 5],
+          "value_label": {
+            "text": "\\SI{5}{\\volt}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [10, 10],
+          "b": [10, 5],
+          "value_label": {
+            "text": "\\SI{10}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [10, 5],
+          "b": [10, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "vin",
+          "points": [[0, 10], [10, 10]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 5], [0, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [10, 0]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [5, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "vin",
+          "variant": "tap",
+          "at": [0, 10],
+          "rot": 0,
+          "text": "vin"
+        },
+        {
+          "type": "net_symbol",
+          "net": "vout",
+          "variant": "tap",
+          "at": [10, 5],
+          "rot": 0,
+          "text": "vout"
+        },
+        {
+          "type": "junction",
+          "at": [5, 0]
+        }
+      ]
+    }
+  ]
+}

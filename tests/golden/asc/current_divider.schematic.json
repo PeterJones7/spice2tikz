@@ -1,0 +1,90 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "current_divider.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "I1",
+          "kind": "isource",
+          "a": [0, 5],
+          "b": [0, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\milli\\ampere}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [5, 5],
+          "b": [5, 0],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [10, 5],
+          "b": [10, 0],
+          "value_label": {
+            "text": "\\SI{2.2}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "mid",
+          "points": [[0, 5], [10, 5]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [10, 0]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "mid",
+          "variant": "tap",
+          "at": [5, 5],
+          "rot": 0,
+          "text": "mid"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [5, 0],
+          "rot": 0
+        },
+        {
+          "type": "junction",
+          "at": [5, 0]
+        },
+        {
+          "type": "junction",
+          "at": [5, 5]
+        }
+      ]
+    }
+  ]
+}

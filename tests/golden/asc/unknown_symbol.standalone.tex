@@ -1,0 +1,17 @@
+\documentclass[border=2pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{siunitx}
+\begin{document}
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (5,9) rectangle (11,11);
+  \node at (8,10) {$U_1$ level.2};
+  \draw (2,11) -- (6,11);
+  \draw (2,9) -- (6,9);
+  \draw (11,10) -- (15,10);
+  \node[right] at (2,11) {inp};
+  \node[right] at (2,9) {inm};
+  \node[right] at (15,10) {out};
+\end{circuitikz}
+\end{document}

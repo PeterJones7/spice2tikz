@@ -1,0 +1,14 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (0,4) to[R=$R_1$, a=\SI{1}{\kilo\ohm}] (5,4);
+  \draw (5,4) to[C=$C_1$, a=\SI{10}{\nano\farad}] (5,0);
+  \draw (10,4) to[R=$R_2$, a=\SI{2}{\kilo\ohm}] (15,4);
+  \draw (5,4) -- (10,4);
+  \draw (5,8) -- (5,4);
+  \draw (5,0) node[ground]{};
+  \node[left] at (0,4) {in};
+  \node[right] at (15,4) {out};
+  \node[right] at (5,8) {bus};
+  \draw (5,4) node[circ]{};
+\end{circuitikz}

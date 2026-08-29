@@ -1,0 +1,115 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "source_netlist": "half_wave_rectifier.asc",
+    "generator": "spice2tikz asc_importer",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "style": {
+    "resistor_variant": "european",
+    "inductor_variant": "cute",
+    "siunitx": true,
+    "label_refs": true
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [0, 5],
+          "b": [0, 0],
+          "value_label": {
+            "text": "{SINE(0 5 50)}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "D1",
+          "kind": "diode",
+          "a": [0, 5],
+          "b": [4, 5],
+          "value_label": {
+            "text": "1N4148"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [10, 5],
+          "b": [10, 0],
+          "value_label": {
+            "text": "\\SI{4.7}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "C1",
+          "kind": "capacitor",
+          "a": [15, 4],
+          "b": [15, 0],
+          "value_label": {
+            "text": "\\SI{22}{\\micro\\farad}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[4, 5], [10, 5]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[10, 5], [15, 5]]
+        },
+        {
+          "type": "wire",
+          "net": "out",
+          "points": [[15, 5], [15, 4]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [15, 0]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [7, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "out",
+          "variant": "tap",
+          "at": [10, 5],
+          "rot": 0,
+          "text": "out"
+        },
+        {
+          "type": "junction",
+          "at": [7, 0]
+        },
+        {
+          "type": "junction",
+          "at": [10, 0]
+        },
+        {
+          "type": "junction",
+          "at": [10, 5]
+        }
+      ]
+    }
+  ]
+}

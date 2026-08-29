@@ -1,0 +1,14 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (0,10) to[american voltage source, l=$V_1$, a=\SI{5}{\volt}] (0,5);
+  \draw (10,10) to[R=$R_1$, a=\SI{10}{\kilo\ohm}] (10,5);
+  \draw (10,5) to[R=$R_2$, a=\SI{10}{\kilo\ohm}] (10,0);
+  \draw (0,10) -- (10,10);
+  \draw (0,5) -- (0,0);
+  \draw (0,0) -- (10,0);
+  \draw (5,0) node[ground]{};
+  \node[right] at (0,10) {vin};
+  \node[right] at (10,5) {vout};
+  \draw (5,0) node[circ]{};
+\end{circuitikz}

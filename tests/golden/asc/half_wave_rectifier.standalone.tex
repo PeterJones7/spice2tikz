@@ -1,0 +1,22 @@
+\documentclass[border=2pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{siunitx}
+\begin{document}
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (0,5) to[american voltage source, l=$V_1$, a={SINE(0 5 50)}] (0,0);
+  \draw (0,5) to[D=$D_1$, a=1N4148] (4,5);
+  \draw (10,5) to[R=$R_1$, a=\SI{4.7}{\kilo\ohm}] (10,0);
+  \draw (15,4) to[C=$C_1$, a=\SI{22}{\micro\farad}] (15,0);
+  \draw (4,5) -- (10,5);
+  \draw (10,5) -- (15,5);
+  \draw (15,5) -- (15,4);
+  \draw (0,0) -- (15,0);
+  \draw (7,0) node[ground]{};
+  \node[right] at (10,5) {out};
+  \draw (7,0) node[circ]{};
+  \draw (10,0) node[circ]{};
+  \draw (10,5) node[circ]{};
+\end{circuitikz}
+\end{document}
