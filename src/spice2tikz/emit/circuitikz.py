@@ -417,11 +417,19 @@ def _emit_shape_node(
     el: NodeComponent, symbol: SymbolDef, base: str, index: int, style: StyleDefaults
 ) -> list[str]:
     """Place a circuitikz shape and wire its anchors out to the declared pins."""
+    # `rotate` is listed BEFORE `xscale`, which reads backwards but is right:
+    # TikZ post-multiplies each transformation onto the current matrix, so the
+    # option written *last* is applied to the shape *first*.  Listing rotate
+    # then xscale therefore mirrors first and rotates second, which is the
+    # IR's own convention (`symbols.transform_offset`).  The other order
+    # disagrees for 90 and 270 degrees and drags the control terminal's lead
+    # straight through the body; verified by compiling both
+    # (`docs/CIRCUITIKZ_NOTES.md`).
     options = [base]
-    if el.mirror:
-        options.append("xscale=-1")
     if el.rot:
         options.append(f"rotate={el.rot}")
+    if el.mirror:
+        options.append("xscale=-1")
     ref_derived = derive_ref_label(el.ref) if style.label_refs else None
     label_opt = _node_label_option(el.label, ref_derived, _free_node_side(el))
     if label_opt is not None:

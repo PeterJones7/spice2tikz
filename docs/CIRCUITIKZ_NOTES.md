@@ -628,6 +628,27 @@ the result, after a user reported a transistor that looked wrong:
 \draw (b.C) node[right]{C} (b.B) node[left]{B} (b.E) node[right]{E};
 ```
 
+### Node transform order (verified by rendering, 2026-08-29)
+
+TikZ **post-multiplies** each transformation onto the current matrix, so the
+option written *last* is applied to the shape *first*. To mirror before
+rotating — the convention `symbols.transform_offset` uses — the options must be
+written the other way round:
+
+```latex
+\node[pmos, rotate=90, xscale=-1] {}   % mirror first, then rotate: correct
+\node[pmos, xscale=-1, rotate=90] {}   % rotates first: wrong at 90 and 270
+```
+
+At 0 and 180 degrees the two orders happen to agree, which is why this survived
+so long. At 90 and 270 they differ, and the control terminal's lead ends up
+drawn straight through the body of the device.
+
+`tests/test_anchor_geometry.py` checks this against a real compiler: it emits
+every built-in symbol in all eight orientations, has TeX report each anchor's
+coordinate through `\typeout`, and compares the direction against
+`resolve_pins`.
+
 ## Node shapes do not scale with the environment `scale`
 
 Measured anchor offsets for `node[nmos] at (0,0)` (no scaling):

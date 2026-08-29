@@ -631,7 +631,16 @@ def test_generic_box_nodes_get_no_anchor_leads():
     assert "s2t" not in text
 
 
-def test_mirrored_and_rotated_node_gets_xscale_and_rotate():
+def test_mirrored_and_rotated_node_rotates_before_it_mirrors():
+    """``rotate`` is listed first so TikZ applies the mirror first.
+
+    TikZ post-multiplies each node transformation onto the current matrix, so
+    the option written *last* reaches the shape *first*. Listing rotate then
+    xscale therefore means mirror-then-rotate, which is the IR's convention
+    (``symbols.transform_offset``). The other way round disagrees at 90 and
+    270 degrees; ``tests/test_anchor_geometry.py`` proves it against a real
+    compiler.
+    """
     ir = _sheet(
         NodeComponent(
             ref="M1",
@@ -646,7 +655,7 @@ def test_mirrored_and_rotated_node_gets_xscale_and_rotate():
     line = emit_snippet(ir)
     assert "xscale=-1" in line
     assert "rotate=90" in line
-    assert line.index("xscale=-1") < line.index("rotate=90")
+    assert line.index("rotate=90") < line.index("xscale=-1")
 
 
 def test_node_label_side_maps_to_a_label_position():

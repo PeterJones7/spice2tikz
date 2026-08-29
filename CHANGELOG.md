@@ -11,6 +11,13 @@ minor releases.
 
 ### Fixed
 
+- Mirrored node components were drawn wrongly at 90° and 270°. The emitter
+  listed `xscale=-1` before `rotate`, on the assumption that TikZ applies node
+  transformations left to right; it post-multiplies, so that order mirrors
+  *after* rotating and disagrees with the IR's convention. The control
+  terminal's lead was drawn through the body of the device. The two orders
+  agree at 0° and 180°, which is why it went unnoticed.
+
 - Every PMOS, PNP and JFET was drawn with leads doubling back across the body
   of the device. circuitikz draws each p-type shape the other way up from its
   n-type counterpart — a PMOS source above its drain, a PNP emitter above its
@@ -40,6 +47,14 @@ minor releases.
 
 ### Added
 
+- `tools/contact_sheet.py`: renders every golden, plus generated reference
+  sheets for every built-in symbol in all eight orientations, every
+  path-component kind and every net-symbol variant, into one self-contained
+  HTML page with the review checklist inline. The reference sheets cover
+  emitter paths no corpus circuit reaches.
+- `tests/test_anchor_geometry.py`: compiles the emitter's own output, has TeX
+  report where circuitikz really places each anchor, and checks it against
+  `resolve_pins`. This is the check both symbol bugs slipped past.
 - `tests/test_end_to_end.py`: SPICE text in, CircuiTikZ out, with no fixtures
   in between — and, most importantly, a test that reads the finished drawing
   back as a person would and checks the recovered connectivity against the
