@@ -98,8 +98,13 @@ The output terminal wins: it is the net the rest of the circuit continues from,
 so putting it beside its own column keeps the signal flowing rightwards.
 """
 
-CHANNEL_PINS: Final[tuple[tuple[str, str], ...]] = (("d", "s"), ("c", "e"))
-"""``(upper, lower)`` terminal pairs of a three-terminal device, unturned."""
+CHANNEL_PAIRS: Final[tuple[tuple[str, str], ...]] = (("d", "s"), ("c", "e"))
+"""The two channel terminals of a three-terminal device, in taxonomy order.
+
+Which of the pair is drawn *above* the other depends on the symbol, not on this
+tuple: circuitikz draws a PMOS source-up and a PNP emitter-up.  The orientation
+heuristic reads that off the symbol's own offsets.
+"""
 
 Band = str  # "ground" | "supply" | "float"
 
@@ -450,15 +455,18 @@ def _orientation(
 ) -> tuple[Rotation, bool]:
     """Return the ``(rot, mirror)`` that points each terminal the right way.
 
-    A device is drawn unturned — output terminal up, control terminal left —
-    unless its *lower* terminal is the one that wants to be at the top: a PMOS
-    with its source on the supply rail, or a PNP emitter-follower.  Turning it
-    through 180° **and** mirroring puts the source or emitter up and the drain
-    or collector down while leaving the control terminal on the left, which is
-    exactly how such a stage is drawn by hand.
+    A device is drawn unturned unless the terminal the symbol puts at the
+    *bottom* is the one that wants to be at the top.  Turning it through 180°
+    **and** mirroring flips it vertically while leaving the control terminal on
+    the left, which is how such a stage is drawn by hand.
+
+    Which terminal the symbol puts on top is read from the symbol itself: a
+    PMOS is drawn source-up and a PNP emitter-up, so a PMOS whose source is on
+    the supply rail already needs no turning at all.
     """
-    for upper, lower in CHANNEL_PINS:
-        if upper not in symbol.pins or lower not in symbol.pins:
+    for first, second in CHANNEL_PAIRS:
+        upper, lower = _vertical_order(symbol, first, second)
+        if upper is None or lower is None:
             continue
         top_net, bottom_net = component.pins.get(upper), component.pins.get(lower)
         if top_net is None or bottom_net is None:
@@ -467,6 +475,19 @@ def _orientation(
             return 180, True
         return 0, False
     return 0, False
+
+
+def _vertical_order(
+    symbol: SymbolDef, first: str, second: str
+) -> tuple[str | None, str | None]:
+    """Return the pair ``(upper, lower)`` as *this symbol* draws them."""
+    above = symbol.pins.get(first)
+    below = symbol.pins.get(second)
+    if above is None or below is None:
+        return None, None
+    if above.offset[1] >= below.offset[1]:
+        return first, second
+    return second, first
 
 
 def _rail_preference(graph: CircuitGraph, net: str) -> int:

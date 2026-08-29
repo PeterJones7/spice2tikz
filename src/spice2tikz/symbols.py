@@ -190,53 +190,68 @@ def lookup_symbol(
     return BUILTIN_SYMBOLS.get(name)
 
 
-def _mos(base: str) -> SymbolDef:
-    """Build a four-terminal MOS symbol: gate left, drain up, source down."""
+def _mos(base: str, *, drain_up: bool) -> SymbolDef:
+    """Build a four-terminal MOS symbol: gate left, channel terminals vertical.
+
+    ``drain_up`` follows the circuitikz shape rather than the device: the
+    ``nmos`` shape puts D at the top and S at the bottom, and ``pmos`` puts them
+    the other way round, because that is how each is conventionally drawn.
+    """
+    top, bottom = ("d", "s") if drain_up else ("s", "d")
     return SymbolDef(
         size=(4, 4),
         pins={
-            "d": PinDef(offset=(0, 2), label="D"),
+            top: PinDef(offset=(0, 2), label=top.upper()),
             "g": PinDef(offset=(-2, 0), label="G"),
-            "s": PinDef(offset=(0, -2), label="S"),
+            bottom: PinDef(offset=(0, -2), label=bottom.upper()),
             "b": PinDef(offset=(0, 0), label="B"),
         },
         base=base,
     )
 
 
-def _bjt(base: str) -> SymbolDef:
-    """Build a bipolar symbol: base left, collector up, emitter down."""
+def _bjt(base: str, *, collector_up: bool) -> SymbolDef:
+    """Build a bipolar symbol: base left, channel terminals vertical.
+
+    ``collector_up`` follows the circuitikz shape: ``npn`` puts C at the top and
+    E at the bottom, ``pnp`` the other way round.
+    """
+    top, bottom = ("c", "e") if collector_up else ("e", "c")
     return SymbolDef(
         size=(4, 4),
         pins={
-            "c": PinDef(offset=(0, 2), label="C"),
+            top: PinDef(offset=(0, 2), label=top.upper()),
             "b": PinDef(offset=(-2, 0), label="B"),
-            "e": PinDef(offset=(0, -2), label="E"),
+            bottom: PinDef(offset=(0, -2), label=bottom.upper()),
         },
         base=base,
     )
 
 
-def _jfet(base: str) -> SymbolDef:
-    """Build a three-terminal JFET symbol: gate left, drain up, source down."""
+def _jfet(base: str, *, drain_up: bool) -> SymbolDef:
+    """Build a three-terminal JFET symbol: gate left, channel vertical.
+
+    ``drain_up`` follows the circuitikz shape, as for the MOS devices.
+    """
+    top, bottom = ("d", "s") if drain_up else ("s", "d")
     return SymbolDef(
         size=(4, 4),
         pins={
-            "d": PinDef(offset=(0, 2), label="D"),
+            top: PinDef(offset=(0, 2), label=top.upper()),
             "g": PinDef(offset=(-2, 0), label="G"),
-            "s": PinDef(offset=(0, -2), label="S"),
+            bottom: PinDef(offset=(0, -2), label=bottom.upper()),
         },
         base=base,
     )
 
 
 BUILTIN_SYMBOLS: Final[dict[str, SymbolDef]] = {
-    "nmos": _mos("nmos"),
-    "pmos": _mos("pmos"),
-    "npn": _bjt("npn"),
-    "pnp": _bjt("pnp"),
-    "njfet": _jfet("njfet"),
-    "pjfet": _jfet("pjfet"),
+    "nmos": _mos("nmos", drain_up=True),
+    "pmos": _mos("pmos", drain_up=False),
+    "npn": _bjt("npn", collector_up=True),
+    "pnp": _bjt("pnp", collector_up=False),
+    "njfet": _jfet("njfet", drain_up=True),
+    "pjfet": _jfet("pjfet", drain_up=False),
 }
 """Symbols every schematic may reference without declaring them.
 
@@ -247,6 +262,14 @@ MOS bulk on the origin.  circuitikz places those anchors at non-integer grid
 distances (D sits 0.77 cm out, which is 1.54 units at the default 0.5 cm
 pitch), so the emitter draws a short lead from each anchor to the pin position
 declared here rather than pretending the two coincide.
+
+The p-type shapes carry their channel terminals the *other way up* from the
+n-type ones — ``pmos`` and ``pjfet`` put S at the top and D at the bottom, and
+``pnp`` puts E at the top and C at the bottom — because that is how each device
+is conventionally drawn.  The offsets here follow the shapes, not the device:
+the emitter draws a lead from each real anchor to the pin position declared
+here, so an offset on the wrong side of the body produces a lead that doubles
+back across the symbol.
 
 ``size`` is a deliberately conservative box: the real shapes extend only to the
 left of the origin, but SPEC_IR §2 defines ``size`` as centred on it.

@@ -79,12 +79,12 @@
           "kind": "pjfet",
           "symbol": "pjfet",
           "at": [29, 6],
-          "rot": 0,
-          "mirror": false,
+          "rot": 180,
+          "mirror": true,
           "pins": {
-            "d": [29, 8],
+            "s": [29, 4],
             "g": [27, 6],
-            "s": [29, 4]
+            "d": [29, 8]
           }
         },
         {

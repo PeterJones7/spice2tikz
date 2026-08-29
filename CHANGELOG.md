@@ -11,6 +11,16 @@ minor releases.
 
 ### Fixed
 
+- Every PMOS, PNP and JFET was drawn with leads doubling back across the body
+  of the device. circuitikz draws each p-type shape the other way up from its
+  n-type counterpart — a PMOS source above its drain, a PNP emitter above its
+  collector — but the built-in symbols declared identical pin offsets for both
+  polarities, so the leads from the real anchors to the declared positions
+  crossed the symbol. The p-type built-ins now carry their real geometry, the
+  layout engine reads which terminal is uppermost from the symbol rather than
+  from a fixed table, and `tests/test_symbols.py` pins the ordering. Reported
+  by a user from a rendered figure.
+
 - The layout engine drew a net's column wire *through* a rail-connected
   component when the net also reached a device terminal below the component's
   row — a resistor with a wire down the middle of it, which reads as a

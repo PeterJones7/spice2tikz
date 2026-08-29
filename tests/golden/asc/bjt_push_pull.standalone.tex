@@ -10,23 +10,25 @@
   \draw (s2t0.B) -| (10,15);
   \draw (s2t0.E) |- (12,13);
   \node[pnp, xscale=-1, rotate=180, label=right:{$Q_2$ 2N2907}] (s2t1) at (12,9) {};
-  \draw (s2t1.C) |- (12,7);
+  \draw (s2t1.E) |- (12,7);
   \draw (s2t1.B) -| (10,9);
-  \draw (s2t1.E) |- (12,11);
+  \draw (s2t1.C) |- (12,11);
   \draw (8,15) -- (8,9);
   \draw (4,12) -- (8,12);
   \draw (12,12) -- (16,12);
   \draw (12,17) -- (12,18);
   \draw (10,15) -- (8,15);
   \draw (12,13) -- (12,12);
-  \draw (12,7) -- (12,6);
+  \draw (12,11) -- (12,6);
   \draw (10,9) -- (8,9);
-  \draw (12,11) -- (12,12);
+  \draw (12,7) -- (12,12);
   \node[right] at (4,12) {in};
   \node[right] at (16,12) {out};
   \node[right] at (12,18) {vcc};
   \node[right] at (12,6) {vee};
   \draw (8,12) node[circ]{};
+  \draw (12,7) node[circ]{};
+  \draw (12,11) node[circ]{};
   \draw (12,12) node[circ]{};
 \end{circuitikz}
 \end{document}

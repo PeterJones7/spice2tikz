@@ -224,3 +224,53 @@ def test_require_rotation_accepts_quarter_turns(value: object):
 def test_require_rotation_rejects_anything_else(value: object):
     with pytest.raises(IRError):
         require_rotation(value, "rot")
+
+
+# --- polarity and the real circuitikz geometry ------------------------------
+
+CHANNEL_TOP = {
+    # circuitikz draws every p-type device the other way up from its n-type
+    # counterpart, because that is how each is conventionally drawn: a PMOS
+    # source sits above its drain, a PNP emitter above its collector.  These
+    # are the anchors that appear at the TOP of each shape, read off a
+    # compiled rendering, not guessed.
+    "nmos": "d",
+    "pmos": "s",
+    "npn": "c",
+    "pnp": "e",
+    "njfet": "d",
+    "pjfet": "s",
+}
+
+
+@pytest.mark.parametrize(("name", "top"), sorted(CHANNEL_TOP.items()))
+def test_channel_terminals_follow_the_circuitikz_shape(name: str, top: str):
+    """The declared offsets must match where circuitikz really puts the anchors.
+
+    The emitter draws a lead from each anchor to the pin position declared
+    here, so an offset on the wrong side of the body produces a lead that
+    doubles back across the symbol — which is exactly what happened while
+    ``pmos`` reused the ``nmos`` offsets.
+    """
+    symbol = BUILTIN_SYMBOLS[name]
+    bottom = {"d": "s", "s": "d", "c": "e", "e": "c"}[top]
+    assert symbol.pins[top].offset[1] > 0, f"{name}: {top} should be drawn on top"
+    assert symbol.pins[bottom].offset[1] < 0, f"{name}: {bottom} should be below"
+    assert symbol.pins["g" if "g" in symbol.pins else "b"].offset[0] < 0
+
+
+@pytest.mark.parametrize(
+    ("n_type", "p_type"), [("nmos", "pmos"), ("npn", "pnp"), ("njfet", "pjfet")]
+)
+def test_a_p_type_is_the_n_type_turned_over(n_type: str, p_type: str):
+    """The two polarities carry the same terminals, the opposite way up."""
+    n_pins = BUILTIN_SYMBOLS[n_type].pins
+    p_pins = BUILTIN_SYMBOLS[p_type].pins
+    assert set(n_pins) == set(p_pins)
+    channel = [pin for pin in n_pins if n_pins[pin].offset[1] != 0]
+    assert len(channel) == 2
+    for pin in channel:
+        assert n_pins[pin].offset[1] == -p_pins[pin].offset[1], pin
+    control = [pin for pin in n_pins if n_pins[pin].offset[0] < 0]
+    for pin in control:
+        assert n_pins[pin].offset == p_pins[pin].offset, pin

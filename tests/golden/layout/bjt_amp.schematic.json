@@ -35,12 +35,12 @@
           "kind": "bjt_pnp",
           "symbol": "pnp",
           "at": [67, 12],
-          "rot": 180,
-          "mirror": true,
+          "rot": 0,
+          "mirror": false,
           "pins": {
-            "c": [67, 10],
+            "e": [67, 14],
             "b": [65, 12],
-            "e": [67, 14]
+            "c": [67, 10]
           }
         },
         {

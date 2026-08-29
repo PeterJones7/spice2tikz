@@ -291,13 +291,34 @@ def _points(element: object) -> list[Point]:
     return [at] if at is not None else []
 
 
-def test_a_supply_side_device_is_turned_over():
-    """A PMOS with its source on the rail is drawn source-up, gate still left."""
+def test_a_supply_side_device_is_drawn_source_up():
+    """A PMOS with its source on the rail: source above drain, gate still left.
+
+    Asserted as an outcome, not as a particular rot/mirror pair: circuitikz
+    draws a PMOS source-up already, so the right answer here is to leave it
+    alone. What matters is where the terminals end up.
+    """
     ir = lay_out("cmos_inverter")
     mp = next(node for node in node_components(ir) if node.ref == "MP")
-    assert (mp.rot, mp.mirror) == (180, True)
     assert mp.pins["s"][1] > mp.pins["d"][1]
     assert mp.pins["g"][0] < mp.at[0]
+
+
+def test_a_ground_side_pmos_is_turned_over():
+    """The converse: a PMOS whose *drain* wants the rail must be flipped."""
+    netlist = spice_parser.parse_spice(
+        "pmos to ground\n"
+        "V1 in 0 AC 1\n"
+        "VDD vdd 0 DC 5\n"
+        "M1 vdd in out out PMOSMOD\n"
+        "R1 out 0 1k\n"
+        ".model PMOSMOD PMOS\n"
+        ".end\n"
+    )
+    ir = layout(netlist)
+    m1 = next(node for node in node_components(ir) if node.ref == "M1")
+    assert m1.pins["d"][1] > m1.pins["s"][1]
+    assert m1.pins["g"][0] < m1.at[0]
 
 
 def test_a_ground_side_device_is_not_turned():

@@ -599,6 +599,35 @@ npn, pnp, nigbt, pigbt:                        base emitter collector (B E C)
 The bulk *terminal* is only drawn when the `bulk` key is given to the node
 (`node[nmos, bulk]{}`); the `bulk` anchor exists either way.
 
+### Which channel terminal is drawn on top (verified by rendering, 2026-08-29)
+
+The anchor *names* above say nothing about where the anchors sit. Every p-type
+shape is drawn **the other way up** from its n-type counterpart, because that
+is how each device is conventionally drawn:
+
+```text
+shape             top anchor   bottom anchor
+nmos, njfet       D            S
+pmos, pjfet       S            D
+npn               C            E
+pnp               E            C
+```
+
+So a `pnp` already has its emitter above its collector with no rotation, and a
+PNP stage with the emitter on the supply rail needs no turning at all. Getting
+this wrong is not cosmetic: `symbols.py` declares a pin offset per terminal and
+the emitter draws a lead from the real anchor to that offset, so a terminal
+declared on the wrong side produces a lead that doubles back across the body of
+the device.
+
+Established by compiling each shape with its anchors labelled and looking at
+the result, after a user reported a transistor that looked wrong:
+
+```latex
+\node[pnp] (b) at (0,0) {};
+\draw (b.C) node[right]{C} (b.B) node[left]{B} (b.E) node[right]{E};
+```
+
 ## Node shapes do not scale with the environment `scale`
 
 Measured anchor offsets for `node[nmos] at (0,0)` (no scaling):

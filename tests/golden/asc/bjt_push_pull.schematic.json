@@ -46,9 +46,9 @@
           "rot": 180,
           "mirror": true,
           "pins": {
-            "c": [12, 7],
+            "e": [12, 7],
             "b": [10, 9],
-            "e": [12, 11]
+            "c": [12, 11]
           },
           "label": {
             "text": "$Q_2$ 2N2907"
@@ -87,7 +87,7 @@
         {
           "type": "wire",
           "net": "vee",
-          "points": [[12, 7], [12, 6]]
+          "points": [[12, 11], [12, 6]]
         },
         {
           "type": "wire",
@@ -97,7 +97,7 @@
         {
           "type": "wire",
           "net": "out",
-          "points": [[12, 11], [12, 12]]
+          "points": [[12, 7], [12, 12]]
         },
         {
           "type": "net_symbol",
@@ -134,6 +134,14 @@
         {
           "type": "junction",
           "at": [8, 12]
+        },
+        {
+          "type": "junction",
+          "at": [12, 7]
+        },
+        {
+          "type": "junction",
+          "at": [12, 11]
         },
         {
           "type": "junction",

@@ -9,10 +9,10 @@
   \draw (s2t0.D) |- (21,8);
   \draw (s2t0.G) -| (19,6);
   \draw (s2t0.S) |- (21,4);
-  \node[pjfet, label=right:{$J_2$}] (s2t1) at (29,6) {};
-  \draw (s2t1.D) |- (29,8);
-  \draw (s2t1.G) -| (27,6);
+  \node[pjfet, xscale=-1, rotate=180, label=right:{$J_2$}] (s2t1) at (29,6) {};
   \draw (s2t1.S) |- (29,4);
+  \draw (s2t1.G) -| (27,6);
+  \draw (s2t1.D) |- (29,8);
   \draw (19,9) rectangle (23,15);
   \node at (21,12) {$SW_1$};
   \draw (35,15) rectangle (39,21);
