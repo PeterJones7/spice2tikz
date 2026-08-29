@@ -1,0 +1,20 @@
+# Issue forms only: a blank issue is nearly always a bug report without the
+# input file, which is the one thing a report about a translator cannot do
+# without (docs/DESIGN.md §6, docs/CONTRIBUTING.md §8).
+blank_issues_enabled: false
+contact_links:
+  - name: Roadmap — is it already planned?
+    url: https://github.com/PeterJones7/spice2tikz/blob/main/docs/ROADMAP.md
+    about: >-
+      Sections 3-6 are planned and unlanded; section 7 is deliberately deferred
+      work. Check here before opening a feature request.
+  - name: Design decisions and non-features
+    url: https://github.com/PeterJones7/spice2tikz/blob/main/docs/DESIGN.md
+    about: >-
+      D1-D16 in section 4 are settled: zero runtime dependencies, two JSON IRs,
+      deterministic output, no external layout libraries.
+  - name: Contributing, and the golden-file workflow
+    url: https://github.com/PeterJones7/spice2tikz/blob/main/docs/CONTRIBUTING.md
+    about: >-
+      Dev setup, the four checks, how goldens are regenerated and reviewed, and
+      how to add a symbol, a SPICE dialect, or an importer.

@@ -1,0 +1,219 @@
+# Release: build and publish spice2tikz to PyPI when a `v*` tag is pushed.
+#
+# The workflow is deliberately three gates deep — checks, then build and smoke
+# test, then publish — so that a tag pushed by mistake cannot ship a broken
+# artifact. Nothing here uploads until `pytest` is green, `twine check` is
+# happy, the tag agrees with `src/spice2tikz/__init__.py`, and the built wheel
+# has been installed into a fresh virtualenv and run.
+#
+# ---------------------------------------------------------------------------
+# ONE-TIME SETUP (a human must do this once, before the first tagged release)
+# ---------------------------------------------------------------------------
+#
+# Publishing uses PyPI *trusted publishing* (OIDC): GitHub mints a short-lived
+# token for this exact workflow, and PyPI trades it for an upload. There is no
+# API token to create, store, rotate, or leak — do not add a PyPI secret to
+# this repository.
+#
+# 1. Create the GitHub environment.
+#    Repository -> Settings -> Environments -> New environment
+#      Name: pypi
+#    Optionally add yourself as a required reviewer (publishing then waits for
+#    a click) and, under "Deployment branches and tags", restrict it to the
+#    tag pattern `v*`. The environment must exist before the first run, and
+#    its name must match the `environment:` key in the `publish` job below.
+#
+# 2. Register the trusted publisher on PyPI.
+#    The project does not exist on PyPI yet, so add a *pending* publisher:
+#      https://pypi.org/manage/account/publishing/
+#      -> "Add a new pending publisher", GitHub tab
+#        PyPI Project Name: spice2tikz
+#        Owner:             PeterJones7
+#        Repository name:   spice2tikz
+#        Workflow name:     release.yml
+#        Environment name:  pypi
+#    PyPI creates the project on the first successful publish. If the project
+#    already exists, add the publisher from the project instead:
+#      PyPI -> spice2tikz -> Manage -> Publishing -> Add a new publisher.
+#    All five fields must match exactly, environment name included; a mismatch
+#    fails at the upload step with "invalid-publisher".
+#
+# 3. Optional, recommended once: repeat step 2 on https://test.pypi.org for a
+#    dry run, add a `testpypi` GitHub environment, and temporarily point the
+#    publish step at TestPyPI with
+#      `with: { repository-url: https://test.pypi.org/legacy/ }`.
+#    TestPyPI still burns the version number, so use a `.devN` suffix.
+#
+# ---------------------------------------------------------------------------
+# CUTTING A RELEASE
+# ---------------------------------------------------------------------------
+#
+#   1. Bump `__version__` in src/spice2tikz/__init__.py (the single source of
+#      truth; pyproject.toml reads it via hatch).
+#   2. Update CHANGELOG.md and README.md, and make sure the tree is clean and
+#      the full suite is green (docs/CONTRIBUTING.md §2).
+#   3. git commit && git push
+#   4. git tag -a v0.3.0 -m "v0.3.0" && git push origin v0.3.0
+#
+# The tag must be exactly `v` plus `__version__`; the `build` job fails loudly
+# if it is not. To recover from a bad tag: delete it locally and on the remote
+# (`git tag -d v0.3.0 && git push --delete origin v0.3.0`), fix, re-tag. A
+# version already uploaded to PyPI can never be replaced — only yanked — which
+# is why the smoke check runs before the publish job, not after.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: checks before publishing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package with dev extras
+        run: python -m pip install -e ".[dev]"
+      - name: ruff check
+        run: ruff check --output-format=github .
+      - name: ruff format
+        run: ruff format --check --diff .
+      - name: mypy (strict)
+        run: mypy
+      - name: pytest
+        run: pytest
+    # Note: the TeX Live compile job lives in ci.yml, which also runs on `v*`
+    # tags, so a tagged commit is compile-checked in parallel with this
+    # workflow. It is not duplicated here — pulling a TeX Live container into
+    # the release path would add ~10 minutes to every publish.
+
+  build:
+    name: build, verify, and smoke-test the wheel
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the tag matches __version__
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+          import re
+          import sys
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          source = pathlib.Path("src/spice2tikz/__init__.py").read_text(
+              encoding="utf-8"
+          )
+          match = re.search(r'^__version__ = "([^"]+)"$', source, re.MULTILINE)
+          if match is None:
+              sys.exit("no __version__ found in src/spice2tikz/__init__.py")
+          version = match.group(1)
+          if tag != f"v{version}":
+              sys.exit(
+                  f"refusing to release: tag is {tag} but "
+                  f"src/spice2tikz/__init__.py says __version__ = {version!r} "
+                  f"(expected tag v{version}). Delete the tag, fix one of the "
+                  f"two, and push it again."
+              )
+          print(f"tag {tag} matches __version__ {version}")
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
+              env.write(f"PACKAGE_VERSION={version}\n")
+          PY
+
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          ls -l dist/
+
+      - name: Check the distribution metadata
+        run: twine check --strict dist/*
+
+      - name: Check the built filenames carry the tagged version
+        # `py3-none-any` is asserted, not incidental: a pure-Python universal
+        # wheel is what makes the pipx install path work on every platform.
+        run: |
+          test -f "dist/spice2tikz-${PACKAGE_VERSION}.tar.gz"
+          test -f "dist/spice2tikz-${PACKAGE_VERSION}-py3-none-any.whl"
+
+      - name: Install the wheel into a fresh venv and run the console script
+        # The pipx install path the roadmap asks about, without depending on
+        # pipx being present: a clean interpreter, the wheel and nothing else,
+        # then the entry point that pyproject.toml declares.
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/python -m pip install --upgrade pip
+          /tmp/smoke/bin/python -m pip install "dist/spice2tikz-${PACKAGE_VERSION}-py3-none-any.whl"
+          output="$(/tmp/smoke/bin/spice2tikz --version)"
+          echo "console script says: ${output}"
+          test "${output}" = "spice2tikz ${PACKAGE_VERSION}"
+          # Zero runtime dependencies (D1): the fresh venv must contain the
+          # package and nothing but pip's own scaffolding.
+          /tmp/smoke/bin/python -m pip list --format=freeze
+
+      - name: Install the sdist too, so a source build is not broken
+        run: |
+          python -m venv /tmp/sdist
+          /tmp/sdist/bin/python -m pip install --upgrade pip
+          /tmp/sdist/bin/python -m pip install "dist/spice2tikz-${PACKAGE_VERSION}.tar.gz"
+          test "$(/tmp/sdist/bin/spice2tikz --version)" = "spice2tikz ${PACKAGE_VERSION}"
+
+      - name: Verify with pipx, when the runner provides it
+        # `pipx run --spec` builds the same isolated environment `pipx install`
+        # would, without depending on pipx's bin directory being on PATH.
+        run: |
+          if command -v pipx >/dev/null 2>&1; then
+            wheel="dist/spice2tikz-${PACKAGE_VERSION}-py3-none-any.whl"
+            output="$(pipx run --spec "${wheel}" spice2tikz --version)"
+            echo "pipx says: ${output}"
+            test "${output}" = "spice2tikz ${PACKAGE_VERSION}"
+          else
+            echo "pipx not on this runner; the venv check above covers the same path"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # Must match the environment name registered with the trusted publisher on
+    # PyPI (see the header). Adding required reviewers to this environment is
+    # what turns a pushed tag into a manual "yes, ship it".
+    environment:
+      name: pypi
+      url: https://pypi.org/p/spice2tikz
+    permissions:
+      # OIDC: this is what lets PyPI verify the workflow without a stored
+      # token. `contents: read` is inherited from the top-level block.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish
+        # Pinned to the action's major-version branch, as its own
+        # documentation recommends; the `vN` tag convention used by the
+        # actions/* actions above does not exist for this one.
+        uses: pypa/gh-action-pypi-publish@release/v1

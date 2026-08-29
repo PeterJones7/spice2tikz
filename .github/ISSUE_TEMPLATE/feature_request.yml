@@ -1,0 +1,91 @@
+name: Feature request
+description: A capability spice2tikz does not have yet.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, please check
+        [`docs/ROADMAP.md`](https://github.com/PeterJones7/spice2tikz/blob/main/docs/ROADMAP.md):
+        sections 3–6 are planned work that simply has not landed yet, and §7 is
+        work that is **deliberately deferred** rather than overlooked (SVG
+        emitter, KiCad import, layout v2, current/voltage annotations, further
+        SPICE dialects, opamp/subckt recognition). A "+1" on an existing
+        roadmap item is more useful than a new issue.
+
+        The [README](https://github.com/PeterJones7/spice2tikz#features) also
+        lists the explicit **non-features**: no simulation, no netlist editing,
+        no AI/heuristic redrawing of arbitrary images, no GUI. Those are not
+        going to change.
+
+        Architectural decisions D1–D16 in
+        [`docs/DESIGN.md`](https://github.com/PeterJones7/spice2tikz/blob/main/docs/DESIGN.md)
+        §4 are final — notably zero runtime dependencies (D1) and deterministic
+        output. A request that requires overturning one of them should say
+        which one, and why.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem you are trying to solve
+      description: >-
+        What are you doing today, and where does it break down? Concrete beats
+        general: the circuit, the document, the step you have to do by hand.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: >-
+        What should the tool do instead? If it is a CLI change, write the
+        command line. If it is an output change, write the LaTeX you want. If
+        it needs new information in a file, say which IR
+        (`docs/SPEC_IR.md`) and which field.
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example input and desired output
+      description: >-
+        A small input file and the output you want from it. This is what turns
+        a request into something testable — a feature that lands arrives with a
+        corpus file and a golden.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: roadmap
+    attributes:
+      label: Does this fit the roadmap?
+      description: See `docs/ROADMAP.md`.
+      options:
+        - It is an existing roadmap item (say which in the box below)
+        - It is listed in §7 (deferred) and I would like it sooner
+        - It is not on the roadmap at all
+        - I could not tell
+    validations:
+      required: true
+
+  - type: input
+    id: roadmap-section
+    attributes:
+      label: Roadmap section, if you named one
+      placeholder: "7.4 — current/voltage annotations"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Would you be willing to work on this?
+      description: >-
+        No obligation either way — `docs/CONTRIBUTING.md` describes the setup
+        and the golden-file workflow if you want to try.
+      options:
+        - label: I would be willing to open a pull request for this.
+          required: false

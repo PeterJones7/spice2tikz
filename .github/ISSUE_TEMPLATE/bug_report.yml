@@ -1,0 +1,133 @@
+name: Bug report
+description: Wrong output, a crash, a confusing error, or a golden that stopped compiling.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a report.
+
+        **The input file is the single most useful thing you can give us.**
+        `spice2tikz` is a translator: without the exact `.sp`, `.asc` or
+        `.json` that went in, nobody else can reproduce what came out. Paste
+        it below, or drag the file into that field to attach it.
+
+        Please check [`docs/CONTRIBUTING.md`](https://github.com/PeterJones7/spice2tikz/blob/main/docs/CONTRIBUTING.md)
+        §8 first — it says what makes a report actionable.
+
+  - type: textarea
+    id: input-file
+    attributes:
+      label: Input file (paste it, or drag the file in to attach it)
+      description: >-
+        The SPICE netlist, LTspice `.asc`, or IR JSON that triggers the bug.
+        Reduce it to the smallest version that still misbehaves if you can, but
+        a large real file beats no file. GitHub's uploader rejects unfamiliar
+        extensions, so rename `.sp`/`.asc` to `.txt`, or attach a `.zip`.
+      placeholder: |
+        * RC low-pass
+        V1 in 0 SIN(0 1 1k)
+        R1 in out 10k
+        C1 out 0 100n
+        .end
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact command you ran
+      description: Copy it from your shell, including every flag.
+      render: shell
+      placeholder: spice2tikz circuit.asc --standalone -o circuit.tex
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: >-
+        The behaviour you actually got, including anything printed on stderr
+        and the exit code (`0` ok, `1` input parse error, `2` validation error,
+        `3` internal error).
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+      description: >-
+        For a drawing complaint, describe the schematic you wanted — which
+        component is misplaced, mirrored, mislabelled, or wired to the wrong
+        pin. A screenshot of the rendered PDF helps a lot here.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Generated output, if any
+      description: >-
+        The `.tex` (or dumped IR JSON) the tool produced. Leave empty if it
+        produced none.
+      render: tex
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: spice2tikz version
+      description: Output of `spice2tikz --version`.
+      placeholder: spice2tikz 0.0.3
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: Output of `python --version`.
+      placeholder: Python 3.12.4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: latex
+    attributes:
+      label: circuitikz / TeX Live version
+      description: >-
+        Only needed when the complaint is about a *rendered* schematic rather
+        than the generated text — the same `.tex` genuinely renders differently
+        across circuitikz releases. `latexmk --version` and the circuitikz
+        version line from the `.log` are enough.
+      placeholder: TeX Live 2026, circuitikz 1.8.5
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and this is not a duplicate.
+          required: true
+        - label: >-
+            I have included the input file above (attached or pasted), or
+            explained below why I cannot.
+          required: true
