@@ -19,6 +19,11 @@ GOLDEN = REPO_ROOT / "tests" / "golden"
 DOCS = REPO_ROOT / "docs"
 
 _LATEX_BLOCK = re.compile(r"```latex\n(.*?)```", re.DOTALL)
+_MARKDOWN_IMAGE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
+_HTML_IMAGE = re.compile(r'<img[^>]*\ssrc="([^"]+)"', re.IGNORECASE)
+_MARKDOWN_LINK = re.compile(r"\]\((?!https?:)([^)#]+)\)")
+_IMG_TAG = re.compile(r"<img[^>]*>", re.IGNORECASE)
+_ALT_TEXT = re.compile(r'\salt="[^"]{10,}"', re.IGNORECASE)
 
 
 def readme_latex_blocks() -> list[str]:
@@ -30,21 +35,72 @@ def test_readme_shows_a_latex_example():
     assert readme_latex_blocks(), "the README no longer shows any generated LaTeX"
 
 
-def test_readme_example_matches_the_golden():
-    golden = (GOLDEN / "rc_lowpass.tex").read_text(encoding="utf-8")
-    assert golden in readme_latex_blocks(), (
-        "README.md's example output no longer matches tests/golden/rc_lowpass.tex; "
-        "update the README block after regenerating the goldens"
+def test_readme_example_matches_what_the_tool_emits():
+    """The README shows the rc_lowpass conversion, so it must be real output."""
+    emitted = (REPO_ROOT / "examples" / "rc_lowpass.tex").read_text(encoding="utf-8")
+    assert emitted in readme_latex_blocks(), (
+        "README.md's example output no longer matches examples/rc_lowpass.tex; "
+        "update the README block after running examples/build.sh"
     )
 
 
-def test_readme_example_image_exists():
+RAW_PREFIX = "https://raw.githubusercontent.com/PeterJones7/spice2tikz/main/"
+
+
+def readme_images() -> list[str]:
+    """Return every README image as a repository-relative path.
+
+    Image sources are absolute ``raw.githubusercontent.com`` URLs so that they
+    render on PyPI as well as on GitHub, where a relative path has no
+    repository to resolve against. They are mapped back here, so the test still
+    proves each one points at a file that exists.
+    """
     text = README.read_text(encoding="utf-8")
-    for match in re.finditer(r"!\[[^\]]*\]\(([^)]+)\)", text):
-        target = match.group(1)
-        if target.startswith("http"):
-            continue
+    found = _MARKDOWN_IMAGE.findall(text) + _HTML_IMAGE.findall(text)
+    targets = []
+    for target in found:
+        if target.startswith(RAW_PREFIX):
+            targets.append(target[len(RAW_PREFIX) :])
+        elif not target.startswith("http"):
+            targets.append(target)
+    return targets
+
+
+def test_readme_images_are_absolute_urls():
+    """A relative image path shows as a broken image on the PyPI project page."""
+    text = README.read_text(encoding="utf-8")
+    relative = [
+        target
+        for target in _MARKDOWN_IMAGE.findall(text) + _HTML_IMAGE.findall(text)
+        if not target.startswith("http")
+    ]
+    assert not relative, f"README images must be absolute URLs: {relative}"
+
+
+def test_readme_shows_a_gallery():
+    assert len(readme_images()) >= 5
+
+
+def test_readme_images_exist():
+    for target in readme_images():
         assert (REPO_ROOT / target).is_file(), f"README image {target} is missing"
+
+
+def test_readme_images_have_alt_text():
+    """An image with no alt text is invisible to screen readers and to search."""
+    text = README.read_text(encoding="utf-8")
+    missing = [tag for tag in _IMG_TAG.findall(text) if not _ALT_TEXT.search(tag)]
+    assert not missing, f"<img> tags without real alt text: {missing}"
+
+
+def test_readme_local_links_resolve():
+    text = README.read_text(encoding="utf-8")
+    broken = [
+        target
+        for target in _MARKDOWN_LINK.findall(text)
+        if not (REPO_ROOT / target).exists()
+    ]
+    assert not broken, f"README links to missing paths: {broken}"
 
 
 @pytest.mark.parametrize(

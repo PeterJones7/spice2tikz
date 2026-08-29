@@ -31,6 +31,7 @@ rlc_series              spice/rlc_series.sp
 bridge_rectifier        spice/bridge_rectifier.sp
 common_source_amp       spice/common_source_amp.sp
 bjt_amp                 spice/bjt_amp.sp
+cmos_inverter           spice/cmos_inverter.sp
 ltspice_rc_lowpass      asc/rc_lowpass.asc
 ltspice_cmos_inverter   asc/cmos_inverter.asc
 "
