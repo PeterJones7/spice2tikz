@@ -323,3 +323,31 @@ images, no GUI).
 
 [bug]: https://github.com/PeterJones7/spice2tikz/issues/new?template=bug_report.yml
 [feature]: https://github.com/PeterJones7/spice2tikz/issues/new?template=feature_request.yml
+
+---
+
+## 9. Looking at the output
+
+Two symbol bugs reached rendered figures because nothing in the suite checks
+*appearance*: goldens prove the output has not changed, `test_compile.py`
+proves it is valid LaTeX, and `test_end_to_end.py` proves the connectivity is
+right — but a symbol whose leads double back across its own body satisfies all
+three.
+
+`tests/test_anchor_geometry.py` now covers the specific failure those bugs
+shared, by asking a real compiler where circuitikz places each anchor. For
+everything else, look:
+
+```sh
+python tools/contact_sheet.py      # build/contact-sheet.html
+```
+
+That renders every golden plus reference sheets for each built-in symbol in all
+eight orientations, every path-component kind, and every net-symbol variant —
+the last of which cover emitter paths no corpus circuit reaches. Each section
+carries its own checklist, and the page remembers which figures you have
+marked.
+
+Rebuild it after any change to the emitter, the symbol library, the importer or
+the layout engine, and look at it before accepting a golden diff. A golden diff
+tells you the output changed; only the picture tells you which way.

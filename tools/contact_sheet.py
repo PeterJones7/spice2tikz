@@ -92,6 +92,12 @@ class Group:
     look_for: list[str] = field(default_factory=list)
     figures: list[Figure] = field(default_factory=list)
 
+    @property
+    def anchor(self) -> str:
+        """Return a stable id, also used as the key for review marks."""
+        keep = [c if c.isalnum() else "-" for c in self.title.lower()]
+        return "".join(keep).strip("-").replace("---", "-").replace("--", "-")
+
 
 # --- reference sheets --------------------------------------------------------
 
@@ -369,74 +375,243 @@ def embed(png: bytes) -> str:
 
 PAGE_CSS = """
 :root {
-  --bg: #f6f5f3; --panel: #ffffff; --ink: #1a1a1a; --muted: #5f5c58;
-  --line: #d9d5d0; --accent: #7a3b2e; --ok: #2f6b3f; --bad: #a8322a;
+  /* Drafting materials: a cool vellum ground, drafting-pen teal, and a plate
+     that stays light in BOTH themes -- the figures are transparent PNGs with
+     black ink, so a dark plate would erase them. A contact sheet is frames on
+     a light table; here that is a constraint as much as a concept. */
+  --ground: #f1f4f3;
+  --panel: #ffffff;
+  --plate: #fbfbfa;
+  --ink: #16191c;
+  --muted: #5a6570;
+  --rule: #d5dbd9;
+  --accent: #0b6b63;
+  --accent-soft: #e2efec;
+  --alert: #a4342b;
+  --done: #0b6b63;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #14161a; --panel: #1c1f25; --ink: #e8e6e3; --muted: #a09b94;
-    --line: #333840; --accent: #d99a7a; --ok: #7fc48f; --bad: #e08a80;
+    --ground: #12161a;
+    --panel: #1a2027;
+    --plate: #f4f5f3;
+    --ink: #e6eae8;
+    --muted: #93a0a6;
+    --rule: #2b343d;
+    --accent: #5fbfb2;
+    --accent-soft: #17302e;
+    --alert: #e2867c;
+    --done: #5fbfb2;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #14161a; --panel: #1c1f25; --ink: #e8e6e3; --muted: #a09b94;
-  --line: #333840; --accent: #d99a7a; --ok: #7fc48f; --bad: #e08a80;
+  --ground: #12161a;
+  --panel: #1a2027;
+  --plate: #f4f5f3;
+  --ink: #e6eae8;
+  --muted: #93a0a6;
+  --rule: #2b343d;
+  --accent: #5fbfb2;
+  --accent-soft: #17302e;
+  --alert: #e2867c;
+  --done: #5fbfb2;
 }
+
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
 body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font: 16px/1.55 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: Archivo, ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
 }
-.wrap { max-width: 1180px; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
-header h1 { font-size: 1.9rem; margin: 0 0 .35rem; letter-spacing: -0.01em; }
-header p { color: var(--muted); margin: 0 0 .5rem; max-width: 62ch; }
-.meta { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.toc { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0 0; padding: 0;
-       list-style: none; }
-.toc a {
-  display: inline-block; padding: .3rem .7rem; border: 1px solid var(--line);
-  border-radius: 999px; text-decoration: none; color: var(--ink);
-  background: var(--panel); font-size: .85rem;
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
-.toc a:hover { border-color: var(--accent); color: var(--accent); }
-section { margin: 3rem 0 0; }
-h2 {
-  font-size: 1.25rem; margin: 0 0 .4rem; padding-bottom: .4rem;
-  border-bottom: 2px solid var(--accent);
+
+.shell { display: grid; grid-template-columns: 1fr; gap: 0; }
+@media (min-width: 1080px) {
+  .shell {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    max-width: 74rem;
+    margin: 0 auto;
+    gap: 2.5rem;
+    padding: 0 1.5rem;
+  }
 }
-.blurb { color: var(--muted); margin: 0 0 1rem; max-width: 72ch; }
-.checklist {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-  padding: .85rem 1rem .85rem 1rem; margin: 0 0 1.5rem;
+
+/* --- index rail ------------------------------------------------------- */
+.rail { padding: 1.5rem 1.25rem 0; }
+@media (min-width: 1080px) {
+  .rail { position: sticky; top: 0; align-self: start; height: 100vh;
+          overflow-y: auto; padding: 3rem 0 2rem; }
 }
-.checklist h3 {
-  margin: 0 0 .5rem; font-size: .8rem; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--muted);
+.rail h2 {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--muted); margin: 0 0 .75rem; font-weight: 600;
 }
-.checklist ul { margin: 0; padding-left: 1.1rem; }
-.checklist li { margin: .2rem 0; font-size: .92rem; }
+.rail ol { list-style: none; margin: 0 0 1.75rem; padding: 0;
+           display: flex; flex-direction: column; gap: .1rem; }
+.rail a {
+  display: flex; justify-content: space-between; gap: .75rem;
+  padding: .3rem .5rem; border-radius: 4px; text-decoration: none;
+  color: var(--ink); font-size: .88rem; transition: background .12s ease;
+}
+.rail a:hover { background: var(--accent-soft); color: var(--accent); }
+.rail a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rail .count { color: var(--muted); font-size: .78rem;
+               font-variant-numeric: tabular-nums; }
+.progress {
+  border-top: 1px solid var(--rule); padding-top: .9rem;
+  font-size: .82rem; color: var(--muted);
+}
+.progress strong { color: var(--accent); font-variant-numeric: tabular-nums; }
+.progress button {
+  margin-top: .6rem; font: inherit; font-size: .78rem; cursor: pointer;
+  background: none; border: 1px solid var(--rule); color: var(--muted);
+  border-radius: 4px; padding: .25rem .6rem;
+}
+.progress button:hover { border-color: var(--accent); color: var(--accent); }
+
+/* --- main ------------------------------------------------------------- */
+main { padding: 1.5rem 1.25rem 6rem; min-width: 0; }
+@media (min-width: 1080px) { main { padding: 3rem 0 8rem; } }
+
+.masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.25rem;
+            margin-bottom: 2.5rem; }
+.eyebrow {
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .16em;
+  color: var(--accent); margin: 0 0 .5rem; font-weight: 600;
+}
+.masthead h1 {
+  font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.1; margin: 0 0 .7rem;
+  font-weight: 700; letter-spacing: -0.02em; text-wrap: balance;
+}
+.masthead p { margin: 0; color: var(--muted); max-width: 62ch; }
+.tally { display: flex; flex-wrap: wrap; gap: 1.75rem; margin-top: 1.25rem; }
+.tally div { display: flex; flex-direction: column; }
+.tally .n {
+  font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.tally .k {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .12em;
+  color: var(--muted); margin-top: .3rem;
+}
+.tally .bad .n { color: var(--alert); }
+
+section { margin-bottom: 3.5rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.15rem; font-weight: 700; margin: 0 0 .4rem;
+  letter-spacing: -0.01em; text-wrap: balance;
+}
+section > .blurb { margin: 0 0 1.25rem; color: var(--muted); max-width: 68ch; }
+
+.note {
+  border-left: 3px solid var(--accent); background: var(--panel);
+  padding: .9rem 1.1rem; margin-bottom: 1.75rem; border-radius: 0 6px 6px 0;
+}
+.note h3 {
+  margin: 0 0 .5rem; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .14em; color: var(--accent); font-weight: 600;
+}
+.note ul { margin: 0; padding-left: 1.1rem; display: flex;
+           flex-direction: column; gap: .3rem; }
+.note li { font-size: .92rem; }
+
+/* --- a frame ---------------------------------------------------------- */
 figure {
-  margin: 0 0 1.75rem; background: var(--panel); border: 1px solid var(--line);
-  border-radius: 12px; overflow: hidden;
+  margin: 0 0 1.5rem; background: var(--panel);
+  border: 1px solid var(--rule); border-radius: 6px; overflow: hidden;
 }
+figure.reviewed { border-color: var(--done); }
 figcaption {
-  display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline;
-  padding: .7rem 1rem; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: .85rem; flex-wrap: wrap;
+  padding: .6rem .9rem; border-bottom: 1px solid var(--rule);
 }
-figcaption .name { font-weight: 650; }
-figcaption .note {
-  color: var(--muted); font-size: .85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+.idx {
+  font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums;
+  border: 1px solid var(--rule); border-radius: 3px; padding: .05rem .4rem;
 }
+figure.reviewed .idx { border-color: var(--done); color: var(--done); }
+.title { font-weight: 600; font-size: .95rem; }
+.path { color: var(--muted); font-size: .78rem; margin-left: auto; }
+.check {
+  display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+  font-size: .76rem; color: var(--muted); user-select: none;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.check input { accent-color: var(--accent); width: 1rem; height: 1rem;
+               cursor: pointer; }
+.check input:focus-visible { outline: 2px solid var(--accent);
+                             outline-offset: 2px; }
+figure.reviewed .check { color: var(--done); }
 .plate {
-  padding: 1.25rem; background: #ffffff; display: flex; justify-content: center;
-  overflow-x: auto;
+  background: var(--plate); padding: 1.5rem 1.25rem;
+  display: flex; justify-content: center; overflow-x: auto;
 }
 .plate img { max-width: 100%; height: auto; display: block; }
-.fail { padding: 1rem; color: var(--bad); font-family: ui-monospace, monospace;
-        font-size: .85rem; }
-footer { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
-         color: var(--muted); font-size: .87rem; }
+.failed {
+  padding: 1.1rem; color: var(--alert); font-size: .84rem;
+  border-left: 3px solid var(--alert);
+}
+footer {
+  border-top: 1px solid var(--rule); padding-top: 1.25rem;
+  color: var(--muted); font-size: .85rem; max-width: 68ch;
+}
+footer code { font-size: .95em; }
+"""
+
+PAGE_SCRIPT = """
+(function () {
+  var KEY = "s2t-review-v1";
+  var seen = {};
+  try { seen = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; }
+  catch (e) { seen = {}; }
+
+  var boxes = Array.prototype.slice.call(
+    document.querySelectorAll("input[data-figure]")
+  );
+  var readout = document.getElementById("done-count");
+  var total = boxes.length;
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(seen)); }
+    catch (e) { /* private browsing: marks just do not persist */ }
+  }
+  function paint() {
+    var done = 0;
+    boxes.forEach(function (box) {
+      var on = !!seen[box.dataset.figure];
+      box.checked = on;
+      box.closest("figure").classList.toggle("reviewed", on);
+      if (on) { done += 1; }
+    });
+    if (readout) { readout.textContent = done + " / " + total; }
+  }
+  boxes.forEach(function (box) {
+    box.addEventListener("change", function () {
+      seen[box.dataset.figure] = box.checked;
+      save();
+      paint();
+    });
+  });
+  var reset = document.getElementById("reset-review");
+  if (reset) {
+    reset.addEventListener("click", function () {
+      seen = {};
+      save();
+      paint();
+    });
+  }
+  paint();
+})();
 """
 
 
@@ -447,43 +622,82 @@ def build_page(groups: list[Group], dpi: int) -> str:
         1 for group in groups for figure in group.figures if figure.png is None
     )
     parts: list[str] = [
-        "<title>spice2tikz visual review</title>",
+        # Without this the page is decoded as Latin-1 by anything that does
+        # not send a charset header, and every dash in the copy becomes
+        # mojibake.
+        '<meta charset="utf-8">',
+        "<title>spice2tikz Review Sheet</title>",
+        '<link rel="preconnect" href="https://fonts.googleapis.com">',
+        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
+        "family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500"
+        '&display=swap">',
         f"<style>{PAGE_CSS}</style>",
-        '<div class="wrap">',
-        "<header>",
-        "<h1>spice2tikz — visual review sheet</h1>",
-        "<p>Every picture this tool can produce, on one page. Golden tests prove "
-        "the output has not changed and compilation proves it is valid LaTeX; "
-        "neither says it is right. This is the part that needs eyes.</p>",
-        f'<p class="meta">{total} figures at {dpi} dpi'
-        + (f" &middot; <strong>{failed} failed to render</strong>" if failed else "")
-        + "</p>",
-        "<ul class='toc'>",
+        '<div class="shell">',
+        '<nav class="rail" aria-label="Sections">',
+        "<h2>Sections</h2><ol>",
     ]
     for group in groups:
-        anchor = group.title.lower().replace(" ", "-").replace("(", "").replace(")", "")
         parts.append(
-            f'<li><a href="#{anchor}">{html.escape(group.title)} '
-            f"({len(group.figures)})</a></li>"
+            f'<li><a href="#{group.anchor}">{html.escape(group.title)}'
+            f'<span class="count mono">{len(group.figures)}</span></a></li>'
         )
-    parts.append("</ul></header>")
+    parts.append("</ol>")
+    parts.append(
+        '<div class="progress">Reviewed <strong class="mono" '
+        'id="done-count">0 / 0</strong>'
+        '<br><button type="button" id="reset-review">Clear marks</button></div>'
+    )
+    parts.append("</nav><main>")
 
+    parts.append('<div class="masthead">')
+    parts.append('<p class="eyebrow mono">Manual visual review</p>')
+    parts.append("<h1>Every figure spice2tikz can draw</h1>")
+    parts.append(
+        "<p>Golden tests prove the output has not changed; compiling proves it "
+        "is valid LaTeX. Neither says it is <em>right</em> — a symbol whose "
+        "leads double back across its own body passes both. This is the part "
+        "that needs eyes.</p>"
+    )
+    parts.append('<div class="tally">')
+    parts.append(
+        f'<div><span class="n mono">{total}</span><span class="k">figures</span></div>'
+    )
+    parts.append(
+        f'<div><span class="n mono">{len(groups)}</span>'
+        '<span class="k">sections</span></div>'
+    )
+    parts.append(
+        f'<div><span class="n mono">{dpi}</span><span class="k">dpi</span></div>'
+    )
+    if failed:
+        parts.append(
+            f'<div class="bad"><span class="n mono">{failed}</span>'
+            '<span class="k">failed to render</span></div>'
+        )
+    parts.append("</div></div>")
+
+    number = 0
     for group in groups:
-        anchor = group.title.lower().replace(" ", "-").replace("(", "").replace(")", "")
-        parts.append(f'<section id="{anchor}">')
+        parts.append(f'<section id="{group.anchor}">')
         parts.append(f"<h2>{html.escape(group.title)}</h2>")
         parts.append(f'<p class="blurb">{html.escape(group.blurb)}</p>')
         if group.look_for:
-            parts.append('<div class="checklist"><h3>What to look for</h3><ul>')
+            parts.append('<div class="note"><h3>What to look for</h3><ul>')
             for item in group.look_for:
                 parts.append(f"<li>{html.escape(item)}</li>")
             parts.append("</ul></div>")
         for figure in group.figures:
+            number += 1
+            key = f"{group.anchor}/{figure.name}"
             parts.append("<figure>")
             parts.append(
-                '<figcaption><span class="name">'
-                f"{html.escape(figure.name)}</span>"
-                f'<span class="note">{html.escape(figure.caption)}</span>'
+                "<figcaption>"
+                f'<span class="idx mono">{number:02d}</span>'
+                f'<span class="title">{html.escape(figure.name)}</span>'
+                f'<span class="path mono">{html.escape(figure.caption)}</span>'
+                f'<label class="check mono"><input type="checkbox" '
+                f'data-figure="{html.escape(key)}"> reviewed</label>'
                 "</figcaption>"
             )
             if figure.png is not None:
@@ -493,18 +707,20 @@ def build_page(groups: list[Group], dpi: int) -> str:
                 )
             else:
                 parts.append(
-                    f'<div class="fail">FAILED TO RENDER — '
+                    '<div class="failed mono">Did not render — '
                     f"{html.escape(figure.error or 'unknown error')}</div>"
                 )
             parts.append("</figure>")
         parts.append("</section>")
 
     parts.append(
-        "<footer>Generated by <code>tools/contact_sheet.py</code>. "
-        "Regenerate after any change that touches the emitter, the symbol "
-        "library, the importer or the layout engine, and look before accepting "
-        "a golden diff.</footer></div>"
+        "<footer>Built by <code>tools/contact_sheet.py</code>. Rebuild it after "
+        "any change to the emitter, the symbol library, the importer or the "
+        "layout engine, and look at it before accepting a golden diff. Marks are "
+        "kept in this browser only.</footer>"
     )
+    parts.append("</main></div>")
+    parts.append(f"<script>{PAGE_SCRIPT}</script>")
     return "\n".join(parts)
 
 
