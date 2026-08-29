@@ -11,11 +11,11 @@ IR can be dumped, hand-tweaked, and re-emitted, and the whole pipeline is
 deterministic — the same input always produces byte-identical output, so
 generated `.tex` diffs cleanly in version control.
 
-**Status: pre-alpha, under active development.** The Schematic IR → CircuiTikZ
-half of the pipeline works today: hand-written or generated Schematic IR JSON
-converts to a `.tex` snippet or a compilable standalone document. The importers
-(LTspice `.asc`, SPICE netlist) and the automatic layout engine are next — see
-`docs/ROADMAP.md`.
+**Status: alpha.** The whole pipeline works: LTspice `.asc` schematics and
+SPICE netlists both convert to CircuiTikZ, the latter through an automatic
+layout engine. Expect the conversion to be right and the automatic layout to
+be good on small circuits and worth a nudge on larger ones — which is what the
+hand-tweak workflow is for. See `docs/ROADMAP.md` for what is still planned.
 
 ## Features
 
@@ -26,9 +26,9 @@ converts to a `.tex` snippet or a compilable standalone document. The importers
 | Symbol library | pin geometry for `nmos`, `pmos`, `npn`, `pnp` incl. rotation/mirror | ✅ 0.0.2 |
 | Validation | the 13 IR invariants of `docs/SPEC_IR.md` §4, as errors and warnings | ✅ 0.0.2 |
 | CircuiTikZ emitter | IR → `.tex` snippet or standalone document | ✅ 0.0.3 |
-| LTspice `.asc` import | schematic capture → Schematic IR, geometry preserved | planned (§3) |
-| SPICE netlist parser | `.sp`/`.cir`/`.net` → Netlist IR | planned (§4) |
-| Layout engine | Netlist IR → Schematic IR (automatic placement and routing) | planned (§5) |
+| LTspice `.asc` import | schematic capture → Schematic IR, geometry preserved | ✅ 0.1.0 |
+| SPICE netlist parser | `.sp`/`.cir`/`.net` → Netlist IR, ngspice dialect | ✅ 0.1.1 |
+| Layout engine | Netlist IR → Schematic IR (automatic placement and routing) | ✅ 0.2.0 |
 
 Explicit non-features: no simulation, no netlist editing, no AI/heuristic
 "redrawing" of arbitrary images, no GUI.
@@ -58,18 +58,31 @@ Check the installation:
 spice2tikz --version
 ```
 
-## Usage so far
+## Usage
 
-Convert a Schematic IR file to CircuiTikZ (format deduced from the extension,
-or forced with `--from {spice,asc,netlist-ir,schematic-ir}`):
+Convert a circuit to CircuiTikZ. The input format is deduced from the
+extension — `.sp`/`.cir`/`.net` is SPICE, `.asc` is LTspice, `.json` is either
+IR — or forced with `--from`:
 
 ```sh
-spice2tikz circuit.schematic.json > circuit.tex     # snippet, for \input
-spice2tikz circuit.schematic.json -o circuit.tex    # same, without the shell
-spice2tikz circuit.schematic.json --standalone      # a compilable document
-spice2tikz circuit.schematic.json -q                # errors only
-spice2tikz circuit.schematic.json -v                # progress and a summary
+spice2tikz amplifier.asc > amplifier.tex        # LTspice, geometry preserved
+spice2tikz amplifier.sp > amplifier.tex         # netlist, laid out automatically
+spice2tikz amplifier.sp --standalone -o amp.tex # a compilable document
+spice2tikz amplifier.sp -v                      # progress and layout metrics
 ```
+
+Automatic layout only has to get close, because the Schematic IR it produces is
+a documented, hand-editable format — dump it, nudge it, re-emit it:
+
+```sh
+spice2tikz amplifier.sp --dump-layout amplifier.schematic.json
+$EDITOR amplifier.schematic.json
+spice2tikz amplifier.schematic.json > amplifier.tex
+```
+
+Re-emitting an unedited dump reproduces the original output byte for byte, so
+every difference in the `.tex` is one you made. Full details in
+`docs/USAGE.md`.
 
 Style defaults can be overridden without editing the file, repeatably and from
 a TOML config (see `docs/EMITTER.md` §3):
@@ -151,7 +164,10 @@ python tools/render_goldens.py
 
 - `docs/DESIGN.md` — motivation, architecture, design decisions
 - `docs/SPEC_IR.md` — the two intermediate representations
+- `docs/USAGE.md` — install, every workflow, every option, a worked tweak
 - `docs/EMITTER.md` — emission rules, style options, how to add a symbol
+- `docs/LAYOUT.md` — how automatic placement works, and what it is bad at
+- `docs/CONTRIBUTING.md` — dev setup, the golden workflow, how to extend it
 - `docs/ROADMAP.md` — implementation plan
 - `docs/DECISIONS.md` — log of small implementation decisions
 

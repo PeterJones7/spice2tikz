@@ -9,6 +9,85 @@ minor releases.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-08-29
+
+Roadmap sections 3, 4 and 5 are complete. The whole pipeline works: LTspice
+schematics and SPICE netlists both convert to CircuiTikZ, the latter through
+an automatic layout engine. Status moves from pre-alpha to **alpha**.
+
+### Added
+
+- `asc_importer.py`: LTspice `.asc` import. Stage one parses `Version`,
+  `SHEET`, `WIRE`, `FLAG`, `IOPIN`, `SYMBOL`, `SYMATTR`, `WINDOW` and `TEXT`
+  records, detecting UTF-16 LE/BE and UTF-8 byte-order marks — UTF-16 `.asc`
+  files exist in the wild. Stage two maps them to the Schematic IR: y-flip,
+  16-to-1 grid rescale, all eight LTspice orientations, a per-symbol pin-offset
+  table checked against the shipped `.asy` files, net inference from wire
+  topology, explicit junctions, and generated boxes for unknown symbols.
+  Because a `.asc` file already carries a layout, this path preserves the
+  geometry a person made.
+- `spice_parser.py`: an ngspice SPICE netlist parser. Stage one assembles
+  logical lines (title, `+` continuations, `*` and `;`/`$` comments, `.end`,
+  CRLF, BOM) and reports positions as `file:line:column`. Stage two maps
+  `R C L D V I Q M J E G H F S T X` cards onto the SPEC_IR §1 kind taxonomy,
+  resolves transistor polarity from `.model`, parses `V`/`I` source
+  specifications (`DC`, `AC`, `SIN`, `PULSE`, `PWL`, `EXP` and combinations),
+  handles nested `.subckt`, and classes nets — ground by name, supply inferred
+  from DC-source-fed nets. Unknown cards become `generic` components with a
+  warning rather than failing the parse.
+- `layout/`: the automatic layout engine (Netlist IR → Schematic IR).
+  `graph.py` builds the connectivity graph, classes nets, ranks them by
+  distance from the input source, and detects series chains and parallel
+  groups. `place.py` gives every signal net its own column and every rail a
+  horizontal line, and turns devices so the terminal wanting the supply faces
+  up. `route.py` wires each net as a spine plus obstacle-avoiding stubs and
+  computes junction dots with the validator's own counting rule. `metrics.py`
+  measures crossings, wire length, bounding-box area and alignment.
+- CLI: the pipeline runs end to end. `.sp`/`.cir`/`.net` and `.asc` inputs
+  convert to LaTeX, `--dump-netlist` and `--dump-layout` write either IR as
+  JSON, and `-v` reports layout metrics.
+- Corpora and goldens: eleven `.asc` files (one saved as UTF-16 LE) with golden
+  Schematic IR and `.tex`; eleven `.sp` decks covering all twenty component
+  kinds with golden Netlist IR; and a golden Schematic IR and `.tex` for every
+  automatically laid-out deck. All twenty-nine standalone goldens compile
+  against TeX Live in CI.
+- `tests/golden/metrics.json` and a regression ratchet: no circuit may gain
+  crossings or wire length, grow, or lose alignment.
+- `tools/cross_validate.py`: reports the automatic layout's metrics beside the
+  human `.asc` layout for the circuits present in both corpora.
+- `docs/USAGE.md`, `docs/LAYOUT.md`, `docs/CONTRIBUTING.md`,
+  `CODE_OF_CONDUCT.md`, GitHub issue forms, and a PyPI trusted-publishing
+  release workflow.
+- Built-in `njfet` and `pjfet` symbols.
+
+### Changed
+
+- A Netlist IR input is now laid out and emitted rather than only validated;
+  the "layout not yet implemented" message is gone. A netlist that fails its
+  own invariants still exits 2 without being drawn.
+- `README.md` describes the real workflows; status is alpha.
+
+### Fixed
+
+- `pytest --update-golden` wrote CRLF goldens when run on Windows, so the same
+  content differed between contributors. The fixture now writes LF, a
+  `.gitattributes` pins the repository to `eol=lf`, and a test fails if a CRLF
+  text file ever lands again.
+
+## [0.1.1] — 2026-08-29
+
+### Added
+
+- SPICE netlist parsing, reachable from the CLI through `--dump-netlist`.
+
+## [0.1.0] — 2026-08-29
+
+### Added
+
+- LTspice `.asc` import: the first genuinely useful release, converting a
+  captured schematic to CircuiTikZ with its geometry intact and no layout
+  engine involved.
+
 ## [0.0.3] — 2026-08-29
 
 Roadmap section 2 (CircuiTikZ emitter) is complete: the Schematic IR →
@@ -109,7 +188,10 @@ ode[nmos, …]` with rotation/mirror, and generated subcircuit
   Python 3.10 and 3.12.
 - Initial documentation: `README.md`, `CHANGELOG.md`, `docs/DECISIONS.md`.
 
-[Unreleased]: https://github.com/PeterJones7/spice2tikz/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/PeterJones7/spice2tikz/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.2.0
+[0.1.1]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.1.1
+[0.1.0]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.1.0
 [0.0.3]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.0.3
 [0.0.2]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.0.2
 [0.0.1]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.0.1
