@@ -9,6 +9,31 @@ minor releases.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-08-29
+
+Public-release polish (roadmap section 6). No behaviour changes to the
+conversion itself.
+
+### Added
+
+- `examples/`: `build.sh` and a `Makefile` that run the tool over eight corpus
+  circuits — six netlists laid out automatically, two LTspice schematics whose
+  geometry is preserved — compile each one and render it to PNG. The generated
+  `.tex` and `.png` files are committed, so the README gallery works for anyone
+  reading the repository on the web, and `tests/test_examples.py` regenerates
+  the `.tex` to prove the gallery has not drifted from the tool.
+- `README.md`: CI, PyPI, Python and licence badges; a quick start; the gallery;
+  and an explicit non-features list.
+- `docs/CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1),
+  GitHub issue forms and a pull-request template.
+- `.github/workflows/release.yml`: on a `v*` tag, checks the tag matches
+  `__version__`, builds an sdist and a wheel, runs `twine check --strict`,
+  installs both into fresh virtualenvs and runs `spice2tikz --version`, then
+  publishes to PyPI through trusted publishing. The one-time PyPI setup a human
+  must do is documented in the workflow's header.
+- `Documentation` and `Issues` project URLs; `examples/` and `tools/` are
+  included in the sdist.
+
 ## [0.2.0] — 2026-08-29
 
 Roadmap sections 3, 4 and 5 are complete. The whole pipeline works: LTspice
@@ -188,7 +213,8 @@ ode[nmos, …]` with rotation/mirror, and generated subcircuit
   Python 3.10 and 3.12.
 - Initial documentation: `README.md`, `CHANGELOG.md`, `docs/DECISIONS.md`.
 
-[Unreleased]: https://github.com/PeterJones7/spice2tikz/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/PeterJones7/spice2tikz/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.3.0
 [0.2.0]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.2.0
 [0.1.1]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.1.1
 [0.1.0]: https://github.com/PeterJones7/spice2tikz/releases/tag/v0.1.0

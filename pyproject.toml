@@ -37,6 +37,8 @@ dev = [
 Homepage = "https://github.com/PeterJones7/spice2tikz"
 Repository = "https://github.com/PeterJones7/spice2tikz"
 Changelog = "https://github.com/PeterJones7/spice2tikz/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/PeterJones7/spice2tikz/tree/main/docs"
+Issues = "https://github.com/PeterJones7/spice2tikz/issues"
 
 [project.scripts]
 spice2tikz = "spice2tikz.cli:main"
@@ -48,7 +50,17 @@ path = "src/spice2tikz/__init__.py"
 packages = ["src/spice2tikz"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "tests", "docs", "README.md", "LICENSE", "CHANGELOG.md"]
+include = [
+    "src",
+    "tests",
+    "docs",
+    "examples",
+    "tools",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+]
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]

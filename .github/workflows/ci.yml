@@ -67,3 +67,16 @@ jobs:
         run: latexmk --version
       - name: Compile every standalone golden
         run: /tmp/venv/bin/python -m pytest tests/test_compile.py -v
+      # Only the .tex is compared: PNG bytes depend on the Ghostscript and
+      # TeX Live versions, so they would differ on every image without the
+      # drawing having changed.
+      - name: Rebuild the example gallery and check the .tex has not drifted
+        run: |
+          apt-get install -y --no-install-recommends ghostscript
+          PYTHON=/tmp/venv/bin/python bash examples/build.sh
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          if ! git diff --quiet -- 'examples/*.tex'; then
+            echo "examples/*.tex differs from what is committed:"
+            git --no-pager diff -- 'examples/*.tex'
+            exit 1
+          fi

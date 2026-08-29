@@ -1,0 +1,28 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \node[nmos, label=right:{$M_1$ NMOS}] (s2t0) at (11,3) {};
+  \draw (s2t0.D) |- (11,5);
+  \draw (s2t0.G) -| (9,3);
+  \draw (s2t0.S) |- (11,1);
+  \node[pmos, xscale=-1, rotate=180, label=right:{$M_2$ PMOS}] (s2t1) at (11,15) {};
+  \draw (s2t1.D) |- (11,13);
+  \draw (s2t1.G) -| (9,15);
+  \draw (s2t1.S) |- (11,17);
+  \draw (8,17) -- (8,1);
+  \draw (4,9) -- (8,9);
+  \draw (11,12) -- (11,6);
+  \draw (11,9) -- (15,9);
+  \draw (11,5) -- (11,6);
+  \draw (9,3) -- (9,1) -- (8,1);
+  \draw (11,1) -- (11,0);
+  \draw (11,13) -- (11,12);
+  \draw (9,15) -- (9,17) -- (8,17);
+  \draw (11,17) -- (11,18);
+  \node[right] at (4,9) {in};
+  \node[right] at (15,9) {out};
+  \draw (11,0) node[ground]{};
+  \node[right] at (11,18) {vdd};
+  \draw (8,9) node[circ]{};
+  \draw (11,9) node[circ]{};
+\end{circuitikz}

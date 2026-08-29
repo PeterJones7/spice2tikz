@@ -1,0 +1,49 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \node[npn, label=right:{$Q_1$}] (s2t0) at (39,6) {};
+  \draw (s2t0.C) |- (39,8);
+  \draw (s2t0.B) -| (37,6);
+  \draw (s2t0.E) |- (39,4);
+  \node[pnp, xscale=-1, rotate=180, label=right:{$Q_2$}] (s2t1) at (67,12) {};
+  \draw (s2t1.C) |- (67,10);
+  \draw (s2t1.B) -| (65,12);
+  \draw (s2t1.E) |- (67,14);
+  \draw (14,6) to[american voltage source, l=$V_1$] (14,0);
+  \draw (14,6) to[C=$\mathrm{CIN}$, a=\SI{1}{\micro\farad}] (28,6);
+  \draw (28,6) to[R=$RB_2$, a=\SI{100}{\kilo\ohm}] (28,0);
+  \draw (56,6) to[R=$RE_1$, a=\SI{1}{\kilo\ohm}] (56,0);
+  \draw (62,6) to[C=$\mathrm{CE}$, a=\SI{10}{\micro\farad}] (62,0);
+  \draw (70,6) to[R=$RC_2$, a=\SI{2.2}{\kilo\ohm}] (70,0);
+  \draw (0,18) to[american voltage source, l=$\mathrm{VCC}$] (0,0);
+  \draw (28,18) to[R=$RB_1$, a=\SI{470}{\kilo\ohm}] (28,14);
+  \draw (42,18) to[R=$RC_1$, a=\SI{4.7}{\kilo\ohm}] (42,14);
+  \draw (28,6) -- (28,14);
+  \draw (37,6) -- (28,6);
+  \draw (42,8) -- (42,14);
+  \draw (39,8) -- (42,8);
+  \draw (65,12) -- (42,12);
+  \draw (56,4) -- (56,6);
+  \draw (39,4) -- (56,4);
+  \draw (62,6) -- (56,6);
+  \draw (70,6) -- (70,10);
+  \draw (67,10) -- (70,10);
+  \draw (0,0) -- (70,0);
+  \draw (0,18) -- (67,18);
+  \draw (67,14) -- (67,18);
+  \node[above] at (14,6) {in};
+  \node[above] at (67,10) {c2};
+  \draw (35,0) node[ground]{};
+  \draw (21,18) node[vcc]{} node[right]{vcc = 12};
+  \draw (14,0) node[circ]{};
+  \draw (21,18) node[circ]{};
+  \draw (28,0) node[circ]{};
+  \draw (28,6) node[circ]{};
+  \draw (28,18) node[circ]{};
+  \draw (35,0) node[circ]{};
+  \draw (42,12) node[circ]{};
+  \draw (42,18) node[circ]{};
+  \draw (56,0) node[circ]{};
+  \draw (56,6) node[circ]{};
+  \draw (62,0) node[circ]{};
+\end{circuitikz}
