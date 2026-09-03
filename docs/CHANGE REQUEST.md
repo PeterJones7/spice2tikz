@@ -1,6 +1,8 @@
-Below a series of chage requests / bugs to fix 
+Below a series of change requests / bugs to fix.
+
 Do each in turn. Update documentation and push changes after each  request is implemented.
-Once addressed they can be removed from this document (with evidence left in chagelog.md)
+
+Once addressed they can be removed from this document (with evidence left in changelog.md)
 
 # 1 Show source values on voltage/current source symbols rather than creating separate rail labels
 
