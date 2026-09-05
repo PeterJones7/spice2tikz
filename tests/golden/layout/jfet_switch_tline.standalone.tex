@@ -21,8 +21,8 @@
   \draw (24,4) to[R=$\mathrm{RS}$, a=\SI{2.2}{\kilo\ohm}] (24,0);
   \draw (48,13) to[american voltage source, l=$\mathrm{VC}$] (48,0);
   \draw (56,19) to[R=$\mathrm{RT}$, a=\SI{50}{\ohm}] (56,0);
-  \draw (8,25) to[american voltage source, l=$\mathrm{VDD}$] (8,0);
-  \draw (0,0) to[american voltage source, l=$\mathrm{VEE}$] (0,31);
+  \draw (8,25) to[american voltage source, l=$\mathrm{VDD}$, a=\SI{15}{\volt}] (8,0);
+  \draw (0,0) to[american voltage source, l=$\mathrm{VEE}$, a=\SI{5}{\volt}] (0,31);
   \draw (32,27) to[R=$\mathrm{RP}$, a=\SI{2.2}{\kilo\ohm}] (32,31);
   \draw (19,6) -- (16,6);
   \draw (24,4) -- (24,15);
@@ -47,8 +47,8 @@
   \node[above] at (19,6) {in};
   \node[above] at (56,19) {out};
   \draw (28,0) node[ground]{};
-  \draw (10,25) node[vcc]{} node[right]{vdd = 15};
-  \draw (34,31) node[vcc]{} node[right]{vee = -5};
+  \draw (10,25) node[vcc]{} node[right]{vdd};
+  \draw (34,31) node[vcc]{} node[right]{vee};
   \draw (8,0) node[circ]{};
   \draw (10,25) node[circ]{};
   \draw (16,0) node[circ]{};

@@ -6,7 +6,7 @@
   \draw (s2t0.G) -| (11,6);
   \draw (s2t0.S) |- (13,4);
   \draw (8,6) to[american voltage source, l=$V_1$] (8,0);
-  \draw (0,12) to[american voltage source, l=$\mathrm{VDD}$] (0,0);
+  \draw (0,12) to[american voltage source, l=$\mathrm{VDD}$, a=\SI{5}{\volt}] (0,0);
   \draw (16,12) to[R=$\mathrm{RD}$, a=\SI{4.7}{\kilo\ohm}] (16,8);
   \draw (11,6) -- (8,6);
   \draw (13,8) -- (16,8);
@@ -16,7 +16,7 @@
   \node[above] at (11,6) {in};
   \node[right] at (16,8) {out};
   \draw (4,0) node[ground]{};
-  \draw (18,12) node[vcc]{} node[right]{vdd = 5};
+  \draw (18,12) node[vcc]{} node[right]{vdd};
   \draw (4,0) node[circ]{};
   \draw (8,0) node[circ]{};
   \draw (16,12) node[circ]{};

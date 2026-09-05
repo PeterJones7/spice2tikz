@@ -9,6 +9,18 @@ minor releases.
 
 ## [Unreleased]
 
+### Changed
+
+- An independent voltage or current source now shows its DC value beside its
+  own symbol (`V1` … `\SI{5}{olt}`), and a supply rail whose source is drawn
+  on the sheet is labelled with just the net name instead of `vdd = 5`. A
+  component's value belongs on the component; putting it on the net stated the
+  same fact twice and attached it to connectivity rather than to the part that
+  establishes it. A rail the netlist declares without a drawn source still
+  carries its voltage, since nothing else would say it. Time-varying sources
+  still show no value: amplitude, offset and frequency are three numbers, not
+  one, and the waveform belongs in the caption.
+
 ### Fixed
 
 - Mirrored node components were drawn wrongly at 90° and 270°. The emitter

@@ -43,7 +43,10 @@
           "ref": "VDD",
           "kind": "vsource",
           "a": [0, 12],
-          "b": [0, 0]
+          "b": [0, 0],
+          "value_label": {
+            "text": "\\SI{5}{\\volt}"
+          }
         },
         {
           "type": "component",
@@ -110,7 +113,7 @@
           "variant": "vcc",
           "at": [18, 12],
           "rot": 0,
-          "text": "vdd = 5"
+          "text": "vdd"
         },
         {
           "type": "junction",

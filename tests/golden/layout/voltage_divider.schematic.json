@@ -30,7 +30,10 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [0, 10],
-          "b": [0, 0]
+          "b": [0, 0],
+          "value_label": {
+            "text": "\\SI{5}{\\volt}"
+          }
         },
         {
           "type": "component",
@@ -74,7 +77,7 @@
           "variant": "vcc",
           "at": [10, 10],
           "rot": 0,
-          "text": "in = 5"
+          "text": "in"
         },
         {
           "type": "junction",

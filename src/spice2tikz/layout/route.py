@@ -36,7 +36,7 @@ from ..schematic_ir import (
     Wire,
 )
 from ..symbols import Point, Rotation
-from .place import Placement
+from .place import Placement, source_value
 
 MIN_JUNCTION_CONDUCTORS: Final = 3
 """Conductors that must meet before a dot means anything (SPEC_IR §4, inv. 10)."""
@@ -470,11 +470,34 @@ def _rail_marker(placement: Placement, net: str, points: list[Point]) -> Point:
 
 
 def _supply_text(placement: Placement, net: str) -> str:
-    """Return the label a supply rail carries: its name, and its voltage if known."""
+    """Return the label a supply rail carries.
+
+    Just the net name when a source drawn on this sheet already shows the
+    voltage beside its own symbol.  Repeating it on the rail states the same
+    fact twice and attaches it to the net rather than to the component that
+    establishes it, which is not how a schematic is read (§1 of the change
+    request).  A rail whose source is *not* drawn — a supply the netlist only
+    declares — still carries its voltage, since nothing else would say it.
+    """
     declared = placement.graph.nets.get(net)
-    if declared is not None and declared.supply_voltage is not None:
-        return f"{net} = {declared.supply_voltage.raw}"
-    return net
+    if declared is None or declared.supply_voltage is None:
+        return net
+    if _voltage_is_shown_on_a_source(placement, net):
+        return net
+    return f"{net} = {declared.supply_voltage.raw}"
+
+
+def _voltage_is_shown_on_a_source(placement: Placement, net: str) -> bool:
+    """Return ``True`` when a source on *net* already carries its value label."""
+    graph = placement.graph
+    drawn = {element.ref for element in placement.components}
+    for terminal in graph.terminals.get(net, ()):
+        if terminal.component not in drawn:
+            continue
+        component = graph.components.get(terminal.component)
+        if component is not None and source_value(component) is not None:
+            return True
+    return False
 
 
 # --- junctions ---------------------------------------------------------------

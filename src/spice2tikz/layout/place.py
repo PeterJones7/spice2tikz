@@ -37,6 +37,7 @@ from typing import Final
 
 from ..emit.circuitikz import format_quantity
 from ..netlist_ir import Component, Kind
+from ..quantity import Quantity
 from ..schematic_ir import LabelSpec, NodeComponent, PathComponent
 from ..symbols import (
     BUILTIN_SYMBOLS,
@@ -708,6 +709,28 @@ def _ground_inner(
     return row_y(row)
 
 
+def source_value(component: Component) -> Quantity | None:
+    """Return the operating value to print beside an independent source.
+
+    A source's ``value`` is its whole specification (``DC 0 AC 1 SIN(...)``),
+    which never parses to a single number, so the figure would otherwise carry
+    no value at all for the one component that sets the circuit's levels.  The
+    DC parameter is the value a reader wants: it is what a supply *is*, and it
+    is the only part of a specification that is a single quantity.
+
+    A time-varying specification deliberately yields nothing.  Its amplitude,
+    offset and frequency are three numbers, not one; they are several times
+    wider than the symbol, and the waveform belongs in the caption.  The
+    symbol itself says the source is time-varying.
+    """
+    if component.kind not in (Kind.VSOURCE, Kind.ISOURCE):
+        return None
+    dc = (component.params or {}).get("dc")
+    if dc is None or dc.value is None:
+        return None
+    return dc
+
+
 def _value_label(component: Component, siunitx: bool) -> LabelSpec | None:
     """Return the component's value as an explicit, already-formatted label.
 
@@ -716,10 +739,12 @@ def _value_label(component: Component, siunitx: bool) -> LabelSpec | None:
     ``emit.format_quantity`` exists for (see the §2.3 decision log).
 
     Only a value that parsed to a *number* is shown.  A source specification
-    (``DC 0 AC 1 SIN(0 10m 1k)``) is several times wider than the symbol it
-    labels and would collide with everything around it; the refdes still names
-    the component, and the waveform belongs in the figure caption.
+    is several times wider than the symbol it labels and would collide with
+    everything around it, so a source shows its DC operating value instead —
+    a component's value belongs on the component, not on a net (§1 of the
+    change request).
     """
-    if component.value is None or component.value.value is None:
+    value = source_value(component) or component.value
+    if value is None or value.value is None:
         return None
-    return LabelSpec(text=format_quantity(component.value, siunitx=siunitx))
+    return LabelSpec(text=format_quantity(value, siunitx=siunitx))

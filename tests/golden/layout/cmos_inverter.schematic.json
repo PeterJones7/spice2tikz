@@ -81,7 +81,10 @@
           "ref": "VDD",
           "kind": "vsource",
           "a": [0, 18],
-          "b": [0, 0]
+          "b": [0, 0],
+          "value_label": {
+            "text": "\\SI{3.3}{\\volt}"
+          }
         },
         {
           "type": "component",
@@ -89,7 +92,10 @@
           "ref": "IBIAS",
           "kind": "isource",
           "a": [24, 18],
-          "b": [24, 14]
+          "b": [24, 14],
+          "value_label": {
+            "text": "\\SI{50}{\\micro\\ampere}"
+          }
         },
         {
           "type": "wire",
@@ -175,7 +181,7 @@
           "variant": "vcc",
           "at": [26, 18],
           "rot": 0,
-          "text": "vdd = 3.3"
+          "text": "vdd"
         },
         {
           "type": "junction",

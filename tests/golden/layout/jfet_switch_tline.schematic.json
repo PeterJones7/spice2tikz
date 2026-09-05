@@ -163,7 +163,10 @@
           "ref": "VDD",
           "kind": "vsource",
           "a": [8, 25],
-          "b": [8, 0]
+          "b": [8, 0],
+          "value_label": {
+            "text": "\\SI{15}{\\volt}"
+          }
         },
         {
           "type": "component",
@@ -171,7 +174,10 @@
           "ref": "VEE",
           "kind": "vsource",
           "a": [0, 0],
-          "b": [0, 31]
+          "b": [0, 31],
+          "value_label": {
+            "text": "\\SI{5}{\\volt}"
+          }
         },
         {
           "type": "component",
@@ -313,7 +319,7 @@
           "variant": "vcc",
           "at": [10, 25],
           "rot": 0,
-          "text": "vdd = 15"
+          "text": "vdd"
         },
         {
           "type": "net_symbol",
@@ -321,7 +327,7 @@
           "variant": "vcc",
           "at": [34, 31],
           "rot": 0,
-          "text": "vee = -5"
+          "text": "vee"
         },
         {
           "type": "junction",

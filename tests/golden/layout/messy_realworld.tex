@@ -3,7 +3,7 @@
   \ctikzset{cute inductors}
   \draw (3,9) rectangle (7,15);
   \node at (5,12) {$Zq_1$};
-  \draw (0,6) to[american voltage source, l=$V_1$] (0,0);
+  \draw (0,6) to[american voltage source, l=$V_1$, a=\SI{0}{\volt}] (0,0);
   \draw (0,6) to[R=$R_1$, a=\SI{10}{\kilo\ohm}] (8,6);
   \draw (8,6) to[C=$\mathrm{CLoad}$, a=\SI{1}{\micro\farad}] (8,0);
   \draw (8,6) -- (8,15);

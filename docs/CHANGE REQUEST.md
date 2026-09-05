@@ -4,51 +4,6 @@ Do each in turn. Update documentation and push changes after each  request is im
 
 Once addressed they can be removed from this document (with evidence left in changelog.md)
 
-# 1 Show source values on voltage/current source symbols rather than creating separate rail labels
-
-Current behaviour
-
-For supply rails the generated schematic may emit a separate net label such as: (eg from voltage divider example)
-
-    \draw (10,10) node[vcc]{} node[right]{in = 5};
-
-while the actual source is drawn elsewhere as:
-
-    \draw (...) to[american voltage source, l=$V_1$] (...);
-
-This duplicates information and associates the voltage value with the net rather than with the component that establishes that voltage.
-
-Requested behaviour
-
-For independent voltage and current sources, emit the source value as the component value label on the source symbol itself, using the same mechanism already used for resistors, capacitors and inductors.
-
-Example:
-
-Current:
-    V1 labelled "V1"
-    separate rail label "in = 5"
-
-Preferred:
-    V1 labelled "V1"
-    V1 value label "5 V"
-    no automatically generated "in = 5" rail annotation
-
-Rationale
-
-- Follows normal schematic convention: component values belong on components.
-- Avoids duplicating information already present in the netlist.
-- Keeps net labels focused on connectivity rather than operating-point information.
-- Produces more consistent output because passive components already display their values on the component body.
-- Generalises naturally to all independent sources:
-    - DC voltage sources
-    - DC current sources
-    - supply generators represented by sources in the netlist
-
-Implementation note
-
-The layout engine should continue to create supply and ground symbols as required, but the emitter should prefer source value labels on the source symbol and suppress automatically generated "<net> = <value>" rail annotations when that value originates from an identifiable source component.
-
-
 # 2 Fix PMOS layout error
 I spotted a layout error in the PMOS transistor of  cmos_inverter.png.  Extra nodes appear and a wire crossing the terminals.  After investigation the following was reported by GPT as requiring fixing.  Read the report to get you started, then fix the issue.
 

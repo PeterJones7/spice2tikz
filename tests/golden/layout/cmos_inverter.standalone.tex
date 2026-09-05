@@ -16,8 +16,8 @@
   \draw (8,6) to[american voltage source, l=$\mathrm{VIN}$] (8,0);
   \draw (24,6) to[R=$\mathrm{RBIAS}$, a=\SI{10}{\kilo\ohm}] (24,0);
   \draw (16,4) to[C=$\mathrm{CL}$, a=\SI{10}{\femto\farad}] (16,0);
-  \draw (0,18) to[american voltage source, l=$\mathrm{VDD}$] (0,0);
-  \draw (24,18) to[american current source, l=$\mathrm{IBIAS}$] (24,14);
+  \draw (0,18) to[american voltage source, l=$\mathrm{VDD}$, a=\SI{3.3}{\volt}] (0,0);
+  \draw (24,18) to[american current source, l=$\mathrm{IBIAS}$, a=\SI{50}{\micro\ampere}] (24,14);
   \draw (8,6) -- (8,12);
   \draw (11,6) -- (8,6);
   \draw (11,12) -- (8,12);
@@ -32,7 +32,7 @@
   \node[left] at (11,12) {in};
   \node[above] at (13,14) {out};
   \draw (12,0) node[ground]{};
-  \draw (26,18) node[vcc]{} node[right]{vdd = 3.3};
+  \draw (26,18) node[vcc]{} node[right]{vdd};
   \draw (8,0) node[circ]{};
   \draw (8,6) node[circ]{};
   \draw (12,0) node[circ]{};

@@ -19,7 +19,7 @@
   \draw (56,4) to[R=$RE_1$, a=\SI{1}{\kilo\ohm}] (56,0);
   \draw (62,4) to[C=$\mathrm{CE}$, a=\SI{10}{\micro\farad}] (62,0);
   \draw (70,10) to[R=$RC_2$, a=\SI{2.2}{\kilo\ohm}] (70,0);
-  \draw (0,18) to[american voltage source, l=$\mathrm{VCC}$] (0,0);
+  \draw (0,18) to[american voltage source, l=$\mathrm{VCC}$, a=\SI{12}{\volt}] (0,0);
   \draw (28,18) to[R=$RB_1$, a=\SI{470}{\kilo\ohm}] (28,14);
   \draw (42,18) to[R=$RC_1$, a=\SI{4.7}{\kilo\ohm}] (42,14);
   \draw (28,6) -- (28,14);
@@ -36,7 +36,7 @@
   \node[above] at (14,6) {in};
   \node[above] at (70,10) {c2};
   \draw (35,0) node[ground]{};
-  \draw (44,18) node[vcc]{} node[right]{vcc = 12};
+  \draw (44,18) node[vcc]{} node[right]{vcc};
   \draw (14,0) node[circ]{};
   \draw (28,0) node[circ]{};
   \draw (28,6) node[circ]{};

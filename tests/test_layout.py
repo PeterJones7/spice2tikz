@@ -606,3 +606,73 @@ def test_cross_validation_measures_both_sides(name: str):
     assert set(pair) == {"human", "auto"}
     for side in pair.values():
         assert side["components"] > 0
+
+
+# --- source values live on the source, not on the net (change request §1) ---
+
+
+def test_a_dc_source_shows_its_voltage_on_the_symbol():
+    ir = lay_out("voltage_divider")
+    v1 = next(
+        element
+        for element in ir.sheets[0].elements
+        if isinstance(element, PathComponent) and element.ref == "V1"
+    )
+    assert v1.value_label is not None
+    assert v1.value_label.text == r"\SI{5}{\volt}"
+
+
+def test_a_supply_rail_is_not_annotated_with_a_voltage_its_source_shows():
+    """Stating it twice attaches the value to the net rather than the part."""
+    ir = lay_out("voltage_divider")
+    supplies = [
+        element
+        for element in ir.sheets[0].elements
+        if getattr(element, "variant", None) == "vcc"
+    ]
+    assert [symbol.text for symbol in supplies] == ["in"]
+
+
+def test_a_supply_with_no_drawn_source_still_carries_its_voltage():
+    """A netlist may declare a rail whose source is off-sheet; nothing else says it."""
+    netlist = netlist_ir.loads(
+        '{"ir": "netlist", "version": "1.0", "meta": {},'
+        ' "circuit": {"components": ['
+        '{"id": "R1", "kind": "resistor", "pins": {"a": "vdd", "b": "0"},'
+        ' "raw": "R1 vdd 0 1k"},'
+        '{"id": "R2", "kind": "resistor", "pins": {"a": "vdd", "b": "0"},'
+        ' "raw": "R2 vdd 0 1k"}],'
+        ' "nets": {"vdd": {"name": "vdd", "class": "supply",'
+        ' "supply_voltage": {"raw": "9", "value": 9.0, "unit": "V"}},'
+        ' "0": {"name": "0", "class": "ground"}}},'
+        ' "subcircuits": {}}'
+    )
+    ir = layout(netlist)
+    supplies = [
+        element
+        for element in ir.sheets[0].elements
+        if getattr(element, "variant", None) == "vcc"
+    ]
+    assert [symbol.text for symbol in supplies] == ["vdd = 9"]
+
+
+def test_a_time_varying_source_shows_no_value():
+    """Amplitude, offset and frequency are three numbers, not one."""
+    ir = lay_out("common_source_amp")
+    v1 = next(
+        element
+        for element in ir.sheets[0].elements
+        if isinstance(element, PathComponent) and element.ref == "V1"
+    )
+    assert v1.value_label is None
+
+
+def test_a_dc_current_source_shows_its_current():
+    ir = lay_out("cmos_inverter")
+    ibias = next(
+        element
+        for element in ir.sheets[0].elements
+        if isinstance(element, PathComponent) and element.ref == "IBIAS"
+    )
+    assert ibias.value_label is not None
+    assert "micro" in ibias.value_label.text

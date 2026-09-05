@@ -112,7 +112,10 @@
           "ref": "VCC",
           "kind": "vsource",
           "a": [0, 18],
-          "b": [0, 0]
+          "b": [0, 0],
+          "value_label": {
+            "text": "\\SI{12}{\\volt}"
+          }
         },
         {
           "type": "component",
@@ -220,7 +223,7 @@
           "variant": "vcc",
           "at": [44, 18],
           "rot": 0,
-          "text": "vcc = 12"
+          "text": "vcc"
         },
         {
           "type": "junction",

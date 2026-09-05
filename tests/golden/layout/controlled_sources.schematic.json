@@ -125,7 +125,10 @@
           "ref": "VS",
           "kind": "vsource",
           "a": [42, 12],
-          "b": [42, 0]
+          "b": [42, 0],
+          "value_label": {
+            "text": "\\SI{0}{\\volt}"
+          }
         },
         {
           "type": "component",

@@ -131,6 +131,7 @@ ref label. An unresolvable symbol falls back to a 2×2 box rather than failing:
 | refdes `R12` | `$R_{12}$` |
 | refdes `Xamp` (no trailing digits) | `$\mathrm{Xamp}$` |
 | `Quantity(10000.0, "ohm")` with `siunitx` | `\SI{10}{\kilo\ohm}` |
+| a source's `dc` parameter | `\SI{5}{olt}` on the source symbol |
 | unparseable value | the raw text, escaped |
 
 `_ $ % # & { } ~ ^ \` are escaped in **all derived text** — refdes labels,

@@ -53,7 +53,10 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [0, 6],
-          "b": [0, 0]
+          "b": [0, 0],
+          "value_label": {
+            "text": "\\SI{0}{\\volt}"
+          }
         },
         {
           "type": "component",
