@@ -1,0 +1,141 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Bridge between two supplies",
+    "source": "bridge_two_supplies.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "n1",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 10"
+        },
+        "params": {
+          "dc": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V1 N1 0 DC 10"
+      },
+      {
+        "id": "V2",
+        "kind": "vsource",
+        "pins": {
+          "p": "n3",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 5"
+        },
+        "params": {
+          "dc": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V2 N3 0 DC 5"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "n1",
+          "b": "n2"
+        },
+        "value": {
+          "raw": "100",
+          "value": 100.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 N1 N2 100"
+      },
+      {
+        "id": "R2",
+        "kind": "resistor",
+        "pins": {
+          "a": "n2",
+          "b": "n3"
+        },
+        "value": {
+          "raw": "220",
+          "value": 220.0,
+          "unit": "ohm"
+        },
+        "raw": "R2 N2 N3 220"
+      },
+      {
+        "id": "R3",
+        "kind": "resistor",
+        "pins": {
+          "a": "n1",
+          "b": "n4"
+        },
+        "value": {
+          "raw": "330",
+          "value": 330.0,
+          "unit": "ohm"
+        },
+        "raw": "R3 N1 N4 330"
+      },
+      {
+        "id": "R4",
+        "kind": "resistor",
+        "pins": {
+          "a": "n3",
+          "b": "n4"
+        },
+        "value": {
+          "raw": "470",
+          "value": 470.0,
+          "unit": "ohm"
+        },
+        "raw": "R4 N3 N4 470"
+      }
+    ],
+    "nets": {
+      "n1": {
+        "name": "n1",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "10",
+          "value": 10.0,
+          "unit": "V"
+        }
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "n3": {
+        "name": "n3",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "5",
+          "value": 5.0,
+          "unit": "V"
+        }
+      },
+      "n2": {
+        "name": "n2",
+        "class": "signal"
+      },
+      "n4": {
+        "name": "n4",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {}
+}

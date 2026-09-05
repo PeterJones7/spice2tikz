@@ -258,7 +258,7 @@
         {
           "type": "wire",
           "net": "0",
-          "points": [[27, 17], [27, 0]]
+          "points": [[27, 17], [31, 17], [31, 0]]
         },
         {
           "type": "net_symbol",
@@ -309,11 +309,11 @@
         },
         {
           "type": "junction",
-          "at": [27, 0]
+          "at": [28, 0]
         },
         {
           "type": "junction",
-          "at": [28, 0]
+          "at": [31, 0]
         },
         {
           "type": "junction",

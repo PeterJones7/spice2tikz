@@ -65,6 +65,27 @@ minor releases.
 
 ### Fixed
 
+- Net spines were emitted without any obstacle check, on the reasoning that a
+  net's own column is its own business. It is not: a component standing on
+  that column had the column drawn straight through its body, and a *foreign*
+  terminal sitting on the same line was shorted to it. A spine is now checked
+  like any other wire and slides to the nearest clear parallel line when it
+  will not fit, taking its stubs with it; a supply glyph, being decoration
+  rather than a terminal, steps further out before the rail itself moves.
+  Reported with a repro deck, now `tests/corpus/spice/bridge_two_supplies.sp`,
+  which was drawn with two shorts and zero findings from the validator.
+- A path component was modelled as the bare line between its two endpoints,
+  which is where the wire is but not where the *drawing* is. circuitikz puts
+  the rectangle, circle or plates around the middle of that line, so a wire
+  crossing at right angles went through the symbol while breaking no rule
+  about connectivity. Components now carry a body obstacle: crossing a lead is
+  still allowed and ordinary, crossing the body is not.
+- Wires of two different nets could meet. Crossing is fine — that is an
+  ordinary crossover — but a wire *ending* on another net's wire is a
+  T-junction, and one running along another is worse; either is a short that
+  no terminal-by-terminal check can see, because the offending point belongs
+  to no component at all. That is how a supply rail came to end exactly on
+  another net's column, junction dot and all.
 - Warnings from the layout stage were counted but never printed, and were only
   counted at all under `-v`. That silenced the "body terminal is not tied to
   the channel" message `docs/USAGE.md` documents, because the warnings were

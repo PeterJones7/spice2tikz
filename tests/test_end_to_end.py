@@ -31,6 +31,7 @@ import pytest
 from spice2tikz import asc_importer, spice_parser
 from spice2tikz.emit.circuitikz import emit_snippet, emit_standalone
 from spice2tikz.layout import layout
+from spice2tikz.layout.route import _body_box, _crosses_box, _touches
 from spice2tikz.netlist_ir import Kind, NetlistIR
 from spice2tikz.schematic_ir import (
     Junction,
@@ -436,3 +437,57 @@ def test_no_wire_is_drawn_over_a_component(name: str):
                 elif any(_strictly_inside(end, part.a, part.b) for end in segment):
                     problems.append(f"wire {wire.net!r} ends inside {part.ref}")
     assert not problems, "\n".join(sorted(set(problems)))
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_no_wire_crosses_the_body_of_a_component(name: str):
+    """A wire may cross a lead. It may not cross the drawn symbol.
+
+    The IR gives a two-terminal part two endpoints, and for a long time every
+    obstacle check treated it as the line between them — which is where the
+    *wire* is, not where the *drawing* is. circuitikz puts the rectangle, the
+    circle or the plates around the middle of that line, so a wire crossing at
+    right angles went straight through the symbol while breaking no rule about
+    connectivity.
+
+    The body region is the router's own, so this asserts the router obeys the
+    obstacles it is given: the bug was never a wrong box, it was the net spine
+    being emitted without consulting one.
+    """
+    ir = layout(spice_parser.load_spice(SPICE_CORPUS / f"{name}.sp"))
+    elements = ir.sheets[0].elements
+    parts = [e for e in elements if isinstance(e, PathComponent)]
+    problems = []
+    for wire in (e for e in elements if isinstance(e, Wire)):
+        for segment in wire.segments():
+            for part in parts:
+                if _crosses_box(segment[0], segment[1], _body_box(part.a, part.b)):
+                    problems.append(f"wire {wire.net!r} crosses the body of {part.ref}")
+    assert not problems, "\n".join(sorted(set(problems)))
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_no_two_nets_touch(name: str):
+    """Wires of different nets may cross. Meeting is a connection.
+
+    A wire ending on another net's wire is a T-junction, and one running along
+    another is worse; either is a short the netlist does not have. Neither
+    shows up in a terminal-by-terminal check, because the offending point
+    belongs to no component at all — which is how a supply rail came to end
+    exactly on another net's column, dot and all.
+    """
+    ir = layout(spice_parser.load_spice(SPICE_CORPUS / f"{name}.sp"))
+    wires = [e for e in ir.sheets[0].elements if isinstance(e, Wire)]
+    problems = []
+    for index, wire in enumerate(wires):
+        for other in wires[index + 1 :]:
+            if wire.net == other.net:
+                continue
+            for segment in wire.segments():
+                for against in other.segments():
+                    if _touches(against, segment):
+                        problems.append(
+                            f"nets {wire.net!r} and {other.net!r} meet at "
+                            f"{segment} / {against}"
+                        )
+    assert not problems, "\n".join(sorted(set(problems))[:6])

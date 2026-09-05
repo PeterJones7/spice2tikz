@@ -1,0 +1,28 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (14,10) to[american voltage source, l=$V_1$, a=\SI{10}{\volt}] (14,0);
+  \draw (0,16) to[american voltage source, l=$V_2$, a=\SI{5}{\volt}] (0,0);
+  \draw (28,10) to[R=$R_1$, a=\SI{100}{\ohm}] (28,6);
+  \draw (34,12) to[R=$R_2$, a=\SI{220}{\ohm}] (34,16);
+  \draw (42,10) to[R=$R_3$, a=\SI{330}{\ohm}] (42,6);
+  \draw (48,16) to[R=$R_4$, a=\SI{470}{\ohm}] (48,12);
+  \draw (30,6) -- (30,12);
+  \draw (28,6) -- (30,6);
+  \draw (34,12) -- (30,12);
+  \draw (44,6) -- (44,12);
+  \draw (42,6) -- (44,6);
+  \draw (48,12) -- (44,12);
+  \draw (0,0) -- (14,0);
+  \draw (14,10) -- (46,10);
+  \draw (0,16) -- (50,16);
+  \node[right] at (48,12) {n4};
+  \draw (7,0) node[ground]{};
+  \draw (46,10) node[vcc]{} node[right]{n1};
+  \draw (50,16) node[vcc]{} node[right]{n3};
+  \draw (7,0) node[circ]{};
+  \draw (28,10) node[circ]{};
+  \draw (34,16) node[circ]{};
+  \draw (42,10) node[circ]{};
+  \draw (48,16) node[circ]{};
+\end{circuitikz}

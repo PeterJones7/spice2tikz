@@ -142,12 +142,17 @@
         {
           "type": "wire",
           "net": "sig",
-          "points": [[32, 6], [32, 16]]
+          "points": [[34, 6], [34, 12]]
         },
         {
           "type": "wire",
           "net": "sig",
-          "points": [[33, 12], [33, 16], [32, 16]]
+          "points": [[33, 12], [34, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "sig",
+          "points": [[32, 6], [34, 6]]
         },
         {
           "type": "wire",

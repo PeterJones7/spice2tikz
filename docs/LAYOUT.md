@@ -88,11 +88,17 @@ unlikely:
    where a terminal sits.
 
 Everything the two rules do not cover is caught by the router's obstacle check
-(§4) and, failing that, by `tests/test_layout.py`, which asserts on every
-corpus circuit that no wire runs through another net's terminal and that no two
-nets share a terminal position. Those tests exist because `validate.py`
-*cannot* catch this: the IR validator sees geometry, not nets, so a sheet that
-shorts two nodes satisfies all thirteen invariants.
+(§4) and, failing that, by tests that read the drawing back as a circuit:
+`tests/test_layout.py` asserts that no wire runs through another net's terminal
+and that no two nets share a terminal position, and `tests/test_end_to_end.py`
+reconstructs the netlist from the geometry and compares it, checks that no wire
+crosses a component's body, and checks that no two nets touch.
+
+Those tests exist because `validate.py` *cannot* catch this: the IR validator
+sees geometry, not nets, so a sheet that shorts two nodes satisfies all
+thirteen invariants. `tests/corpus/spice/bridge_two_supplies.sp` is the case
+that proved it — two arms across two supplies, drawn with two shorts, and zero
+findings from the validator.
 
 ---
 
@@ -155,7 +161,26 @@ rail); each terminal joins it by the shortest *clear* route:
    offsets outwards until one is clear.
 
 "Clear" means the route passes through no other net's terminal, through no
-device body, and not collinear with an already-drawn wire of a different net.
+device body, through no path component's drawn symbol, and neither along nor
+into an already-drawn wire of a different net. Two nets may **cross** — that
+is an ordinary crossover, drawn without a dot and counted by the metrics —
+but they may not *meet*: a wire ending on another net's wire is a T-junction,
+which is a connection the netlist does not have.
+
+**The spine is checked the same way.** It used to be emitted straight from the
+terminal extents on the reasoning that a net's own column is its own business,
+which is wrong twice over: a component standing on that column had the column
+drawn through its body, and a foreign terminal sitting on the line was shorted
+to it. A net whose spine will not fit slides to the nearest parallel line that
+is clear — even steps, so a signal column stays even — and takes its stubs with
+it. A supply glyph, being decoration rather than a terminal, steps further out
+before the rail itself is asked to move.
+
+A **path component is leads plus a body**, not just the line between its
+endpoints. That line is where the wire is; the drawing is the rectangle,
+circle or plates circuitikz puts around the middle of it, about 1.4 cm long.
+Crossing a lead is allowed and ordinary. Crossing the body is not, and used to
+happen freely because no obstacle described it.
 
 The spine spans exactly the range of its own connection points, so both ends
 land on something: **dangling wire ends (invariant 9) are impossible by
@@ -224,8 +249,10 @@ one above the other. That is the largest single gap, and it is what layout v2
 - **No multi-sheet output, no hierarchy expansion.** A subcircuit *instance* is
   one box; its contents are not drawn. `layout_scope` will lay out a
   `SubcktDef` if asked, but nothing composes the sheets.
-- **Crossings are counted, not minimised.** The router avoids drawing through
-  terminals; it does not try to reduce the number of times wires cross.
+- **Crossings are counted, not minimised.** The router refuses to draw through
+  a terminal, a device body or a component's symbol, and refuses to let two
+  nets meet; it does not try to reduce the number of times wires legitimately
+  cross.
 
 ---
 

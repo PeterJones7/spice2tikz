@@ -15,6 +15,22 @@
     "wire_length": 28,
     "wires": 3
   },
+  "bridge_two_supplies": {
+    "alignment": 1.0,
+    "bbox_area": 800,
+    "components": 6,
+    "crossings": 2,
+    "wire_length": 120,
+    "wires": 9
+  },
+  "bridge_with_link": {
+    "alignment": 1.0,
+    "bbox_area": 800,
+    "components": 7,
+    "crossings": 2,
+    "wire_length": 124,
+    "wires": 9
+  },
   "cmos_inverter": {
     "alignment": 1.0,
     "bbox_area": 468,
@@ -36,7 +52,7 @@
     "bbox_area": 1748,
     "components": 11,
     "crossings": 2,
-    "wire_length": 229,
+    "wire_length": 233,
     "wires": 15
   },
   "jfet_switch_tline": {
@@ -60,7 +76,7 @@
     "bbox_area": 120,
     "components": 4,
     "crossings": 0,
-    "wire_length": 35,
+    "wire_length": 37,
     "wires": 4
   },
   "opamp_inverting": {
@@ -68,8 +84,8 @@
     "bbox_area": 910,
     "components": 7,
     "crossings": 1,
-    "wire_length": 150,
-    "wires": 10
+    "wire_length": 144,
+    "wires": 11
   },
   "rc_lowpass": {
     "alignment": 1.0,

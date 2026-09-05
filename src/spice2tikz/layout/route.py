@@ -50,6 +50,45 @@ MAX_DETOURS: Final = 12
 Box = tuple[int, int, int, int]
 Segment = tuple[Point, Point]
 
+BODY_REACH: Final = 2
+"""Half the length of a bipole's drawn body, in grid units.
+
+circuitikz draws a two-terminal part about 1.4 cm long, centred on its
+segment, with the rest of the span made up of leads — a little under three
+grid units at the default 0.5 cm pitch. Rounded up to four, because a wire
+arriving where the lead meets the body reads as badly as one through it.
+"""
+
+BODY_WIDTH: Final = 1
+"""How far a bipole's body reaches either side of its own segment."""
+
+
+def _body_box(a: Point, b: Point) -> Box:
+    """Return the region a path component's *symbol* occupies.
+
+    The IR gives a component two endpoints, and every obstacle check until now
+    treated it as the line between them.  That is where the wire is, but not
+    where the *drawing* is: circuitikz puts a resistor's rectangle, a source's
+    circle or a capacitor's plates around the middle of that line, and a wire
+    crossing at right angles goes straight through the symbol while breaking
+    no rule about connectivity.  This is that missing area.
+
+    Only the middle is covered.  Crossing a lead is an ordinary wire crossing
+    and stays allowed, and a wire may still *arrive* at either terminal, which
+    is what a terminal is for.
+    """
+    vertical = a[0] == b[0]
+    axis = 1 if vertical else 0
+    low, high = min(a[axis], b[axis]), max(a[axis], b[axis])
+    # Never so long that a terminal ends up inside its own body.
+    reach = min(BODY_REACH, max(1, (high - low) // 2 - 1))
+    middle = (low + high) // 2
+    near, far = middle - reach, middle + reach
+    across = a[0] if vertical else a[1]
+    if vertical:
+        return (across - BODY_WIDTH, near, across + BODY_WIDTH, far)
+    return (near, across - BODY_WIDTH, far, across + BODY_WIDTH)
+
 
 @dataclass
 class _Obstacles:
@@ -76,7 +115,7 @@ class _Obstacles:
         if any(_runs_along(segment, (start, end)) for segment in self.paths):
             return True
         return any(
-            other != net and _overlaps(segment, (start, end))
+            other != net and _touches(segment, (start, end))
             for segment, other in self.drawn
         )
 
@@ -90,16 +129,17 @@ def route(placement: Placement) -> list[Element]:
         points = _unique(placement.net_pins.get(net, []))
         if not points:
             continue
-        # A supply glyph is drawn just past the end of its rail, so extend the
-        # rail to reach it before the wires are built.
-        stub = _supply_marker(placement, net, points)
-        wired = [*points, stub] if stub is not None else points
-        net_wires = _wire_net(placement, obstacles, net, wired)
-        for wire in net_wires:
+        # A supply glyph is drawn just past the end of its rail, so the rail
+        # is extended to reach it as it is built; if the spine has to move, the
+        # glyph moves with it.
+        wiring = _wire_net(
+            placement, obstacles, net, points, _supply_marker(placement, net, points)
+        )
+        for wire in wiring.wires:
             for segment in wire.segments():
                 obstacles.drawn.append((segment, net))
-        wires.extend(net_wires)
-        symbols.extend(_net_symbols(placement, net, points, stub))
+        wires.extend(wiring.wires)
+        symbols.extend(_net_symbols(placement, net, points, wiring.marker))
     elements: list[Element] = [*placement.components, *wires, *symbols]
     elements.extend(_junctions(elements))
     return elements
@@ -116,6 +156,7 @@ def _collect_obstacles(placement: Placement) -> _Obstacles:
             for point, net in zip((element.a, element.b), nets, strict=False):
                 obstacles.pins.setdefault(point, set()).add(net)
             obstacles.paths.append((element.a, element.b))
+            obstacles.bodies.append(_body_box(element.a, element.b))
             continue
         for pin, point in element.pins.items():
             owner = component.pins.get(pin) if component is not None else None
@@ -165,25 +206,109 @@ def _unique(points: list[Point]) -> list[Point]:
     return result
 
 
+@dataclass
+class _Wiring:
+    """One net's wires, and whether every one of them was allowed."""
+
+    wires: list[Wire]
+    marker: Point | None
+    clear: bool
+
+
 def _wire_net(
-    placement: Placement, obstacles: _Obstacles, net: str, points: list[Point]
-) -> list[Wire]:
+    placement: Placement,
+    obstacles: _Obstacles,
+    net: str,
+    points: list[Point],
+    marker: Point | None,
+) -> _Wiring:
     """Return the spine and stubs joining every terminal of *net*."""
     if len(points) < 2:
         # A net with a single terminal has nothing to join it to; a stub to an
         # empty spine would be a dangling wire end (invariant 9).
-        return []
+        return _Wiring([], marker, True)
     horizontal = net in placement.rail_y
     spine_at = placement.rail_y[net] if horizontal else placement.columns.get(net)
     if spine_at is None:
         # A net with no column and no rail (a stray net referenced by terminals
         # the netlist never declared): chain them so nothing dangles.
-        return _chain(net, points)
+        return _Wiring(_chain(net, points), marker, True)
 
+    # The spine is a wire like any other and is checked like one.  It used to
+    # be emitted straight from the terminal extents, which is how a net's own
+    # column came to be drawn through the body of a component standing on it —
+    # and, worse, through a *foreign* terminal that happened to sit on the same
+    # line, which is a short no invariant catches because both wires are legal
+    # on their own.  A net whose spine will not fit slides to the nearest
+    # parallel line that is clear and takes its stubs with it.
+    fallback: _Wiring | None = None
+    for candidate in _spine_candidates(spine_at):
+        attempt = _wire_at(obstacles, net, points, marker, candidate, horizontal)
+        if attempt.clear:
+            if candidate != spine_at:
+                _move_spine(placement, net, candidate, horizontal)
+            return attempt
+        if fallback is None:
+            fallback = attempt
+    # Nothing was clear. Draw it where it belongs rather than somewhere
+    # arbitrary: a wrong wire in the expected place is easier to see.
+    assert fallback is not None
+    return fallback
+
+
+def _wire_at(
+    obstacles: _Obstacles,
+    net: str,
+    points: list[Point],
+    marker: Point | None,
+    spine_at: int,
+    horizontal: bool,
+) -> _Wiring:
+    """Wire *net* with its spine on *spine_at*, reporting whether it fits.
+
+    A supply glyph is what makes a rail reach past its last terminal, so when
+    the rail cannot reach that far the glyph steps further out before the rail
+    itself is moved: the arrow is decoration and the terminals are not.
+    """
+    first: _Wiring | None = None
+    for step in _marker_steps(marker):
+        moved = None if marker is None else _pushed(marker, step, horizontal)
+        attempt = _spine_and_stubs(obstacles, net, points, moved, spine_at, horizontal)
+        if attempt.clear:
+            return attempt
+        first = first or attempt
+    assert first is not None
+    return first
+
+
+def _marker_steps(marker: Point | None) -> list[int]:
+    """Return how far past its usual place a supply glyph may be pushed."""
+    return [0] if marker is None else [0, SUPPLY_STUB, 2 * SUPPLY_STUB]
+
+
+def _pushed(marker: Point, step: int, horizontal: bool) -> Point:
+    """Return *marker* moved *step* further along the spine, away from the net."""
+    return (
+        (marker[0] + step, marker[1]) if horizontal else (marker[0], marker[1] + step)
+    )
+
+
+def _spine_and_stubs(
+    obstacles: _Obstacles,
+    net: str,
+    points: list[Point],
+    marker: Point | None,
+    spine_at: int,
+    horizontal: bool,
+) -> _Wiring:
+    """Wire *net* with its spine on *spine_at* and its glyph, if any, at *marker*."""
+    moved = None if marker is None else _onto_spine(marker, spine_at, horizontal)
     stubs: list[Wire] = []
     connections: list[Point] = []
-    for point in points:
+    clear = True
+    for point in [*points, *([moved] if moved is not None else [])]:
         polyline = _route_to_spine(obstacles, net, point, spine_at, horizontal)
+        clear = clear and _clear(obstacles, net, polyline)
         connections.append(polyline[-1])
         if len(polyline) > 1:
             stubs.append(Wire(net=net, points=polyline))
@@ -196,9 +321,35 @@ def _wire_net(
             if horizontal
             else [(spine_at, along[0]), (spine_at, along[-1])]
         )
+        clear = clear and not obstacles.blocked(net, ends[0], ends[1])
         wires.append(Wire(net=net, points=ends))
     wires.extend(stubs)
-    return wires
+    return _Wiring(wires, moved, clear)
+
+
+def _spine_candidates(spine_at: int) -> list[int]:
+    """Return spine positions to try: where it belongs, then either side.
+
+    Steps are even so that a signal net's column stays even, which is what
+    keeps a column from ever running through a node terminal (see NODE_INSET
+    in ``layout/place.py``).
+    """
+    return [spine_at, *(spine_at + step for step in _detours())]
+
+
+def _onto_spine(point: Point, spine_at: int, horizontal: bool) -> Point:
+    """Return *point* moved onto the spine; it is a marker, not a terminal."""
+    return (point[0], spine_at) if horizontal else (spine_at, point[1])
+
+
+def _move_spine(
+    placement: Placement, net: str, spine_at: int, horizontal: bool
+) -> None:
+    """Record that *net*'s spine moved, so the rest of the sheet agrees."""
+    if horizontal:
+        placement.rail_y[net] = spine_at
+    else:
+        placement.columns[net] = spine_at
 
 
 def _route_to_spine(
@@ -328,6 +479,23 @@ def _runs_along(component: Segment, wire: Segment) -> bool:
     if _overlaps(component, wire):
         return True
     return any(_strictly_inside(end, *component) for end in wire)
+
+
+def _touches(drawn: Segment, wire: Segment) -> bool:
+    """Return ``True`` when two nets' wires would share any point but a crossing.
+
+    Wires of different nets may *cross* — that is an ordinary crossover, drawn
+    without a dot and counted by the metrics. What they may not do is meet:
+    a wire ending on another net's wire is a T-junction, which is a connection
+    the netlist does not have, and running along one is worse. Neither is
+    caught by looking at terminals, because the offending point belongs to no
+    component at all.
+    """
+    if _overlaps(drawn, wire):
+        return True
+    return any(_on_segment(end, *drawn) for end in wire) or any(
+        _on_segment(end, *wire) for end in drawn
+    )
 
 
 def _overlaps(first: Segment, second: Segment) -> bool:

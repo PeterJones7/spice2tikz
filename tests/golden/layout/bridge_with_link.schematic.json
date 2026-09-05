@@ -1,0 +1,200 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Bridge between two supplies, with the midpoints linked",
+    "source_netlist": "bridge_with_link.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R5",
+          "kind": "resistor",
+          "a": [28, 6],
+          "b": [42, 6],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [14, 10],
+          "b": [14, 0],
+          "value_label": {
+            "text": "\\SI{10}{\\volt}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V2",
+          "kind": "vsource",
+          "a": [0, 16],
+          "b": [0, 0],
+          "value_label": {
+            "text": "\\SI{5}{\\volt}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [28, 10],
+          "b": [28, 6],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [34, 12],
+          "b": [34, 16],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R3",
+          "kind": "resistor",
+          "a": [42, 10],
+          "b": [42, 6],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R4",
+          "kind": "resistor",
+          "a": [48, 12],
+          "b": [48, 16],
+          "value_label": {
+            "text": "\\SI{1}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "n2",
+          "points": [[30, 4], [30, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "n2",
+          "points": [[28, 6], [28, 4], [30, 4]]
+        },
+        {
+          "type": "wire",
+          "net": "n2",
+          "points": [[34, 12], [30, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "n4",
+          "points": [[44, 6], [44, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "n4",
+          "points": [[42, 6], [44, 6]]
+        },
+        {
+          "type": "wire",
+          "net": "n4",
+          "points": [[48, 12], [44, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [14, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "n1",
+          "points": [[14, 10], [46, 10]]
+        },
+        {
+          "type": "wire",
+          "net": "n3",
+          "points": [[0, 16], [50, 16]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "n4",
+          "variant": "tap",
+          "at": [48, 12],
+          "rot": 0,
+          "text": "n4"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [7, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "n1",
+          "variant": "vcc",
+          "at": [46, 10],
+          "rot": 0,
+          "text": "n1"
+        },
+        {
+          "type": "net_symbol",
+          "net": "n3",
+          "variant": "vcc",
+          "at": [50, 16],
+          "rot": 0,
+          "text": "n3"
+        },
+        {
+          "type": "junction",
+          "at": [7, 0]
+        },
+        {
+          "type": "junction",
+          "at": [28, 6]
+        },
+        {
+          "type": "junction",
+          "at": [28, 10]
+        },
+        {
+          "type": "junction",
+          "at": [34, 16]
+        },
+        {
+          "type": "junction",
+          "at": [42, 6]
+        },
+        {
+          "type": "junction",
+          "at": [42, 10]
+        },
+        {
+          "type": "junction",
+          "at": [48, 16]
+        }
+      ]
+    }
+  ]
+}

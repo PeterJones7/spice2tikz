@@ -98,7 +98,7 @@
         {
           "type": "wire",
           "net": "0",
-          "points": [[3, 11], [3, 0]]
+          "points": [[3, 11], [1, 11], [1, 0]]
         },
         {
           "type": "net_symbol",
@@ -125,7 +125,7 @@
         },
         {
           "type": "junction",
-          "at": [3, 0]
+          "at": [1, 0]
         },
         {
           "type": "junction",
