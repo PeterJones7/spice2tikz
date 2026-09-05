@@ -426,7 +426,9 @@ coordinate. In a hand-edited file this is nearly always a node component whose
 anything.
 
 **The layout is ugly.** Read `docs/LAYOUT.md` §5 for what the engine is known
-to be bad at, then use the dump-and-edit workflow. If a whole *class* of
+to be bad at, then use the dump-and-edit workflow. If the deck was written by
+an AI tool, `docs/AI_PROMPT.md` is a prompt that avoids the shapes this engine
+handles worst. If a whole *class* of
 circuit comes out wrong, that is a bug worth reporting with the netlist
 attached — see `docs/CONTRIBUTING.md`.
 

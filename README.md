@@ -93,7 +93,9 @@ spice2tikz amplifier.sp -o amp.pdf        # or .png, or .svg, or .tex
 
 The input format comes from the extension — `.sp`, `.cir` and `.net` are SPICE,
 `.asc` is LTspice, `.json` is either intermediate format — or force it with
-`--from`. The **output** format comes from the extension too: `.tex` is the
+`--from`. Generating the netlist with an AI tool? Give it
+[`docs/AI_PROMPT.md`](docs/AI_PROMPT.md) — how a deck is written changes how it
+is drawn. The **output** format comes from the extension too: `.tex` is the
 CircuiTikZ source, and `.pdf`, `.png` and `.svg` are rendered from exactly that
 source by a LaTeX run, so the picture you check is the picture your document
 gets. `--dpi` sets the PNG resolution; `--standalone` wraps the `.tex` in a
@@ -349,6 +351,7 @@ python tools/render_goldens.py
 | [`docs/USAGE.md`](docs/USAGE.md) | every workflow and option, with a worked tweak |
 | [`docs/EMITTER.md`](docs/EMITTER.md) | emission rules, style options, how to add a symbol |
 | [`docs/LAYOUT.md`](docs/LAYOUT.md) | how placement works, measured against human layouts, and what it is bad at |
+| [`docs/AI_PROMPT.md`](docs/AI_PROMPT.md) | a prompt for AI tools writing SPICE for this tool, and why each rule is there |
 | [`docs/SPEC_IR.md`](docs/SPEC_IR.md) | the two intermediate representations |
 | [`docs/DESIGN.md`](docs/DESIGN.md) | motivation, architecture, the settled design decisions |
 | [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | dev setup, the golden workflow, how to extend it |

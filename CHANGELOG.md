@@ -11,6 +11,12 @@ minor releases.
 
 ### Added
 
+- `docs/AI_PROMPT.md`: a prompt for AI tools writing SPICE for this tool, with
+  the reasoning behind each rule. A netlist says nothing about where things go,
+  so how a deck is written changes how it is drawn, and the rules that matter
+  are not obvious from the outside — that ground is the one class decided by
+  name, that a supply rail is recognised by its *shape* rather than by being
+  called `VDD`, and that an op amp must ask to be one.
 - An independent source is now drawn from what it *does*, not just from what
   it is: a sinusoid gets the sine symbol (`sV`, `sI`) and a pulse train the
   square-wave one (`sqV`), so a reader can see a stimulus without reading its
