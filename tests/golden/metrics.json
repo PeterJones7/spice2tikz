@@ -47,6 +47,14 @@
     "wire_length": 333,
     "wires": 20
   },
+  "label_control": {
+    "alignment": 0.895,
+    "bbox_area": 880,
+    "components": 8,
+    "crossings": 0,
+    "wire_length": 124,
+    "wires": 9
+  },
   "messy_realworld": {
     "alignment": 0.6,
     "bbox_area": 120,
@@ -54,6 +62,14 @@
     "crossings": 0,
     "wire_length": 35,
     "wires": 4
+  },
+  "opamp_inverting": {
+    "alignment": 0.556,
+    "bbox_area": 910,
+    "components": 7,
+    "crossings": 1,
+    "wire_length": 150,
+    "wires": 10
   },
   "rc_lowpass": {
     "alignment": 1.0,

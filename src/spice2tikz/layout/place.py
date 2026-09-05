@@ -32,20 +32,24 @@ Placement produces components and the pin positions each net must reach;
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Final
 
-from ..emit.circuitikz import format_quantity
+from .._serde import warn
+from ..emit.circuitikz import escape_latex, format_quantity
 from ..netlist_ir import Component, Kind
 from ..quantity import Quantity
-from ..schematic_ir import LabelSpec, NodeComponent, PathComponent
+from ..schematic_ir import LabelSide, LabelSpec, NodeComponent, PathComponent
 from ..symbols import (
     BUILTIN_SYMBOLS,
+    OPAMP_BASE,
+    OPAMP_PINS,
     SYMBOL_FOR_KIND,
     PinDef,
     Point,
     Rotation,
     SymbolDef,
+    opamp_symbol,
     resolve_pins,
 )
 from .graph import CircuitGraph, column_order
@@ -92,11 +96,15 @@ even, so no column can pass through a foreign terminal; and three units clears
 the two-unit half-width of the body, so no column passes through a body either.
 """
 
-ANCHOR_PREFERENCE: Final[tuple[str, ...]] = ("d", "c", "s", "e", "g", "b")
+ANCHOR_PREFERENCE: Final[tuple[str, ...]] = ("d", "c", "out", "s", "e", "g", "b")
 """Which pin fixes a node's column, most preferred first.
 
 The output terminal wins: it is the net the rest of the circuit continues from,
 so putting it beside its own column keeps the signal flowing rightwards.
+
+These are *symbol* pin names, so this is consulted only for symbols that draw a
+real shape.  The pins of a generated box are the subcircuit's own port names,
+and a port that happens to be called ``b`` is not a transistor base.
 """
 
 CHANNEL_PAIRS: Final[tuple[tuple[str, str], ...]] = (("d", "s"), ("c", "e"))
@@ -258,7 +266,7 @@ def place(
 
     for ref in graph.components:
         if not graph.is_path(ref):
-            _place_node(graph, placement, ref, reserved, rows, warnings)
+            _place_node(graph, placement, ref, reserved, rows, siunitx, warnings)
 
     planned = {vertical.ref: vertical for vertical in verticals}
     # Anything touching a supply net has to wait for the supply rail's height.
@@ -271,7 +279,14 @@ def place(
     for ref in graph.components:
         if graph.is_path(ref) and ref not in deferred:
             _place_path(
-                graph, placement, ref, planned.get(ref), reserved, rows, siunitx
+                graph,
+                placement,
+                ref,
+                planned.get(ref),
+                reserved,
+                rows,
+                siunitx,
+                warnings,
             )
 
     # The supply rails sit above everything already drawn, so they can only be
@@ -282,7 +297,9 @@ def place(
     for index, net in enumerate(graph.supply_nets):
         placement.rail_y[net] = top + RAIL_GAP + ROW_PITCH * index
     for ref in deferred:
-        _place_path(graph, placement, ref, planned.get(ref), reserved, rows, siunitx)
+        _place_path(
+            graph, placement, ref, planned.get(ref), reserved, rows, siunitx, warnings
+        )
     return placement
 
 
@@ -367,10 +384,11 @@ def _place_node(
     ref: str,
     reserved: _ReservedColumns,
     rows: _RowAllocator,
+    siunitx: bool,
     warnings: list[str] | None,
 ) -> None:
     """Place one multi-terminal component as a node with resolved pins."""
-    component = graph.components[ref]
+    component = _for_requested_symbol(graph.components[ref], warnings)
     name, symbol = _symbol_for(component, placement)
     anchor = _anchor(graph, component, symbol)
     rot, mirror = _orientation(graph, component, symbol)
@@ -380,6 +398,13 @@ def _place_node(
     else:
         x = reserved.right(max(placement.columns.values(), default=0)) - NODE_INSET
 
+    # A node has never shown a value, so one appears only when asked for.
+    label, value_label = _labelling(component, siunitx, warnings, default_value=None)
+    if symbol.base == OPAMP_BASE:
+        # The default side is opposite the pins' centre of mass, which for a
+        # triangle whose inputs are all on the left means "right" — inside the
+        # body. Above it is, with the value below.
+        label = _with_side(label, "above")
     row = _node_row(graph, placement, component, symbol, x, rows)
     at = (x, row_y(row))
     at = _free_node_position(placement, symbol, at)
@@ -394,6 +419,8 @@ def _place_node(
             rot=rot,
             mirror=mirror,
             pins=pins,
+            label=label,
+            value_label=value_label,
         )
     )
     _reserve_node_rows(rows, at, symbol)
@@ -517,7 +544,21 @@ def _bulk_is_implicit(component: Component, pin: str) -> bool:
 
 def _anchor(graph: CircuitGraph, component: Component, symbol: SymbolDef) -> str | None:
     """Return the net whose column this node is placed against."""
-    preferred: list[str] = [pin for pin in ANCHOR_PREFERENCE if pin in symbol.pins]
+    # A pin is preferred by the anchor it is drawn from, which is the tool's
+    # own vocabulary; a pin named after a port falls back to that name, and a
+    # generated box has no anchors at all, so its ports are never matched
+    # against this list — a port called `b` is not a transistor base.
+    anchors = (
+        {pin: (definition.anchor or pin) for pin, definition in symbol.pins.items()}
+        if symbol.base is not None
+        else {}
+    )
+    preferred: list[str] = [
+        pin
+        for name in ANCHOR_PREFERENCE
+        for pin, anchor in anchors.items()
+        if anchor == name
+    ]
     preferred.extend(pin for pin in symbol.pins if pin not in preferred)
     for pin in preferred:
         net = component.pins.get(pin)
@@ -566,6 +607,61 @@ def _reserve_node_rows(rows: _RowAllocator, at: Point, symbol: SymbolDef) -> Non
         row += 1
 
 
+def _for_requested_symbol(
+    component: Component, warnings: list[str] | None
+) -> Component:
+    """Return *component* with any symbol request it cannot honour removed.
+
+    ``.subckt LM741 PLUS MINUS OUT VCC VEE ; symbol=opamp`` is the only way a
+    subcircuit becomes anything but a labelled box, and the ports map onto the
+    symbol by position alone — port 1 to ``+``, port 2 to ``-``, then ``out``,
+    ``up`` and ``down``. Nothing reads the port names: ``PLUS``, ``IN+`` and
+    ``VP`` all mean the same thing, and a list of the spellings people use
+    would never be finished, nor be right about ``LM317``.
+
+    The names are *kept*, though: the symbol records which anchor each pin is
+    drawn from, so the sheet still says ``PLUS`` where the netlist does and
+    the drawing can be read back against the circuit.
+    """
+    requested = component.meta.get("symbol")
+    if requested is None:
+        return component
+    if requested != "opamp":
+        warn(
+            warnings,
+            f"{component.id}: symbol={requested!r} is not a symbol this version "
+            "draws; falling back to a labelled box",
+        )
+        return _without_symbol(component)
+    ports = list(component.pins)
+    if not 3 <= len(ports) <= len(OPAMP_PINS):
+        warn(
+            warnings,
+            f"{component.id}: symbol=opamp expects 3 to {len(OPAMP_PINS)} ports "
+            f"(+, -, out, up, down) but this has {len(ports)}; falling back to "
+            "a labelled box",
+        )
+        return _without_symbol(component)
+    return component
+
+
+def _with_side(label: LabelSpec | None, side: LabelSide) -> LabelSpec | None:
+    """Ask for *side*, unless the label is suppressed or already placed."""
+    if label is None:
+        return LabelSpec(side=side)
+    if label.text == SUPPRESSED or label.side is not None:
+        return label
+    return replace(label, side=side)
+
+
+def _without_symbol(component: Component) -> Component:
+    """Return *component* with its unusable ``symbol`` request dropped."""
+    return replace(
+        component,
+        meta={key: value for key, value in component.meta.items() if key != "symbol"},
+    )
+
+
 def _symbol_for(component: Component, placement: Placement) -> tuple[str, SymbolDef]:
     """Return the symbol name and geometry to draw *component* with.
 
@@ -573,6 +669,17 @@ def _symbol_for(component: Component, placement: Placement) -> tuple[str, Symbol
     generated box written into the document's own ``symbols`` block, so the
     file renders without tool-internal lookups (SPEC_IR §2).
     """
+    if component.meta.get("symbol") == "opamp":
+        # The geometry is the built-in's, but the pin names are the
+        # subcircuit's own ports, so each instance kind declares its own
+        # symbol in the document — exactly as a generated box does.
+        ports = list(component.pins)
+        if tuple(ports) == OPAMP_PINS:
+            return "opamp", BUILTIN_SYMBOLS["opamp"]
+        name = f"opamp:{component.subckt.lower()}" if component.subckt else "opamp:x"
+        if name not in placement.symbols:
+            placement.symbols[name] = opamp_symbol(ports)
+        return name, placement.symbols[name]
     builtin = SYMBOL_FOR_KIND.get(component.kind)
     if builtin is not None and builtin in BUILTIN_SYMBOLS:
         symbol = BUILTIN_SYMBOLS[builtin]
@@ -634,6 +741,7 @@ def _place_path(
     reserved: _ReservedColumns,
     rows: _RowAllocator,
     siunitx: bool,
+    warnings: list[str] | None,
 ) -> None:
     """Place one two-terminal component as a segment between two grid points."""
     component = graph.components[ref]
@@ -668,13 +776,18 @@ def _place_path(
         y = row_y(row)
         a, b = (left, y), (right, y)
 
+    # A path component has always shown its value, so that is the default.
+    label, value_label = _labelling(
+        component, siunitx, warnings, default_value=_value_label(component, siunitx)
+    )
     placement.components.append(
         PathComponent(
             ref=component.id,
             kind=component.kind,
             a=a,
             b=b,
-            value_label=_value_label(component, siunitx),
+            label=label,
+            value_label=value_label,
         )
     )
     placement.add_pin(first, a)
@@ -729,6 +842,86 @@ def source_value(component: Component) -> Quantity | None:
     if dc is None or dc.value is None:
         return None
     return dc
+
+
+LABEL_PARTS: Final[tuple[str, ...]] = ("ref", "value", "none")
+"""What ``; labels=`` accepts: ``ref``, ``value``, both, or ``none``."""
+
+SUPPRESSED: Final = "-"
+"""``LabelSpec.text`` that means "draw nothing here" (SPEC_IR §2)."""
+
+
+def _requested_labels(
+    component: Component, warnings: list[str] | None
+) -> tuple[bool, bool] | None:
+    """Return ``(show_ref, show_value)`` from ``; labels=``, or ``None``.
+
+    ``None`` means the card said nothing, which is not the same as saying
+    ``none``: the defaults then stand, so a deck that carries no metadata
+    draws exactly as it did before this existed.
+
+    A misspelling is worth a warning — it is a request that will silently not
+    happen otherwise — but never an error, because a deck must still convert.
+    """
+    raw = component.meta.get("labels")
+    if raw is None:
+        return None
+    # Empty parts are kept so that they fall into `unknown` below: metadata is
+    # whitespace-delimited, so `labels=ref, value` reaches here as `ref,` with
+    # the `value` dropped as a separate token, and saying so beats guessing.
+    wanted = [part.strip().lower() for part in raw.split(",")]
+    unknown = [part for part in wanted if part not in LABEL_PARTS]
+    if unknown or not wanted:
+        warn(
+            warnings,
+            f"{component.id}: labels={raw!r} is not understood "
+            f"(expected {', '.join(LABEL_PARTS)}); the defaults are used",
+        )
+        return None
+    if "none" in wanted:
+        if len(wanted) > 1:
+            warn(
+                warnings,
+                f"{component.id}: labels={raw!r} asks for 'none' as well as "
+                f"{', '.join(p for p in wanted if p != 'none')}; nothing is drawn",
+            )
+        return False, False
+    return "ref" in wanted, "value" in wanted
+
+
+def _labelling(
+    component: Component,
+    siunitx: bool,
+    warnings: list[str] | None,
+    *,
+    default_value: LabelSpec | None,
+) -> tuple[LabelSpec | None, LabelSpec | None]:
+    """Return the ``(label, value_label)`` a component should carry.
+
+    *default_value* is what it would show with no metadata at all — a path
+    component's value, and nothing for a node, which never carried one.
+    """
+    request = _requested_labels(component, warnings)
+    if request is None:
+        return None, default_value
+    show_ref, show_value = request
+    # A label with no text means "derive it from the ref", which is how a ref
+    # is drawn; the sentinel is the only way to say "draw nothing".
+    label = None if show_ref else LabelSpec(text=SUPPRESSED)
+    return label, _shown_value(component, siunitx) if show_value else None
+
+
+def _shown_value(component: Component, siunitx: bool) -> LabelSpec | None:
+    """Return what ``labels=value`` means for *component*.
+
+    A resistor has a value; a transistor has a model name and a subcircuit has
+    a definition name, which is the thing a reader would call its value.
+    """
+    explicit = _value_label(component, siunitx)
+    if explicit is not None:
+        return explicit
+    name = component.model or component.subckt
+    return None if name is None else LabelSpec(text=escape_latex(name))
 
 
 def _value_label(component: Component, siunitx: bool) -> LabelSpec | None:

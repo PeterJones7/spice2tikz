@@ -1,0 +1,39 @@
+\documentclass[border=2pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{siunitx}
+\begin{document}
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \node[nmos, label=right:{nfet}] (s2t0) at (37,6) {};
+  \draw (s2t0.D) |- (37,8);
+  \draw (s2t0.G) -| (35,6);
+  \draw (s2t0.S) |- (37,4);
+  \draw (16,6) to[R, a=\SI{22}{\kilo\ohm}] (24,6);
+  \draw (24,6) to[R=$R_3$, a=\SI{33}{\kilo\ohm}] (32,6);
+  \draw (32,12) to[R] (40,12);
+  \draw (40,8) to[R=$R_5$, a=\SI{56}{\kilo\ohm}] (40,0);
+  \draw (8,16) to[american voltage source, l=$V_1$] (8,0);
+  \draw (16,16) to[R=$R_1$] (16,12);
+  \draw (0,22) to[american voltage source] (0,0);
+  \draw (16,6) -- (16,12);
+  \draw (32,6) -- (32,12);
+  \draw (40,8) -- (40,12);
+  \draw (37,8) -- (40,8);
+  \draw (0,0) -- (40,0);
+  \draw (37,4) -- (37,0);
+  \draw (8,16) -- (18,16);
+  \draw (0,22) -- (35,22);
+  \draw (35,6) -- (35,22);
+  \node[above] at (40,12) {d};
+  \draw (20,0) node[ground]{};
+  \draw (18,16) node[vcc]{} node[right]{in};
+  \draw (2,22) node[vcc]{} node[right]{g};
+  \draw (2,22) node[circ]{};
+  \draw (8,0) node[circ]{};
+  \draw (16,16) node[circ]{};
+  \draw (20,0) node[circ]{};
+  \draw (37,0) node[circ]{};
+  \draw (40,8) node[circ]{};
+\end{circuitikz}
+\end{document}

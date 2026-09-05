@@ -53,7 +53,7 @@ from __future__ import annotations
 import codecs
 import re
 from collections.abc import Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Final
 
@@ -302,12 +302,17 @@ class SpiceLine:
     of the card's first character in the source file.  The deck's title line
     is returned as the first :class:`SpiceLine` with ``is_title`` set, since
     it is text rather than a card.
+
+    ``metadata`` holds any ``key=value`` pairs the card's inline comment
+    carried.  A simulator ignores them; they exist to say things about the
+    *drawing* that SPICE has no way to express.
     """
 
     text: str
     number: int
     column: int = 1
     is_title: bool = False
+    metadata: dict[str, str] = field(default_factory=dict)
 
     @property
     def head(self) -> str:
@@ -369,19 +374,43 @@ def _location(source: str | None, number: int, column: int) -> str:
     return f"{source or INPUT_LABEL}:{number}:{column}"
 
 
-def _strip_inline_comment(text: str) -> str:
-    """Remove a ``;`` or ``$`` inline comment from *text*.
+def _split_inline_comment(text: str) -> tuple[str, str]:
+    """Split *text* into its card and its ``;`` or ``$`` inline comment.
 
     ``;`` starts a comment anywhere.  ``$`` only does so at the start of the
     card or after whitespace, so that a parameter reference such as ``$vdd``
     embedded in a token survives; ngspice applies the same restriction.
+
+    The comment is returned rather than dropped because it may carry drawing
+    metadata (:func:`_metadata_from_comment`).  Nothing about the *card* text
+    changes: what the simulator sees is exactly what it saw before.
     """
     for index, char in enumerate(text):
         if char == ";":
-            return text[:index]
+            return text[:index], text[index + 1 :]
         if char == "$" and (index == 0 or text[index - 1].isspace()):
-            return text[:index]
-    return text
+            return text[:index], text[index + 1 :]
+    return text, ""
+
+
+def _metadata_from_comment(comment: str) -> dict[str, str]:
+    """Read ``key=value`` pairs out of an inline *comment*.
+
+    ``R1 in out 10k ; labels=ref,value`` yields ``{"labels": "ref,value"}``.
+    Keys are lowercased; values are kept as written, since a value may be a
+    symbol name or a list and is interpreted by whoever asked for the key.
+
+    Prose is not an error — an ordinary comment simply contributes nothing,
+    and a key nothing consumes is carried along in case something later does.
+    That is the point of a general mechanism: a reader that does not know a
+    key must not reject the deck over it.
+    """
+    metadata: dict[str, str] = {}
+    for token in comment.split():
+        key, separator, value = token.partition("=")
+        if separator and key:
+            metadata[key.lower()] = value
+    return metadata
 
 
 def _title_of(line: str) -> str:
@@ -437,16 +466,22 @@ def _assemble(
                 )
             )
             continue
-        content = _strip_inline_comment(raw.strip())
+        content, comment = _split_inline_comment(raw.strip())
         if content.startswith(COMMENT):
             continue
         content = content.strip()
+        metadata = _metadata_from_comment(comment)
         if not content:
             continue
         if content.startswith(CONTINUATION):
-            _continue_line(lines, content, source, number, _column_of(raw))
+            _continue_line(lines, content, metadata, source, number, _column_of(raw))
             continue
-        card = SpiceLine(text=content, number=number, column=_column_of(raw))
+        card = SpiceLine(
+            text=content,
+            number=number,
+            column=_column_of(raw),
+            metadata=metadata,
+        )
         if card.head == ".end":
             end_at = number
             continue
@@ -469,6 +504,7 @@ def _column_of(raw: str) -> int:
 def _continue_line(
     lines: list[SpiceLine],
     content: str,
+    metadata: dict[str, str],
     source: str | None,
     number: int,
     column: int,
@@ -477,6 +513,9 @@ def _continue_line(
 
     Full-line comments and blank lines between a card and its continuation
     are transparent, because they were dropped before this point.
+
+    A continuation's own metadata joins the card's, later lines winning, so
+    that a long card can be annotated wherever it is convenient.
     """
     if not lines or lines[-1].is_title:
         # Nothing to continue: the deck is malformed in a way that changes
@@ -488,7 +527,9 @@ def _continue_line(
     previous = lines[-1]
     tail = content[1:].strip()
     joined = previous.text if not tail else f"{previous.text} {tail}"
-    lines[-1] = replace(previous, text=joined)
+    lines[-1] = replace(
+        previous, text=joined, metadata={**previous.metadata, **metadata}
+    )
 
 
 # --- tokenizing -------------------------------------------------------------
@@ -574,6 +615,7 @@ class _Parser:
         self.title: str | None = None
         self.models: dict[str, ModelDef] = {}
         self.subckt_ports: dict[str, list[str]] = {}
+        self.subckt_meta: dict[str, dict[str, str]] = {}
         self.stack: list[SubcktDef] = []
         self.pending_controls: list[tuple[Scope, Component, str, SpiceLine]] = []
 
@@ -636,6 +678,9 @@ class _Parser:
                 name, ports, _ = _subckt_header(line)
                 if name is not None:
                     self.subckt_ports[name] = ports
+                    # An instance may appear before its definition, so the
+                    # definition's metadata has to be known in this pass too.
+                    self.subckt_meta[name] = line.metadata
 
     def _model(self, line: SpiceLine) -> None:
         """Record one ``.model`` card."""
@@ -692,7 +737,9 @@ class _Parser:
     def _begin_subckt(self, line: SpiceLine) -> None:
         """Open a ``.subckt`` scope, registering its definition."""
         name, ports, params = _subckt_header(line)
-        definition = SubcktDef(ports=ports, params=_quantities(params))
+        definition = SubcktDef(
+            ports=ports, params=_quantities(params), meta=dict(line.metadata)
+        )
         if name is None:
             self._warn_at(line, "'.subckt' without a name; its body is discarded")
         else:
@@ -959,6 +1006,9 @@ class _Parser:
             pins=self._connect(names, nodes),
             subckt=subckt,
             params=_quantities(keywords),
+            # The definition says what its instances are drawn as; the
+            # instance may say otherwise, so its own metadata wins.
+            meta={**self.subckt_meta.get(subckt, {}), **line.metadata},
             raw=line.text,
         )
         self.scope.components.append(component)
@@ -1049,6 +1099,7 @@ class _Parser:
             model=model,
             control=control,
             params=merged,
+            meta=dict(line.metadata),
             raw=line.text,
         )
         self.scope.components.append(component)

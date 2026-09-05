@@ -214,6 +214,7 @@ class Component:
     subckt: str | None = None
     control: str | None = None
     params: dict[str, Quantity] = field(default_factory=dict)
+    meta: dict[str, str] = field(default_factory=dict)
     raw: str = ""
 
     def __post_init__(self) -> None:
@@ -238,6 +239,8 @@ class Component:
             data["params"] = {
                 key: quantity.to_json() for key, quantity in self.params.items()
             }
+        if self.meta:
+            data["meta"] = dict(self.meta)
         data["raw"] = self.raw
         return data
 
@@ -261,6 +264,7 @@ class Component:
                 "subckt",
                 "control",
                 "params",
+                "meta",
                 "raw",
             ),
             location,
@@ -301,6 +305,9 @@ class Component:
             subckt=_optional_str(mapping, "subckt", location),
             control=_optional_str(mapping, "control", location),
             params=params,
+            meta=_meta_from_json(
+                optional_field(mapping, "meta", location), f"{location}.meta"
+            ),
             raw=require_str(require_field(mapping, "raw", location), f"{location}.raw"),
         )
 
@@ -339,6 +346,19 @@ class SubcktDef(Scope):
 
     ports: list[str] = field(default_factory=list)
     params: dict[str, Quantity] = field(default_factory=dict)
+    meta: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def symbol(self) -> str | None:
+        """Return the symbol this subcircuit asks to be drawn as, if any.
+
+        ``.subckt LM741 PLUS MINUS OUT VCC VEE ; symbol=opamp`` is the only
+        way to get anything but a labelled box: nothing guesses from the name,
+        because ``LM741`` is an op amp and ``LM317`` is a regulator and no
+        list of prefixes stays right.  Derived from :attr:`meta` rather than
+        stored beside it, so there is one place a symbol can come from.
+        """
+        return self.meta.get("symbol")
 
     def to_json(self) -> dict[str, Any]:
         """Serialise ports and params before the scope body."""
@@ -347,6 +367,8 @@ class SubcktDef(Scope):
             data["params"] = {
                 key: quantity.to_json() for key, quantity in self.params.items()
             }
+        if self.meta:
+            data["meta"] = dict(self.meta)
         data.update(Scope.to_json(self))
         return data
 
@@ -360,7 +382,10 @@ class SubcktDef(Scope):
         """Load from JSON."""
         mapping = require_mapping(data, location)
         check_keys(
-            mapping, ("ports", "params", "components", "nets"), location, warnings
+            mapping,
+            ("ports", "params", "meta", "components", "nets"),
+            location,
+            warnings,
         )
         ports_list = require_list(
             require_field(mapping, "ports", location), f"{location}.ports"
@@ -373,7 +398,15 @@ class SubcktDef(Scope):
             optional_field(mapping, "params", location), f"{location}.params", warnings
         )
         components, nets = _scope_body_from_json(mapping, location, warnings)
-        return cls(components=components, nets=nets, ports=ports, params=params)
+        return cls(
+            components=components,
+            nets=nets,
+            ports=ports,
+            params=params,
+            meta=_meta_from_json(
+                optional_field(mapping, "meta", location), f"{location}.meta"
+            ),
+        )
 
 
 @dataclass
@@ -550,6 +583,24 @@ def _params_from_json(
     return {
         key: Quantity.from_json(value, f"{location}.{key}", warnings)
         for key, value in mapping.items()
+    }
+
+
+def _meta_from_json(
+    data: Any,  # noqa: ANN401
+    location: str,
+) -> dict[str, str]:
+    """Load a ``meta`` table: free-form ``key: value`` strings.
+
+    Values are strings and nothing else.  Metadata says things about the
+    *drawing* that SPICE cannot express, and every consumer interprets its own
+    key, so this is deliberately not a place where types are decided.
+    """
+    if data is None:
+        return {}
+    mapping = require_mapping(data, location)
+    return {
+        key: require_str(value, f"{location}.{key}") for key, value in mapping.items()
     }
 
 

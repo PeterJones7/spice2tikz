@@ -49,7 +49,8 @@ NetlistIR {
 }
 
 Scope     { components: Component[]; nets: { [net_id: string]: Net } }
-SubcktDef extends Scope { ports: string[]; params?: ParamMap }
+SubcktDef extends Scope { ports: string[]; params?: ParamMap;
+                          meta?: MetaMap }   // meta.symbol picks a shape
 
 Net { name: string;                      // net_id == name
       class: "signal" | "ground" | "supply";
@@ -64,12 +65,41 @@ Component {
   subckt?: string                        // for kind "subcircuit"
   control?: string                       // for ccvs/cccs: controlling V id
   params?: ParamMap
+  meta?: MetaMap                         // drawing metadata; see below
   raw: string                            // original SPICE card verbatim
 }
 
 Quantity { raw: string; value?: number; unit?: string }  // unit: SI canonical
 ParamMap { [key: string]: Quantity }
+MetaMap  { [key: string]: string }
 ```
+
+### Metadata
+
+`meta` carries what an inline `;` comment said in `key=value` form:
+
+```spice
+R1 in out 10k                          ; labels=ref,value
+.subckt LM741 PLUS MINUS OUT VCC VEE   ; symbol=opamp
+```
+
+SPICE ignores comments, so metadata can never change what the circuit *is* —
+it says things about the drawing that the netlist has no way to express.
+Values are strings; each key is interpreted by whoever consumes it.
+
+**An unknown key is not an error, at any stage.** A document must load, and a
+deck must convert, on a version of the tool that has never heard of the key.
+Two keys are defined today:
+
+| key | on | meaning |
+|---|---|---|
+| `symbol` | `.subckt`, or an `X` instance | draw instances as this symbol; `opamp` is the only value implemented |
+| `labels` | any component | which of `ref` and `value` to draw; `none` for neither |
+
+An `X` instance inherits `symbol` from its definition and may override it: the
+definition says what its instances are by default, the instance has the last
+word. `SubcktDef.symbol` is `meta.symbol`, so there is one place it comes
+from, and nothing is ever inferred from a subcircuit's *name*.
 
 ### Kind taxonomy and fixed pin names (order = SPICE card order)
 
@@ -129,7 +159,7 @@ NodeComponent {                          // → \node[nmos, ...] at ...;
   pins: { [pin: string]: [int, int] };   // resolved absolute positions;
                                          // redundant; validated for
                                          // consistency with symbol geometry
-  label?: LabelSpec; style?: StyleOverride
+  label?: LabelSpec; value_label?: LabelSpec; style?: StyleOverride
 }
 
 Wire     { type: "wire"; net: string; points: [int, int][] }  // ≥2 pts
@@ -171,16 +201,24 @@ SymbolDef {
   base?: string                    // circuitikz node shape if one exists
   size: [int, int]                 // bbox in grid units, centered on origin
   pins: { [pin: string]: { offset: [int, int];   // from origin, unrotated
-                           label?: string } }
+                           label?: string;
+                           anchor?: string } }    // circuitikz anchor, when
+                                                  // the pin name is not it
 }
 ```
 
-Built-in symbols (nmos, pmos, npn, pnp, opamp, …) ship in
+Built-in symbols (nmos, pmos, npn, pnp, njfet, pjfet, opamp) ship in
 `symbols.py` with pin offsets matched to circuitikz node shapes;
 the file-level `symbols` block carries only overrides and generated
-subcircuit box symbols (named `subckt:<defname>`, ports distributed
-left/right) — a schematic file must render identically forever
-without tool-internal lookups for non-built-ins.
+symbols — subcircuit boxes (named `subckt:<defname>`, ports distributed
+left/right) and op amps (named `opamp:<defname>`) — a schematic file must
+render identically forever without tool-internal lookups for non-built-ins.
+
+A built-in's pin names are this tool's own vocabulary (`d`, `g`, `s`), so the
+circuitikz anchor is looked up from the shape. A generated symbol's pin names
+come from the deck (`PLUS`, `VCC`), which no table can map, so each pin states
+its `anchor` instead. The pin names on a sheet are therefore always the ones
+the netlist uses, which is what lets a drawing be checked against its circuit.
 
 ## 3. Derived-label formatting (emitter rules)
 

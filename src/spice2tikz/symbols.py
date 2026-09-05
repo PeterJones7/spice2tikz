@@ -17,6 +17,7 @@ identically forever without depending on tool internals.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any, Final, Literal, cast
 
@@ -43,12 +44,26 @@ class PinDef:
 
     offset: Point
     label: str | None = None
+    anchor: str | None = None
+    """The circuitikz anchor this pin is drawn from, when the pin's own name
+    is not it.
+
+    A transistor's pins are named in the tool's own vocabulary, so ``d`` finds
+    the ``D`` anchor through :data:`BASE_PIN_ANCHORS` and this stays unset.  A
+    subcircuit's pins are named by whoever wrote the deck — ``PLUS``, ``IN+``,
+    ``VP`` — and no table can map those, so the symbol that gives such a pin a
+    position says which anchor it belongs to at the same time.  That keeps the
+    *netlist's* pin names on the sheet, which is what lets the drawing be
+    checked back against the circuit.
+    """
 
     def to_json(self) -> dict[str, Any]:
         """Serialise, omitting an absent label."""
         data: dict[str, Any] = {"offset": list(self.offset)}
         if self.label is not None:
             data["label"] = self.label
+        if self.anchor is not None:
+            data["anchor"] = self.anchor
         return data
 
     @classmethod
@@ -60,7 +75,7 @@ class PinDef:
     ) -> PinDef:
         """Load from JSON."""
         mapping = require_mapping(data, location)
-        check_keys(mapping, ("offset", "label"), location, warnings)
+        check_keys(mapping, ("offset", "label", "anchor"), location, warnings)
         offset = require_point(
             require_field(mapping, "offset", location), f"{location}.offset"
         )
@@ -68,7 +83,13 @@ class PinDef:
         label = (
             None if raw_label is None else require_str(raw_label, f"{location}.label")
         )
-        return cls(offset=offset, label=label)
+        raw_anchor = optional_field(mapping, "anchor", location)
+        anchor = (
+            None
+            if raw_anchor is None
+            else require_str(raw_anchor, f"{location}.anchor")
+        )
+        return cls(offset=offset, label=label, anchor=anchor)
 
 
 @dataclass
@@ -245,6 +266,62 @@ def _jfet(base: str, *, drain_up: bool) -> SymbolDef:
     )
 
 
+OPAMP_BASE: Final = "op amp"
+"""The circuitikz shape name; note the space."""
+
+OPAMP_PINS: Final[tuple[str, ...]] = ("+", "-", "out", "up", "down")
+"""Op-amp pins, in the order a ``.subckt`` is expected to declare its ports.
+
+The mapping is positional and nothing else: port 1 is the non-inverting input,
+port 2 the inverting input, port 3 the output, and ports 4 and 5 the positive
+and negative supplies.  Port *names* are documentation for whoever wrote the
+deck — ``PLUS``/``IN+``/``VP`` all mean the same thing here — so nothing tries
+to read them, which is what keeps this free of synonym lists.
+"""
+
+OPAMP_OFFSETS: Final[dict[str, Point]] = {
+    "+": (-4, -2),
+    "-": (-4, 2),
+    "out": (4, 0),
+    "up": (0, 4),
+    "down": (0, -4),
+}
+"""Where each op-amp pin sits, in grid units, unrotated.
+
+circuitikz draws the non-inverting input *below* the inverting one, which is
+its convention and not a choice made here; the offsets follow the shape, as
+they must, or the leads would cross the body.  Measured from the shape itself:
+at the default 0.5 cm pitch the inputs sit 2.38 units out and 0.98 up or down,
+and the supplies 1.08 above and below the origin.
+
+**No two pins share a row.**  The supplies are pushed out to four rather than
+kept beside the inputs at two, because a router given two terminals on one row
+will run the wire for one of them straight through the other — with ``+`` on
+ground and ``down`` on the negative supply, that is a short, and the validator
+cannot see it because both wires are legal on their own.
+"""
+
+
+def opamp_symbol(ports: Sequence[str] = OPAMP_PINS) -> SymbolDef:
+    """Return op-amp geometry for *ports*, mapped onto the pins by position.
+
+    The pins keep the subcircuit's own port names — ``PLUS`` stays ``PLUS`` —
+    and each records the anchor it is drawn from, so the sheet can still be
+    read back against the netlist. Ports beyond the fifth are not mapped, and
+    a subcircuit that declares three is an ideal op amp with no supply
+    terminals: drawing leads it has not got would be an invention.
+    """
+    return SymbolDef(
+        size=(8, 8),
+        pins={
+            port: PinDef(offset=OPAMP_OFFSETS[anchor], label=anchor, anchor=anchor)
+            # Extra ports are left unmapped; strict= would make that fatal.
+            for port, anchor in zip(ports, OPAMP_PINS)  # noqa: B905
+        },
+        base=OPAMP_BASE,
+    )
+
+
 BUILTIN_SYMBOLS: Final[dict[str, SymbolDef]] = {
     "nmos": _mos("nmos", drain_up=True),
     "pmos": _mos("pmos", drain_up=False),
@@ -252,6 +329,7 @@ BUILTIN_SYMBOLS: Final[dict[str, SymbolDef]] = {
     "pnp": _bjt("pnp", collector_up=False),
     "njfet": _jfet("njfet", drain_up=True),
     "pjfet": _jfet("pjfet", drain_up=False),
+    "opamp": opamp_symbol(),
 }
 """Symbols every schematic may reference without declaring them.
 
@@ -274,7 +352,10 @@ back across the symbol.
 ``size`` is a deliberately conservative box: the real shapes extend only to the
 left of the origin, but SPEC_IR §2 defines ``size`` as centred on it.
 
-Opamps and other shapes are deferred to a later roadmap section.
+``opamp`` is the five-terminal form.  Unlike the transistors it is never
+chosen from a component's *kind* — a subcircuit asks for it by name, with
+``; symbol=opamp`` on its ``.subckt`` card — and an instance with fewer ports
+gets a matching symbol from :func:`opamp_symbol` instead of this one.
 """
 
 BASE_PIN_ANCHORS: Final[dict[str, dict[str, str]]] = {
@@ -284,6 +365,8 @@ BASE_PIN_ANCHORS: Final[dict[str, dict[str, str]]] = {
     "pnp": {"c": "C", "b": "B", "e": "E"},
     "njfet": {"d": "D", "g": "G", "s": "S"},
     "pjfet": {"d": "D", "g": "G", "s": "S"},
+    # The op amp's pins are named after its anchors, so this maps to itself.
+    OPAMP_BASE: {pin: pin for pin in OPAMP_PINS},
 }
 """Pin name → circuitikz node anchor, per built-in ``base`` shape.
 
@@ -291,11 +374,23 @@ Anchor names are the documented ones (CircuiTikZ manual §4.15.9: MOS devices
 expose ``base``/``gate``/``source``/``drain``, abbreviated ``B``/``G``/``S``/
 ``D``, plus a ``bulk`` anchor; bipolars expose ``B``/``C``/``E``).  The emitter
 needs them to draw leads from the rendered terminal to the declared pin.
+
+The op amp exposes ``+``, ``-``, ``out``, ``up`` and ``down``.  Those names
+contain characters no other anchor does, and they are used verbatim inside
+``(node.+)``, which TeX accepts.
 """
 
 
-def pin_anchor(base: str | None, pin: str) -> str | None:
-    """Return the circuitikz anchor for *pin* of shape *base*, if known."""
+def pin_anchor(
+    base: str | None, pin: str, definition: PinDef | None = None
+) -> str | None:
+    """Return the circuitikz anchor for *pin* of shape *base*, if known.
+
+    A pin that names its own anchor wins: that is the only way a symbol whose
+    pin names come from a deck rather than from this module can be drawn.
+    """
+    if definition is not None and definition.anchor is not None:
+        return definition.anchor
     if base is None:
         return None
     return BASE_PIN_ANCHORS.get(base, {}).get(pin)

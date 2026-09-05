@@ -385,6 +385,7 @@ class NodeComponent:
     mirror: bool = False
     pins: dict[str, Point] = field(default_factory=dict)
     label: LabelSpec | None = None
+    value_label: LabelSpec | None = None
     style: StyleOverride | None = None
 
     TYPE: ClassVar[str] = "component"
@@ -408,6 +409,8 @@ class NodeComponent:
         }
         if self.label is not None:
             data["label"] = self.label.to_json()
+        if self.value_label is not None:
+            data["value_label"] = self.value_label.to_json()
         if self.style is not None:
             data["style"] = self.style.to_json()
         return data
@@ -433,6 +436,7 @@ class NodeComponent:
                 "mirror",
                 "pins",
                 "label",
+                "value_label",
                 "style",
             ),
             location,
@@ -460,6 +464,7 @@ class NodeComponent:
             ),
             pins=pins,
             label=_optional_label(data, "label", location, warnings),
+            value_label=_optional_label(data, "value_label", location, warnings),
             style=_optional_style(data, location, warnings),
         )
 

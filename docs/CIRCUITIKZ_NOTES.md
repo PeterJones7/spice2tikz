@@ -364,6 +364,32 @@ anchor=+
 
 to place the op-amp on an incoming wire.
 
+### Measured anchor positions
+
+Probed from the shape itself (`\pgfpointanchor`, unscaled picture), relative
+to `center`, in points:
+
+| anchor | x | y |
+|---|---|---|
+| `+` | -33.86 | **-13.94** |
+| `-` | -33.86 | **+13.94** |
+| `out` | +33.86 | 0 |
+| `up` | -2.37 | +15.34 |
+| `down` | -2.37 | -15.34 |
+| `north east` | +33.86 | +27.88 |
+| `south west` | -33.86 | -27.88 |
+
+Two things matter to the emitter:
+
+* **The non-inverting input is drawn *below* the inverting one.** That is
+  circuitikz's convention, not a choice; a symbol declaring `+` above `-`
+  produces leads that cross the body. `spice2tikz` follows the shape.
+* The body is 67.7 × 55.8 pt — 2.38 × 1.96 cm — so at the default 0.5 cm grid
+  pitch it spans about 4.8 × 3.9 grid units.
+
+`+` and `-` are usable verbatim inside a coordinate: `\draw (A.+) -- (A.-);`
+compiles. The shape responds to `rotate=` and `xscale=-1` like any other node.
+
 ---
 
 # Anchors

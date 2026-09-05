@@ -196,6 +196,7 @@ came out; CI regenerates them and fails on any drift.
 | [`rlc_series.sp`](tests/corpus/spice/rlc_series.sp) | <img src="https://raw.githubusercontent.com/PeterJones7/spice2tikz/main/examples/rlc_series.png" width="250" alt="Series RLC circuit: source, 100 ohm resistor, 10 millihenry inductor and 100 nanofarad capacitor around one loop."> |
 | [`bridge_rectifier.sp`](tests/corpus/spice/bridge_rectifier.sp) | <img src="https://raw.githubusercontent.com/PeterJones7/spice2tikz/main/examples/bridge_rectifier.png" width="250" alt="Full-wave bridge rectifier: four diodes around a source, feeding a 1 kilohm load."> |
 | [`common_source_amp.sp`](tests/corpus/spice/common_source_amp.sp) | <img src="https://raw.githubusercontent.com/PeterJones7/spice2tikz/main/examples/common_source_amp.png" width="250" alt="NMOS common-source amplifier: a 4.7 kilohm drain resistor from the 5 V rail, signal source on the gate, source grounded."> |
+| [`opamp_inverting.sp`](tests/corpus/spice/opamp_inverting.sp) — `; symbol=opamp` | <img src="https://raw.githubusercontent.com/PeterJones7/spice2tikz/main/examples/opamp_inverting.png" width="300" alt="Inverting amplifier: an op-amp triangle with the inverting input fed through a 10 kilohm resistor and a 100 kilohm feedback resistor, the non-inverting input grounded, supplies from plus and minus 15 volt rails."> |
 | [`bjt_amp.sp`](tests/corpus/spice/bjt_amp.sp) — two stages | <img src="https://raw.githubusercontent.com/PeterJones7/spice2tikz/main/examples/bjt_amp.png" width="440" alt="Two-stage BJT amplifier: biasing divider, input coupling capacitor, an NPN stage with a bypassed emitter resistor, and a second stage."> |
 
 ### The input decides the layout
@@ -256,6 +257,7 @@ at all.
 | **LTspice schematics** | `.asc`, including UTF-16 files, with wires, flags, I/O pins, all eight symbol orientations, and per-symbol pin offsets taken from the shipped `.asy` files |
 | **Automatic layout** | signal flow left to right, ground at the bottom, supplies at the top, orthogonal wires, junction dots, devices turned by convention |
 | **Output** | a CircuiTikZ snippet to `\input`, a standalone document that crops to the drawing, or a PDF, PNG or SVG rendered from it |
+| **Drawing metadata** | an inline `; labels=value` or `; symbol=opamp` comment says what SPICE cannot; simulators ignore it, and an unknown key is never an error |
 | **Escape hatch** | both intermediate formats dump to documented, hand-editable JSON and load straight back |
 
 Deliberately **not** included:
@@ -264,8 +266,12 @@ Deliberately **not** included:
 - **No AI or heuristic redrawing of images.** The input must already be
   machine-readable — determinism is the whole point.
 - **No GUI**, and no netlist editing: conversion is one-way.
-- **No hierarchy expansion.** A subcircuit instance is one labelled box; its
-  contents are not drawn on their own sheet.
+- **No hierarchy expansion.** A subcircuit instance is one labelled box — or
+  an op-amp triangle if its `.subckt` asks with `; symbol=opamp` — but its
+  contents are never drawn on their own sheet.
+- **No guessing from names.** A subcircuit called `LM741` is a box until it
+  says it is an op amp: `LM317` is a regulator, and no list of prefixes stays
+  right.
 - **No current or voltage annotations** yet ([roadmap](docs/ROADMAP.md) §7.3).
 - **One dialect.** ngspice, on purpose;
   [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) §5 says how to add another.

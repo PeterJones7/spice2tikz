@@ -81,13 +81,14 @@ order of the output, which keeps generated `.tex` diffs readable.
 ### NodeComponent with a circuitikz shape → `\node[nmos, ...]`
 
 ```latex
-\node[nmos, xscale=-1, rotate=90, label=right:{$M_1$}] (s2t3) at (4,2) {};
+\node[nmos, rotate=90, xscale=-1, label=right:{$M_1$}] (s2t3) at (4,2) {};
 \draw (s2t3.G) -| (2,2);
 ```
 
-- Options are listed `shape, xscale=-1 (if mirrored), rotate=R`: TikZ composes
-  node transforms left to right, which matches the IR's "mirror before rotate"
-  convention.
+- Options are listed `shape, rotate=R (if turned), xscale=-1 (if mirrored)`,
+  which reads backwards and is right: TikZ **post-multiplies** each transform
+  onto the current matrix, so the option written *last* reaches the shape
+  *first*. That is what the IR's "mirror before rotate" convention needs.
 - Node shapes are drawn at their own absolute size and are **not** scaled by
   the environment `scale=`, so a rendered terminal never lands exactly on an
   integer grid point (an unrotated `nmos` drain sits 0.77 cm out). The emitter
@@ -99,15 +100,32 @@ order of the output, which keeps generated `.tex` diffs readable.
   characters TikZ rejects in a node name.
 - The ref label defaults to the side the component's pins leave clear
   (opposite the centre of mass of the pin directions), and rotates with the
-  component. An explicit `LabelSpec.side` always wins.
+  component. An explicit `LabelSpec.side` always wins. An op amp is the one
+  exception the placer makes: its pins are all on the left, so "clear" comes
+  out as *inside the triangle*, and the layout stage asks for `above`.
+- A `value_label`, when there is one, becomes a second `label=` on the
+  opposite side. TikZ allows repeated `label=` on one node. Node components
+  carry no value unless a `; labels=` request asks for one, so this is absent
+  from every sheet that predates the metadata mechanism.
+- The anchor a lead comes from is `PinDef.anchor` when the pin states one, and
+  otherwise the shape's table in `symbols.py`. A built-in's pins are named in
+  this tool's vocabulary (`d`, `g`, `s`) and use the table; a generated
+  symbol's pins are named by the deck (`PLUS`, `VCC`) and state their own
+  anchor, which is what lets an op amp keep the netlist's port names.
 
 ### NodeComponent without a shape → a labelled box
 
 A symbol with no `base` — a generated subcircuit box, or anything circuitikz
 has no shape for — is drawn as a plain rectangle sized from `SymbolDef.size`,
 with a straight stub from each pin that sits off the box edge and a centred
-ref label. An unresolvable symbol falls back to a 2×2 box rather than failing:
+ref label. A `value_label` goes under the box, since the middle is taken. An
+unresolvable symbol falls back to a 2×2 box rather than failing:
 `docs/DESIGN.md` §6 requires a labelled placeholder, never silence.
+
+Pin *names* are never drawn. `PinDef.label` exists for a symbol to record what
+a terminal is called, and the box gets its identity from the ref in its
+centre; printing `PLUS` and `VCC` around an op amp would duplicate markings
+the shape already carries.
 
 ### Wire, Junction, NetSymbol, Port, Label
 
@@ -261,7 +279,10 @@ rotation and mirroring.
    circuitikz anchors — a lead is drawn from the anchor to the declared pin,
    so a wrong direction shows up as a kinked wire.
 3. Add the pin→anchor mapping to `BASE_PIN_ANCHORS`, keyed by the `base` name.
-   A pin with no entry simply gets no lead.
+   A pin with no entry simply gets no lead. If the pin *names* will come from
+   a deck rather than from `symbols.py` — as a subcircuit's ports do — set
+   `PinDef.anchor` on each pin instead, which takes precedence over the table
+   and keeps the netlist's own names on the sheet.
 4. If the symbol is a 2-terminal device that should be placed by its endpoints
    instead, it belongs in `BIPOLE_NAMES` in `emit/circuitikz.py` as a path
    component, not in the symbol library at all.

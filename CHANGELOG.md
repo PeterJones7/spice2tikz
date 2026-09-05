@@ -11,6 +11,28 @@ minor releases.
 
 ### Added
 
+- Drawing metadata in inline `;` comments, as `key=value`. A simulator ignores
+  comments, which makes them the one place a deck can say something about the
+  *drawing* without changing the circuit. The parser keeps them, both IRs
+  carry them, and **an unknown key is never an error** at any stage — that is
+  what makes it an extension point rather than two features in a trench coat.
+- `; labels=` chooses what text a component shows: `ref`, `value`, both, or
+  `none`. Absent, the defaults stand, so existing decks render unchanged. A
+  device's "value" is its value if it has one and otherwise its model or
+  subcircuit name, which is what a reader would call it; node components show
+  one only when asked, since they never carried one before.
+- `; symbol=opamp` on a `.subckt` draws its instances as a real circuitikz
+  `op amp` instead of a labelled box. **Nothing is inferred from the name** —
+  `LM741` is an op amp and `LM317` is a regulator — so the metadata is the
+  only trigger. Ports map onto the terminals by position (`+`, `-`, `out`,
+  `up`, `down`), so what they are called does not matter; three ports is an
+  ideal op amp with no supply terminals. Port names are not drawn, since the
+  triangle carries its own markings, but they are kept as the sheet's pin
+  names so a drawing can still be read back against its netlist.
+- `SymbolDef` pins may state the circuitikz `anchor` they are drawn from. A
+  built-in's pins are named in the tool's own vocabulary and find their anchor
+  from a table; a generated symbol's pins are named by whoever wrote the deck,
+  which no table can map.
 - `-o` now chooses the output format from the file extension: `.tex` writes
   CircuiTikZ as before, and `.pdf`, `.png` and `.svg` render it. There is one
   emitter, and the images are derivatives of its output — spice2tikz compiles
@@ -43,6 +65,14 @@ minor releases.
 
 ### Fixed
 
+- Warnings from the layout stage were counted but never printed, and were only
+  counted at all under `-v`. That silenced the "body terminal is not tied to
+  the channel" message `docs/USAGE.md` documents, because the warnings were
+  printed before the stage that produces them ran.
+- A subcircuit port named `b`, `d`, `s`, `g`, `c` or `e` was treated as though
+  it were a transistor terminal when choosing which column to place the box
+  against. That preference list is the tool's own pin vocabulary and is now
+  consulted only for symbols that draw a real shape.
 - Imported LTspice PMOS and PNP devices were drawn with their source and drain
   leads crossing back over the body, shorting them together and leaving three
   junction dots on the device. circuitikz draws p-type shapes inverted relative

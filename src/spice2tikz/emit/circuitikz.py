@@ -143,6 +143,12 @@ _NODE_LABEL_POSITION: Final[dict[str, str]] = {
     "left": "left",
     "right": "right",
 }
+_OPPOSITE_SIDE: Final[dict[str, str]] = {
+    "above": "below",
+    "below": "above",
+    "left": "right",
+    "right": "left",
+}
 """Explicit ``LabelSpec.side`` → TikZ label position. ``auto`` is absent on
 purpose: it means "let the emitter choose" (see :func:`_free_node_side`)."""
 _ROTATION_POSITION: Final[dict[int, str]] = {
@@ -288,6 +294,13 @@ def _free_node_side(el: NodeComponent) -> str:
     return "below" if total_y > 0 else "above"
 
 
+def _requested_side(spec: LabelSpec | None) -> str | None:
+    """Return the node side *spec* asks for, or ``None`` for "wherever"."""
+    if spec is None or spec.side is None:
+        return None
+    return _NODE_LABEL_POSITION.get(spec.side)
+
+
 def _node_label_option(
     spec: LabelSpec | None, derived: str | None, fallback: str
 ) -> str | None:
@@ -431,9 +444,20 @@ def _emit_shape_node(
     if el.mirror:
         options.append("xscale=-1")
     ref_derived = derive_ref_label(el.ref) if style.label_refs else None
-    label_opt = _node_label_option(el.label, ref_derived, _free_node_side(el))
+    free = _free_node_side(el)
+    label_opt = _node_label_option(el.label, ref_derived, free)
     if label_opt is not None:
         options.append(label_opt)
+    # A second `label=` is legal on a TikZ node, so the value goes opposite the
+    # ref rather than on top of it; if the ref is suppressed it takes the free
+    # side itself. `None` as the derived text means a component with no value
+    # label prints nothing, which is what every component did before.
+    taken = (_requested_side(el.label) or free) if label_opt is not None else None
+    value_opt = _node_label_option(
+        el.value_label, None, _OPPOSITE_SIDE[taken] if taken else free
+    )
+    if value_opt is not None:
+        options.append(value_opt)
     options.extend(_style_options(el.style))
     name = tikz_node_name(index)
     lines = [
@@ -458,8 +482,8 @@ def _emit_pin_leads(
     """
     leads = []
     for pin, point in el.pins.items():
-        anchor = pin_anchor(base, pin)
         definition = symbol.pins.get(pin)
+        anchor = pin_anchor(base, pin, definition)
         if anchor is None or definition is None:
             continue
         if definition.offset == (0, 0):
@@ -497,6 +521,12 @@ def _emit_generic_box(
     label = _resolve_label(el.label, ref_derived)
     if label is not None:
         lines.append(f"\\node at ({_fmt_point(el.at)}) {{{label}}};")
+    value = _resolve_label(el.value_label, None)
+    if value is not None:
+        # Under the box: the middle is where the ref goes, and a box is
+        # drawn precisely because nothing knows what the thing inside is.
+        below = (el.at[0], el.at[1] - half_h)
+        lines.append(f"\\node[below] at ({_fmt_point(below)}) {{{value}}};")
     return lines
 
 

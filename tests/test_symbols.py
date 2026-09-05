@@ -7,11 +7,13 @@ import pytest
 from spice2tikz._serde import IRError
 from spice2tikz.netlist_ir import Kind, required_pins
 from spice2tikz.symbols import (
+    BASE_PIN_ANCHORS,
     BUILTIN_SYMBOLS,
     SYMBOL_FOR_KIND,
     PinDef,
     SymbolDef,
     lookup_symbol,
+    opamp_symbol,
     require_point,
     require_rotation,
     resolve_pins,
@@ -130,7 +132,51 @@ def test_builtins_cover_the_promised_symbols():
         "pnp",
         "njfet",
         "pjfet",
+        "opamp",
     }
+
+
+def test_the_opamp_is_not_reached_from_a_kind():
+    """It is asked for by name (`; symbol=opamp`), never guessed from a card."""
+    assert "opamp" not in SYMBOL_FOR_KIND.values()
+
+
+def test_the_opamp_has_the_five_documented_anchors():
+    symbol = BUILTIN_SYMBOLS["opamp"]
+    assert list(symbol.pins) == ["+", "-", "out", "up", "down"]
+    assert symbol.base == "op amp"
+    assert set(BASE_PIN_ANCHORS["op amp"]) == set(symbol.pins)
+
+
+def test_the_opamp_puts_the_noninverting_input_below_the_inverting_one():
+    """The shape draws it that way; a wrong-side offset crosses the body."""
+    pins = BUILTIN_SYMBOLS["opamp"].pins
+    assert pins["+"].offset[1] < pins["-"].offset[1]
+    assert pins["+"].offset[0] == pins["-"].offset[0] < 0
+    assert pins["out"].offset == (4, 0)
+
+
+def test_a_shorter_opamp_keeps_the_shape_and_drops_the_pins():
+    """A three-port subcircuit is an ideal op amp with no supply terminals."""
+    ideal = opamp_symbol(["+", "-", "out"])
+    full = BUILTIN_SYMBOLS["opamp"]
+    assert list(ideal.pins) == ["+", "-", "out"]
+    assert ideal.base == full.base
+    assert ideal.size == full.size
+    for pin, definition in ideal.pins.items():
+        assert definition.offset == full.pins[pin].offset
+
+
+def test_every_node_pin_offset_is_even():
+    """Columns are even and node bodies sit an odd distance from them.
+
+    An odd offset would land a terminal on a column, where a net's vertical
+    wire runs — see NODE_INSET in layout/place.py.
+    """
+    for name, symbol in BUILTIN_SYMBOLS.items():
+        for pin, definition in symbol.pins.items():
+            assert definition.offset[0] % 2 == 0, f"{name}.{pin}"
+            assert definition.offset[1] % 2 == 0, f"{name}.{pin}"
 
 
 def test_builtin_pin_names_match_the_kind_taxonomy():

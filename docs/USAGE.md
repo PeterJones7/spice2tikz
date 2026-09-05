@@ -224,7 +224,87 @@ timestamps anywhere.
 
 ---
 
-## 5. A worked example, with a tweak
+## 5. Telling the drawing what the netlist cannot
+
+SPICE has no way to say "draw this one as an op amp" or "leave the value off
+that resistor" — and it should not, because those are not facts about the
+circuit. So spice2tikz reads them from an inline `;` comment, which every
+simulator ignores:
+
+```spice
+R1 in out 10k                          ; labels=ref,value
+.subckt LM741 PLUS MINUS OUT VCC VEE   ; symbol=opamp
+```
+
+The form is `key=value`, separated by spaces, as many as you like. **A key the
+tool does not know is not an error** — it is carried through the IR and left
+for something else to read — so a deck annotated for a later version still
+converts today. Note that a value cannot contain a space: `labels=ref, value`
+loses the second half, and says so.
+
+### `labels=` — what text a component shows
+
+| written | drawn |
+|---|---|
+| `labels=ref` | `R1` |
+| `labels=value` | `10k` |
+| `labels=ref,value` | both |
+| `labels=none` | neither |
+| *(nothing)* | the default: both, for anything that has a value |
+
+```spice
+R1 in out 10k ; labels=value    * just the value, for a figure that names it
+C1 out 0 100n ; labels=none     * a decoupling cap nobody needs to read
+Q1 c b e bc547 ; labels=value   * the part number, not "Q1"
+```
+
+A device's "value" is its value if it has one, and otherwise its model or
+subcircuit name — which is what a reader would call it. A transistor shows no
+value unless asked, exactly as before.
+
+### `symbol=` — draw a subcircuit as a real symbol
+
+Put it on the `.subckt` card, and every instance is drawn that way:
+
+```spice
+.subckt LM741 PLUS MINUS OUT VCC VEE ; symbol=opamp
+.ends
+X1 0 inv out vcc vee LM741
+```
+
+`opamp` is the one symbol implemented. **Nothing is guessed from the name** —
+`LM741` is an op amp and `LM317` is a regulator, and no list of prefixes stays
+right — so a subcircuit without the metadata is drawn as a labelled box, as it
+always was.
+
+The ports map onto the symbol **by position**:
+
+| port | terminal |
+|---|---|
+| 1 | non-inverting input (`+`) |
+| 2 | inverting input (`-`) |
+| 3 | output |
+| 4 | positive supply |
+| 5 | negative supply |
+
+so what the ports are *called* does not matter; `PLUS`, `IN+` and `VP` are all
+just "port 1". Three ports is an ideal op amp with no supply terminals, and
+those are then not drawn. The port names are never printed beside the symbol —
+the triangle carries its own `+` and `-` markings — but they are kept in the
+IR, so a dumped layout still says which net reached which port.
+
+An instance may override its definition:
+
+```spice
+X2 0 inv out vcc vee LM741 ; symbol=none    * this one as a box
+```
+
+If a request cannot be honoured — an unknown symbol name, or a port count that
+does not fit — spice2tikz says so and falls back to the box.
+
+---
+
+## 6. A worked example, with a tweak
 
 Start from a netlist:
 
@@ -300,7 +380,7 @@ Useful edits, in rough order of how often they are wanted:
 
 ---
 
-## 6. When something goes wrong
+## 7. When something goes wrong
 
 **"cannot deduce the input format"** — the extension is not one the tool knows.
 Pass `--from spice`, `--from asc`, `--from netlist-ir` or
@@ -314,6 +394,12 @@ beats none; if the card matters, it needs a kind in `docs/SPEC_IR.md` §1.
 substrate is on its own net. It is declared but not drawn, because a wire out
 of the middle of a device crosses both its other terminals. Wire it by hand in
 the dumped layout if the connection matters to the reader.
+
+**A `labels=` or `symbol=` request did nothing.** Look at the warnings: a
+misspelling (`labels=refs`), a value with a space in it (`labels=ref, value`),
+an unknown symbol, or a subcircuit whose port count the symbol cannot take are
+all reported, and the defaults are used instead. A key the tool has never
+heard of is silent by design — that is what makes the mechanism extensible.
 
 **Validation errors, exit 2.** The itemised report names the element and the
 coordinate. In a hand-edited file this is nearly always a node component whose

@@ -1,0 +1,203 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Metadata control over which labels are drawn",
+    "source": "label_control.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 5"
+        },
+        "params": {
+          "dc": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          }
+        },
+        "meta": {
+          "labels": "ref"
+        },
+        "raw": "V1 in 0 DC 5"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "a"
+        },
+        "value": {
+          "raw": "10k",
+          "value": 10000.0,
+          "unit": "ohm"
+        },
+        "meta": {
+          "labels": "ref"
+        },
+        "raw": "R1 in a 10k"
+      },
+      {
+        "id": "R2",
+        "kind": "resistor",
+        "pins": {
+          "a": "a",
+          "b": "b"
+        },
+        "value": {
+          "raw": "22k",
+          "value": 22000.0,
+          "unit": "ohm"
+        },
+        "meta": {
+          "labels": "value"
+        },
+        "raw": "R2 a b 22k"
+      },
+      {
+        "id": "R3",
+        "kind": "resistor",
+        "pins": {
+          "a": "b",
+          "b": "c"
+        },
+        "value": {
+          "raw": "33k",
+          "value": 33000.0,
+          "unit": "ohm"
+        },
+        "meta": {
+          "labels": "ref,value"
+        },
+        "raw": "R3 b c 33k"
+      },
+      {
+        "id": "R4",
+        "kind": "resistor",
+        "pins": {
+          "a": "c",
+          "b": "d"
+        },
+        "value": {
+          "raw": "47k",
+          "value": 47000.0,
+          "unit": "ohm"
+        },
+        "meta": {
+          "labels": "none"
+        },
+        "raw": "R4 c d 47k"
+      },
+      {
+        "id": "R5",
+        "kind": "resistor",
+        "pins": {
+          "a": "d",
+          "b": "0"
+        },
+        "value": {
+          "raw": "56k",
+          "value": 56000.0,
+          "unit": "ohm"
+        },
+        "raw": "R5 d 0 56k"
+      },
+      {
+        "id": "M1",
+        "kind": "nmos",
+        "pins": {
+          "d": "d",
+          "g": "g",
+          "s": "0",
+          "b": "0"
+        },
+        "model": "nfet",
+        "meta": {
+          "labels": "value"
+        },
+        "raw": "M1 d g 0 0 nfet"
+      },
+      {
+        "id": "V2",
+        "kind": "vsource",
+        "pins": {
+          "p": "g",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 1"
+        },
+        "params": {
+          "dc": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          }
+        },
+        "meta": {
+          "labels": "none"
+        },
+        "raw": "V2 g 0 DC 1"
+      }
+    ],
+    "nets": {
+      "in": {
+        "name": "in",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "5",
+          "value": 5.0,
+          "unit": "V"
+        }
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "a": {
+        "name": "a",
+        "class": "signal"
+      },
+      "b": {
+        "name": "b",
+        "class": "signal"
+      },
+      "c": {
+        "name": "c",
+        "class": "signal"
+      },
+      "d": {
+        "name": "d",
+        "class": "signal"
+      },
+      "g": {
+        "name": "g",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "1",
+          "value": 1.0,
+          "unit": "V"
+        }
+      }
+    }
+  },
+  "subcircuits": {},
+  "models": {
+    "nfet": {
+      "type": "nmos",
+      "params": {},
+      "raw": ".model nfet nmos"
+    }
+  }
+}

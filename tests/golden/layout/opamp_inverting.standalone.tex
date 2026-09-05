@@ -1,0 +1,44 @@
+\documentclass[border=2pt]{standalone}
+\usepackage{circuitikz}
+\usepackage{siunitx}
+\begin{document}
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \node[op amp, label=above:{$X_1$}] (s2t0) at (29,12) {};
+  \draw (s2t0.+) -| (25,10);
+  \draw (s2t0.-) -| (25,14);
+  \draw (s2t0.out) -| (33,12);
+  \draw (s2t0.up) |- (29,16);
+  \draw (s2t0.down) |- (29,8);
+  \draw (16,6) to[american voltage source, l=$V_1$] (16,0);
+  \draw (16,6) to[R=$R_1$, a=\SI{10}{\kilo\ohm}] (24,6);
+  \draw (24,6) to[R=$R_2$, a=\SI{100}{\kilo\ohm}] (32,6);
+  \draw (32,6) to[R=$\mathrm{RL}$, a=\SI{10}{\kilo\ohm}] (32,0);
+  \draw (8,20) to[american voltage source, l=$V_2$, a=\SI{15}{\volt}] (8,0);
+  \draw (0,26) to[american voltage source, l=$V_3$, a=\SI{-15}{\volt}] (0,0);
+  \draw (24,6) -- (24,14);
+  \draw (25,14) -- (24,14);
+  \draw (32,6) -- (32,16);
+  \draw (33,12) -- (33,16) -- (32,16);
+  \draw (0,0) -- (32,0);
+  \draw (25,10) -- (25,0);
+  \draw (8,20) -- (29,20);
+  \draw (29,16) -- (29,20);
+  \draw (0,26) -- (35,26);
+  \draw (29,8) -- (35,8) -- (35,26);
+  \node[above] at (16,6) {in};
+  \node[right] at (33,12) {sig};
+  \draw (15,0) node[ground]{};
+  \draw (10,20) node[vcc]{} node[right]{vcc};
+  \draw (2,26) node[vcc]{} node[right]{vee};
+  \draw (2,26) node[circ]{};
+  \draw (8,0) node[circ]{};
+  \draw (10,20) node[circ]{};
+  \draw (15,0) node[circ]{};
+  \draw (16,0) node[circ]{};
+  \draw (24,6) node[circ]{};
+  \draw (25,0) node[circ]{};
+  \draw (32,6) node[circ]{};
+\end{circuitikz}
+\end{document}

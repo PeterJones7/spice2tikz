@@ -266,11 +266,14 @@ LaTeX toolchain, and a second native emitter is deliberately not planned —
 two drawing back ends would drift apart, and the CircuiTikZ one is what makes
 the symbols publication-quality in the first place.
 
+Subcircuit symbol recognition, once 7.6, is done: a `.subckt` asks for a
+symbol with `; symbol=opamp` metadata rather than a separate mapping file,
+and nothing is inferred from its name. Further symbols (`comparator`,
+`instamp`) reuse that mechanism and need no new plumbing.
+
 - 7.1 KiCad `.kicad_sch` importer (s-expressions; geometry present).
 - 7.2 Layout v2: layered orthogonal placement, crossing minimization,
   evaluation against the `.asc` human-layout corpus.
 - 7.3 Current/voltage annotations (`i=`, `v=`) as optional
   PathComponent fields (IR v1.1, additive).
 - 7.4 Additional SPICE dialect quirks (LTspice netlist, PSpice).
-- 7.5 Opamp/subckt recognition: user-supplied mapping file
-  ("this subckt is an opamp") → proper symbols.

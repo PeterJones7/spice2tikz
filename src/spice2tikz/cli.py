@@ -234,9 +234,7 @@ def _run(args: Namespace) -> int:
     else:
         schematic = schematic_ir.loads(path.read_text(encoding="utf-8"), warnings)
 
-    if not args.quiet:
-        for warning in warnings:
-            _report(f"warning: {warning}")
+    _report_warnings(warnings, 0, args)
 
     if args.dump_netlist and netlist is None:
         raise UsageError("--dump-netlist: this input has no Netlist IR stage")
@@ -259,7 +257,12 @@ def _run(args: Namespace) -> int:
             if not args.quiet:
                 _report(_summary(path, errors, warning_count + len(warnings)))
             return EXIT_VALIDATION_ERROR
-        schematic = layout(netlist, warnings=warnings if args.verbose else None)
+        # Always collected, not only when verbose: the layout stage is where
+        # a reader is told a connection is not drawn, or that a `; labels=`
+        # request was misspelled and so did not happen.
+        before = len(warnings)
+        schematic = layout(netlist, warnings=warnings)
+        _report_warnings(warnings, before, args)
 
     # Exactly one path above always produces a schematic; this narrows the type.
     assert schematic is not None
@@ -313,6 +316,14 @@ def _validate_and_report(
             continue
         _report(format_finding(finding))
     return count_by_severity(findings)
+
+
+def _report_warnings(warnings: list[str], start: int, args: Namespace) -> None:
+    """Print the warnings added since *start*, unless asked to be quiet."""
+    if args.quiet:
+        return
+    for warning in warnings[start:]:
+        _report(f"warning: {warning}")
 
 
 def _summary(path: Path, errors: int, warnings: int) -> str:

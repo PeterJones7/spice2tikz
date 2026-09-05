@@ -1,0 +1,215 @@
+{
+  "ir": "schematic",
+  "version": "1.0",
+  "meta": {
+    "title": "Metadata control over which labels are drawn",
+    "source_netlist": "label_control.sp",
+    "generator": "spice2tikz",
+    "grid": {
+      "pitch": 0.5
+    }
+  },
+  "sheets": [
+    {
+      "name": "main",
+      "elements": [
+        {
+          "type": "component",
+          "mode": "node",
+          "ref": "M1",
+          "kind": "nmos",
+          "symbol": "nmos",
+          "at": [37, 6],
+          "rot": 0,
+          "mirror": false,
+          "pins": {
+            "d": [37, 8],
+            "g": [35, 6],
+            "s": [37, 4],
+            "b": [37, 6]
+          },
+          "label": {
+            "text": "-"
+          },
+          "value_label": {
+            "text": "nfet"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R2",
+          "kind": "resistor",
+          "a": [16, 6],
+          "b": [24, 6],
+          "label": {
+            "text": "-"
+          },
+          "value_label": {
+            "text": "\\SI{22}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R3",
+          "kind": "resistor",
+          "a": [24, 6],
+          "b": [32, 6],
+          "value_label": {
+            "text": "\\SI{33}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R4",
+          "kind": "resistor",
+          "a": [32, 12],
+          "b": [40, 12],
+          "label": {
+            "text": "-"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R5",
+          "kind": "resistor",
+          "a": [40, 8],
+          "b": [40, 0],
+          "value_label": {
+            "text": "\\SI{56}{\\kilo\\ohm}"
+          }
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V1",
+          "kind": "vsource",
+          "a": [8, 16],
+          "b": [8, 0]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "R1",
+          "kind": "resistor",
+          "a": [16, 16],
+          "b": [16, 12]
+        },
+        {
+          "type": "component",
+          "mode": "path",
+          "ref": "V2",
+          "kind": "vsource",
+          "a": [0, 22],
+          "b": [0, 0],
+          "label": {
+            "text": "-"
+          }
+        },
+        {
+          "type": "wire",
+          "net": "a",
+          "points": [[16, 6], [16, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "c",
+          "points": [[32, 6], [32, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "d",
+          "points": [[40, 8], [40, 12]]
+        },
+        {
+          "type": "wire",
+          "net": "d",
+          "points": [[37, 8], [40, 8]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[0, 0], [40, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "0",
+          "points": [[37, 4], [37, 0]]
+        },
+        {
+          "type": "wire",
+          "net": "in",
+          "points": [[8, 16], [18, 16]]
+        },
+        {
+          "type": "wire",
+          "net": "g",
+          "points": [[0, 22], [35, 22]]
+        },
+        {
+          "type": "wire",
+          "net": "g",
+          "points": [[35, 6], [35, 22]]
+        },
+        {
+          "type": "net_symbol",
+          "net": "d",
+          "variant": "tap",
+          "at": [40, 12],
+          "rot": 90,
+          "text": "d"
+        },
+        {
+          "type": "net_symbol",
+          "net": "0",
+          "variant": "ground",
+          "at": [20, 0],
+          "rot": 0
+        },
+        {
+          "type": "net_symbol",
+          "net": "in",
+          "variant": "vcc",
+          "at": [18, 16],
+          "rot": 0,
+          "text": "in"
+        },
+        {
+          "type": "net_symbol",
+          "net": "g",
+          "variant": "vcc",
+          "at": [2, 22],
+          "rot": 0,
+          "text": "g"
+        },
+        {
+          "type": "junction",
+          "at": [2, 22]
+        },
+        {
+          "type": "junction",
+          "at": [8, 0]
+        },
+        {
+          "type": "junction",
+          "at": [16, 16]
+        },
+        {
+          "type": "junction",
+          "at": [20, 0]
+        },
+        {
+          "type": "junction",
+          "at": [37, 0]
+        },
+        {
+          "type": "junction",
+          "at": [40, 8]
+        }
+      ]
+    }
+  ]
+}

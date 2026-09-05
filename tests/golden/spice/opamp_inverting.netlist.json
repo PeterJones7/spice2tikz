@@ -1,0 +1,196 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Inverting amplifier around a five-terminal op amp",
+    "source": "opamp_inverting.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "in",
+          "n": "0"
+        },
+        "value": {
+          "raw": "AC 1"
+        },
+        "params": {
+          "ac": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V1 in 0 AC 1"
+      },
+      {
+        "id": "V2",
+        "kind": "vsource",
+        "pins": {
+          "p": "vcc",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 15"
+        },
+        "params": {
+          "dc": {
+            "raw": "15",
+            "value": 15.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V2 vcc 0 DC 15"
+      },
+      {
+        "id": "V3",
+        "kind": "vsource",
+        "pins": {
+          "p": "vee",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC -15"
+        },
+        "params": {
+          "dc": {
+            "raw": "-15",
+            "value": -15.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V3 vee 0 DC -15"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "in",
+          "b": "inv"
+        },
+        "value": {
+          "raw": "10k",
+          "value": 10000.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 in inv 10k"
+      },
+      {
+        "id": "R2",
+        "kind": "resistor",
+        "pins": {
+          "a": "inv",
+          "b": "sig"
+        },
+        "value": {
+          "raw": "100k",
+          "value": 100000.0,
+          "unit": "ohm"
+        },
+        "raw": "R2 inv sig 100k"
+      },
+      {
+        "id": "X1",
+        "kind": "subcircuit",
+        "pins": {
+          "plus": "0",
+          "minus": "inv",
+          "out": "sig",
+          "vcc": "vcc",
+          "vee": "vee"
+        },
+        "subckt": "lm741",
+        "meta": {
+          "symbol": "opamp"
+        },
+        "raw": "X1 0 inv sig vcc vee lm741"
+      },
+      {
+        "id": "RL",
+        "kind": "resistor",
+        "pins": {
+          "a": "sig",
+          "b": "0"
+        },
+        "value": {
+          "raw": "10k",
+          "value": 10000.0,
+          "unit": "ohm"
+        },
+        "raw": "RL sig 0 10k"
+      }
+    ],
+    "nets": {
+      "in": {
+        "name": "in",
+        "class": "signal"
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "vcc": {
+        "name": "vcc",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "15",
+          "value": 15.0,
+          "unit": "V"
+        }
+      },
+      "vee": {
+        "name": "vee",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "-15",
+          "value": -15.0,
+          "unit": "V"
+        }
+      },
+      "inv": {
+        "name": "inv",
+        "class": "signal"
+      },
+      "sig": {
+        "name": "sig",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {
+    "lm741": {
+      "ports": ["plus", "minus", "out", "vcc", "vee"],
+      "meta": {
+        "symbol": "opamp"
+      },
+      "components": [],
+      "nets": {
+        "plus": {
+          "name": "plus",
+          "class": "signal"
+        },
+        "minus": {
+          "name": "minus",
+          "class": "signal"
+        },
+        "out": {
+          "name": "out",
+          "class": "signal"
+        },
+        "vcc": {
+          "name": "vcc",
+          "class": "signal"
+        },
+        "vee": {
+          "name": "vee",
+          "class": "signal"
+        }
+      }
+    }
+  }
+}
