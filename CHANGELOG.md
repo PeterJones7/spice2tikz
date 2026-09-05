@@ -9,6 +9,16 @@ minor releases.
 
 ## [Unreleased]
 
+### Fixed
+
+- Imported LTspice PMOS and PNP devices were drawn with their source and drain
+  leads crossing back over the body, shorting them together and leaving three
+  junction dots on the device. circuitikz draws p-type shapes inverted relative
+  to n-type ones, while LTspice keeps the same body geometry for both, so
+  LTspice's orientation code could not be applied to the circuitikz shape
+  unchanged. The importer now derives the disagreement from the two pin tables
+  and turns the device over when they differ. Reported by a user.
+
 ### Changed
 
 - An independent voltage or current source now shows its DC value beside its

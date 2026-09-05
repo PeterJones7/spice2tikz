@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from spice2tikz import schematic_ir
+from spice2tikz import asc_importer, schematic_ir
 from spice2tikz._serde import IRError
 from spice2tikz.asc_importer import (
     GENERATOR,
@@ -39,7 +39,7 @@ from spice2tikz.schematic_ir import (
     SchematicIR,
     Wire,
 )
-from spice2tikz.symbols import lookup_symbol, resolve_pins
+from spice2tikz.symbols import Point, lookup_symbol, resolve_pins
 from spice2tikz.validate import Severity, format_finding, validate
 
 CORPUS = Path(__file__).parent / "corpus" / "asc"
@@ -632,3 +632,119 @@ def test_json_round_trip_is_lossless(name: str):
 def test_round_tripped_document_still_validates(name: str):
     reloaded = schematic_ir.loads(schematic_ir.dumps(load(name)))
     assert not validate(reloaded)
+
+
+# --- p-type orientation adaptation (change request §2) ----------------------
+
+
+Segment = tuple[Point, Point]
+
+
+def _lead_wires(ir: SchematicIR) -> list[Wire]:
+    """Return the short wires the importer draws from IR pins to LTspice's."""
+    return [e for e in ir.sheets[0].elements if isinstance(e, Wire)]
+
+
+def _overlaps(first: Segment, second: Segment) -> bool:
+    """Return ``True`` when two segments lie along each other."""
+    (a1, a2), (b1, b2) = first, second
+    if a1[0] == a2[0] == b1[0] == b2[0]:
+        return min(max(a1[1], a2[1]), max(b1[1], b2[1])) > max(
+            min(a1[1], a2[1]), min(b1[1], b2[1])
+        )
+    if a1[1] == a2[1] == b1[1] == b2[1]:
+        return min(max(a1[0], a2[0]), max(b1[0], b2[0])) > max(
+            min(a1[0], a2[0]), min(b1[0], b2[0])
+        )
+    return False
+
+
+P_TYPE_FILES = ["cmos_inverter", "bjt_push_pull", "symbol_gallery", "orientations"]
+
+
+@pytest.mark.parametrize("name", P_TYPE_FILES)
+def test_no_two_leads_of_one_device_overlap(name: str):
+    """Circuitikz draws p-type shapes the other way up from n-type ones.
+
+    Applying LTspice's orientation code straight to the circuitikz shape put
+    the channel terminals on the wrong sides, so the leads bridging them to
+    LTspice's real pin positions ran back across the device and shorted source
+    to drain. See ``_channel_flip``.
+    """
+    ir = asc_importer.load_asc(CORPUS / f"{name}.asc")
+    wires = _lead_wires(ir)
+    offenders = []
+    for index, first in enumerate(wires):
+        for second in wires[index + 1 :]:
+            for a in first.segments():
+                for b in second.segments():
+                    if _overlaps(a, b):
+                        offenders.append(f"{first.net} overlaps {second.net}: {a} {b}")
+    assert not offenders, "\n".join(sorted(set(offenders)))
+
+
+@pytest.mark.parametrize("name", P_TYPE_FILES)
+def test_no_wire_passes_through_a_device_body(name: str):
+    ir = asc_importer.load_asc(CORPUS / f"{name}.asc")
+    nodes = [e for e in ir.sheets[0].elements if isinstance(e, NodeComponent)]
+    offenders = []
+    for wire in _lead_wires(ir):
+        for start, end in wire.segments():
+            for node in nodes:
+                symbol = lookup_symbol(node.symbol, ir.symbols)
+                if symbol is None:
+                    continue
+                half_w, half_h = symbol.size[0] / 2, symbol.size[1] / 2
+                x0, x1 = node.at[0] - half_w, node.at[0] + half_w
+                y0, y1 = node.at[1] - half_h, node.at[1] + half_h
+                vertical = (
+                    start[0] == end[0]
+                    and x0 < start[0] < x1
+                    and min(start[1], end[1]) < y1
+                    and max(start[1], end[1]) > y0
+                )
+                horizontal = (
+                    start[1] == end[1]
+                    and y0 < start[1] < y1
+                    and min(start[0], end[0]) < x1
+                    and max(start[0], end[0]) > x0
+                )
+                if vertical or horizontal:
+                    offenders.append(f"{wire.net} crosses {node.ref}")
+    assert not offenders, "\n".join(sorted(set(offenders)))
+
+
+@pytest.mark.parametrize("name", P_TYPE_FILES)
+def test_no_junction_sits_on_an_unconnected_body_terminal(name: str):
+    """A dot at a device's own origin means two leads met inside the device."""
+    ir = asc_importer.load_asc(CORPUS / f"{name}.asc")
+    dots = {e.at for e in ir.sheets[0].elements if isinstance(e, Junction)}
+    origins = {
+        node.at
+        for node in ir.sheets[0].elements
+        if isinstance(node, NodeComponent) and node.pins.get("b") == node.at
+    }
+    assert not (dots & origins), f"junction on a body terminal: {dots & origins}"
+
+
+def test_a_pmos_is_not_turned_over_when_ltspice_already_agrees():
+    """LTspice M180 on a pmos4 needs no turn: circuitikz draws PMOS source-up."""
+    ir = asc_importer.load_asc(CORPUS / "cmos_inverter.asc")
+    pmos = next(
+        node
+        for node in ir.sheets[0].elements
+        if isinstance(node, NodeComponent) and node.symbol == "pmos"
+    )
+    assert (pmos.rot, pmos.mirror) == (0, False)
+    assert pmos.pins["s"][1] > pmos.pins["d"][1]
+
+
+def test_an_nmos_keeps_the_generic_orientation():
+    ir = asc_importer.load_asc(CORPUS / "cmos_inverter.asc")
+    nmos = next(
+        node
+        for node in ir.sheets[0].elements
+        if isinstance(node, NodeComponent) and node.symbol == "nmos"
+    )
+    assert (nmos.rot, nmos.mirror) == (0, False)
+    assert nmos.pins["d"][1] > nmos.pins["s"][1]

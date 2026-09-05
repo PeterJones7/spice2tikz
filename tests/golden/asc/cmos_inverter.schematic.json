@@ -44,12 +44,12 @@
           "kind": "pmos",
           "symbol": "pmos",
           "at": [11, 15],
-          "rot": 180,
-          "mirror": true,
+          "rot": 0,
+          "mirror": false,
           "pins": {
-            "s": [11, 13],
+            "s": [11, 17],
             "g": [9, 15],
-            "d": [11, 17],
+            "d": [11, 13],
             "b": [11, 15]
           },
           "label": {
@@ -94,7 +94,7 @@
         {
           "type": "wire",
           "net": "out",
-          "points": [[11, 17], [11, 12]]
+          "points": [[11, 13], [11, 12]]
         },
         {
           "type": "wire",
@@ -104,7 +104,7 @@
         {
           "type": "wire",
           "net": "vdd",
-          "points": [[11, 13], [11, 18]]
+          "points": [[11, 17], [11, 18]]
         },
         {
           "type": "net_symbol",
@@ -144,18 +144,6 @@
         {
           "type": "junction",
           "at": [11, 9]
-        },
-        {
-          "type": "junction",
-          "at": [11, 13]
-        },
-        {
-          "type": "junction",
-          "at": [11, 15]
-        },
-        {
-          "type": "junction",
-          "at": [11, 17]
         }
       ]
     }

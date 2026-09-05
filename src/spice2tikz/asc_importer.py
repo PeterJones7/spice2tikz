@@ -1016,11 +1016,50 @@ def _path_component(item: _Placed, definition: AscSymbolDef) -> PathComponent:
     )
 
 
+def _channel_flip(definition: AscSymbolDef, symbol: SymbolDef) -> bool:
+    """Return ``True`` when LTspice and circuitikz disagree on which way up.
+
+    circuitikz draws every p-type shape inverted relative to its n-type
+    counterpart — a PMOS source above its drain, a PNP emitter above its
+    collector — while LTspice's ``pmos4`` and ``pnp`` keep the same body
+    geometry as their n-type siblings and distinguish polarity by a bubble or
+    an arrow.  Applying LTspice's orientation code straight to the circuitikz
+    shape therefore lands the channel terminals on the wrong sides, and the
+    leads that bridge them to LTspice's real pin positions run back across the
+    device.
+
+    The disagreement is read from the two pin tables rather than hard-coded per
+    symbol, so neither table can be changed later without this following it.
+    """
+    origin = definition.origin or (0, 0)
+    for pin, offset in definition.pins:
+        builtin = symbol.pins.get(pin)
+        if builtin is None or builtin.offset[1] == 0:
+            continue  # a control or body terminal has no opinion about "up"
+        # LTspice files are y-down; the IR is y-up.
+        if (origin[1] - offset[1] > 0) != (builtin.offset[1] > 0):
+            return True
+    return False
+
+
+def _turn_over(rot: Rotation, mirror: bool) -> tuple[Rotation, bool]:
+    """Return the orientation that additionally flips the symbol vertically.
+
+    A vertical flip is itself ``rot=180, mirror=True``, and the IR composes
+    mirror-before-rotate, so pre-composing one onto an existing orientation
+    works out as a half-turn plus a toggle of the mirror — for either starting
+    value of the mirror, since a half-turn commutes with everything.
+    """
+    return cast(Rotation, (rot + 180) % 360), not mirror
+
+
 def _node_component(
     item: _Placed, definition: AscSymbolDef, symbol: SymbolDef
 ) -> NodeComponent:
     """Build a multi-terminal component from a placed symbol (D6)."""
     rot, mirror = item.symbol.orientation.to_ir()
+    if _channel_flip(definition, symbol):
+        rot, mirror = _turn_over(rot, mirror)
     origin = definition.origin or (0, 0)
     dx, dy = item.symbol.orientation.place(origin)
     at = _to_ir((item.symbol.x + dx, item.symbol.y + dy))
