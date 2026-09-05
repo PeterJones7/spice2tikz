@@ -12,7 +12,7 @@ minor releases.
 ### Changed
 
 - An independent voltage or current source now shows its DC value beside its
-  own symbol (`V1` … `\SI{5}{olt}`), and a supply rail whose source is drawn
+  own symbol (`V1` … `\SI{5}{\volt}`), and a supply rail whose source is drawn
   on the sheet is labelled with just the net name instead of `vdd = 5`. A
   component's value belongs on the component; putting it on the net stated the
   same fact twice and attached it to connectivity rather than to the part that
