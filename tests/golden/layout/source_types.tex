@@ -1,0 +1,49 @@
+\begin{circuitikz}[scale=0.5]
+  \ctikzset{european resistors}
+  \ctikzset{cute inductors}
+  \draw (28,6) to[sV, l=$V_2$] (28,0);
+  \draw (34,6) to[R=$R_2$, a=\SI{1}{\kilo\ohm}] (34,0);
+  \draw (42,6) to[sqV, l=$V_3$] (42,0);
+  \draw (48,6) to[R=$R_3$, a=\SI{1}{\kilo\ohm}] (48,0);
+  \draw (56,6) to[american voltage source, l=$V_4$, a=\SI{5}{\volt}] (56,0);
+  \draw (62,6) to[R=$R_4$, a=\SI{1}{\kilo\ohm}] (62,0);
+  \draw (70,6) to[american voltage source, l=$V_5$] (70,0);
+  \draw (76,6) to[R=$R_5$, a=\SI{1}{\kilo\ohm}] (76,0);
+  \draw (84,6) to[american current source, l=$I_1$, a=\SI{1}{\milli\ampere}] (84,0);
+  \draw (90,6) to[R=$R_6$, a=\SI{1}{\kilo\ohm}] (90,0);
+  \draw (98,6) to[sI, l=$I_2$] (98,0);
+  \draw (104,6) to[R=$R_7$, a=\SI{1}{\kilo\ohm}] (104,0);
+  \draw (112,6) to[american current source, l=$I_3$] (112,0);
+  \draw (118,6) to[R=$R_8$, a=\SI{1}{\kilo\ohm}] (118,0);
+  \draw (14,10) to[american voltage source, l=$V_1$, a=\SI{5}{\volt}] (14,0);
+  \draw (0,10) to[R=$R_1$, a=\SI{1}{\kilo\ohm}] (0,0);
+  \draw (34,6) -- (28,6);
+  \draw (48,6) -- (42,6);
+  \draw (62,6) -- (56,6);
+  \draw (76,6) -- (70,6);
+  \draw (90,6) -- (84,6);
+  \draw (104,6) -- (98,6);
+  \draw (118,6) -- (112,6);
+  \draw (0,0) -- (118,0);
+  \draw (0,10) -- (16,10);
+  \node[above] at (34,6) {b};
+  \node[above] at (118,6) {h};
+  \draw (59,0) node[ground]{};
+  \draw (16,10) node[vcc]{} node[right]{a};
+  \draw (14,0) node[circ]{};
+  \draw (14,10) node[circ]{};
+  \draw (28,0) node[circ]{};
+  \draw (34,0) node[circ]{};
+  \draw (42,0) node[circ]{};
+  \draw (48,0) node[circ]{};
+  \draw (56,0) node[circ]{};
+  \draw (59,0) node[circ]{};
+  \draw (62,0) node[circ]{};
+  \draw (70,0) node[circ]{};
+  \draw (76,0) node[circ]{};
+  \draw (84,0) node[circ]{};
+  \draw (90,0) node[circ]{};
+  \draw (98,0) node[circ]{};
+  \draw (104,0) node[circ]{};
+  \draw (112,0) node[circ]{};
+\end{circuitikz}

@@ -1,0 +1,422 @@
+{
+  "ir": "netlist",
+  "version": "1.0",
+  "meta": {
+    "title": "Every source specification, and the symbol each one gets",
+    "source": "source_types.sp",
+    "generator": "spice2tikz",
+    "dialect": "ngspice"
+  },
+  "circuit": {
+    "components": [
+      {
+        "id": "V1",
+        "kind": "vsource",
+        "pins": {
+          "p": "a",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 5"
+        },
+        "params": {
+          "dc": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V1 a 0 DC 5"
+      },
+      {
+        "id": "R1",
+        "kind": "resistor",
+        "pins": {
+          "a": "a",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R1 a 0 1k"
+      },
+      {
+        "id": "V2",
+        "kind": "vsource",
+        "pins": {
+          "p": "b",
+          "n": "0"
+        },
+        "value": {
+          "raw": "SIN(0 1 1k)"
+        },
+        "params": {
+          "sin_offset": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "sin_amplitude": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          },
+          "sin_freq": {
+            "raw": "1k",
+            "value": 1000.0,
+            "unit": "Hz"
+          }
+        },
+        "raw": "V2 b 0 SIN(0 1 1k)"
+      },
+      {
+        "id": "R2",
+        "kind": "resistor",
+        "pins": {
+          "a": "b",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R2 b 0 1k"
+      },
+      {
+        "id": "V3",
+        "kind": "vsource",
+        "pins": {
+          "p": "c",
+          "n": "0"
+        },
+        "value": {
+          "raw": "PULSE(0 5 0 1n 1n 1u 2u)"
+        },
+        "params": {
+          "pulse_initial": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "pulse_pulsed": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          },
+          "pulse_delay": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "s"
+          },
+          "pulse_rise": {
+            "raw": "1n",
+            "value": 1e-09,
+            "unit": "s"
+          },
+          "pulse_fall": {
+            "raw": "1n",
+            "value": 1e-09,
+            "unit": "s"
+          },
+          "pulse_width": {
+            "raw": "1u",
+            "value": 1e-06,
+            "unit": "s"
+          },
+          "pulse_period": {
+            "raw": "2u",
+            "value": 2e-06,
+            "unit": "s"
+          }
+        },
+        "raw": "V3 c 0 PULSE(0 5 0 1n 1n 1u 2u)"
+      },
+      {
+        "id": "R3",
+        "kind": "resistor",
+        "pins": {
+          "a": "c",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R3 c 0 1k"
+      },
+      {
+        "id": "V4",
+        "kind": "vsource",
+        "pins": {
+          "p": "d",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 5 AC 1"
+        },
+        "params": {
+          "dc": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          },
+          "ac": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V4 d 0 DC 5 AC 1"
+      },
+      {
+        "id": "R4",
+        "kind": "resistor",
+        "pins": {
+          "a": "d",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R4 d 0 1k"
+      },
+      {
+        "id": "V5",
+        "kind": "vsource",
+        "pins": {
+          "p": "e",
+          "n": "0"
+        },
+        "value": {
+          "raw": "PWL(0 0 1u 5)"
+        },
+        "params": {
+          "pwl_t1": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "s"
+          },
+          "pwl_v1": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "V"
+          },
+          "pwl_t2": {
+            "raw": "1u",
+            "value": 1e-06,
+            "unit": "s"
+          },
+          "pwl_v2": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "V"
+          }
+        },
+        "raw": "V5 e 0 PWL(0 0 1u 5)"
+      },
+      {
+        "id": "R5",
+        "kind": "resistor",
+        "pins": {
+          "a": "e",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R5 e 0 1k"
+      },
+      {
+        "id": "I1",
+        "kind": "isource",
+        "pins": {
+          "p": "f",
+          "n": "0"
+        },
+        "value": {
+          "raw": "DC 1m"
+        },
+        "params": {
+          "dc": {
+            "raw": "1m",
+            "value": 0.001,
+            "unit": "A"
+          }
+        },
+        "raw": "I1 f 0 DC 1m"
+      },
+      {
+        "id": "R6",
+        "kind": "resistor",
+        "pins": {
+          "a": "f",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R6 f 0 1k"
+      },
+      {
+        "id": "I2",
+        "kind": "isource",
+        "pins": {
+          "p": "g",
+          "n": "0"
+        },
+        "value": {
+          "raw": "SIN(0 1m 1k)"
+        },
+        "params": {
+          "sin_offset": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "A"
+          },
+          "sin_amplitude": {
+            "raw": "1m",
+            "value": 0.001,
+            "unit": "A"
+          },
+          "sin_freq": {
+            "raw": "1k",
+            "value": 1000.0,
+            "unit": "Hz"
+          }
+        },
+        "raw": "I2 g 0 SIN(0 1m 1k)"
+      },
+      {
+        "id": "R7",
+        "kind": "resistor",
+        "pins": {
+          "a": "g",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R7 g 0 1k"
+      },
+      {
+        "id": "I3",
+        "kind": "isource",
+        "pins": {
+          "p": "h",
+          "n": "0"
+        },
+        "value": {
+          "raw": "PULSE(0 1m 0 1n 1n 1u 2u)"
+        },
+        "params": {
+          "pulse_initial": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "A"
+          },
+          "pulse_pulsed": {
+            "raw": "1m",
+            "value": 0.001,
+            "unit": "A"
+          },
+          "pulse_delay": {
+            "raw": "0",
+            "value": 0.0,
+            "unit": "s"
+          },
+          "pulse_rise": {
+            "raw": "1n",
+            "value": 1e-09,
+            "unit": "s"
+          },
+          "pulse_fall": {
+            "raw": "1n",
+            "value": 1e-09,
+            "unit": "s"
+          },
+          "pulse_width": {
+            "raw": "1u",
+            "value": 1e-06,
+            "unit": "s"
+          },
+          "pulse_period": {
+            "raw": "2u",
+            "value": 2e-06,
+            "unit": "s"
+          }
+        },
+        "raw": "I3 h 0 PULSE(0 1m 0 1n 1n 1u 2u)"
+      },
+      {
+        "id": "R8",
+        "kind": "resistor",
+        "pins": {
+          "a": "h",
+          "b": "0"
+        },
+        "value": {
+          "raw": "1k",
+          "value": 1000.0,
+          "unit": "ohm"
+        },
+        "raw": "R8 h 0 1k"
+      }
+    ],
+    "nets": {
+      "a": {
+        "name": "a",
+        "class": "supply",
+        "supply_voltage": {
+          "raw": "5",
+          "value": 5.0,
+          "unit": "V"
+        }
+      },
+      "0": {
+        "name": "0",
+        "class": "ground"
+      },
+      "b": {
+        "name": "b",
+        "class": "signal"
+      },
+      "c": {
+        "name": "c",
+        "class": "signal"
+      },
+      "d": {
+        "name": "d",
+        "class": "signal"
+      },
+      "e": {
+        "name": "e",
+        "class": "signal"
+      },
+      "f": {
+        "name": "f",
+        "class": "signal"
+      },
+      "g": {
+        "name": "g",
+        "class": "signal"
+      },
+      "h": {
+        "name": "h",
+        "class": "signal"
+      }
+    }
+  },
+  "subcircuits": {}
+}

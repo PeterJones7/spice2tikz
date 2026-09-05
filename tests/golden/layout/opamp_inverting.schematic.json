@@ -72,7 +72,8 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [16, 6],
-          "b": [16, 0]
+          "b": [16, 0],
+          "waveform": "ac"
         },
         {
           "type": "component",
@@ -116,7 +117,8 @@
           "b": [8, 0],
           "value_label": {
             "text": "\\SI{15}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",
@@ -127,7 +129,8 @@
           "b": [0, 0],
           "value_label": {
             "text": "\\SI{-15}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "wire",

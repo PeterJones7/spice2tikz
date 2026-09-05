@@ -62,6 +62,16 @@ LABEL_ANCHORS: Final[tuple[str, ...]] = ("north", "south", "east", "west", "cent
 ComponentVariant = Literal["american", "european"]
 COMPONENT_VARIANTS: Final[tuple[str, ...]] = ("american", "european")
 
+Waveform = Literal["dc", "ac", "sine", "pulse", "exp", "pwl"]
+WAVEFORMS: Final[tuple[str, ...]] = ("dc", "ac", "sine", "pulse", "exp", "pwl")
+"""What an independent source puts out, in the netlist's own vocabulary.
+
+A drawing decision, but not a *drawing* word: the sheet records what the deck
+said the source does, and the emitter decides which symbol says that. Not
+every waveform has one — circuitikz draws a sine and a square wave, and has no
+shape at all for an exponential or a piecewise-linear source.
+"""
+
 InductorVariant = Literal["american", "european", "cute"]
 INDUCTOR_VARIANTS: Final[tuple[str, ...]] = ("american", "european", "cute")
 """Inductors have three circuitikz styles, not two; ``cute`` is its default."""
@@ -322,6 +332,7 @@ class PathComponent:
     b: Point
     label: LabelSpec | None = None
     value_label: LabelSpec | None = None
+    waveform: Waveform | None = None
     style: StyleOverride | None = None
 
     TYPE: ClassVar[str] = "component"
@@ -344,6 +355,8 @@ class PathComponent:
             data["label"] = self.label.to_json()
         if self.value_label is not None:
             data["value_label"] = self.value_label.to_json()
+        if self.waveform is not None:
+            data["waveform"] = self.waveform
         if self.style is not None:
             data["style"] = self.style.to_json()
         return data
@@ -358,7 +371,18 @@ class PathComponent:
         """Load from JSON."""
         check_keys(
             data,
-            ("type", "mode", "ref", "kind", "a", "b", "label", "value_label", "style"),
+            (
+                "type",
+                "mode",
+                "ref",
+                "kind",
+                "a",
+                "b",
+                "label",
+                "value_label",
+                "waveform",
+                "style",
+            ),
             location,
             warnings,
         )
@@ -369,6 +393,7 @@ class PathComponent:
             b=require_point(require_field(data, "b", location), f"{location}.b"),
             label=_optional_label(data, "label", location, warnings),
             value_label=_optional_label(data, "value_label", location, warnings),
+            waveform=_optional_waveform(data, location),
             style=_optional_style(data, location, warnings),
         )
 
@@ -873,6 +898,14 @@ def _require_kind(data: dict[str, Any], location: str) -> Kind:
         return Kind(text)
     except ValueError as exc:
         raise IRError(f"{location}.kind: unknown kind {text!r}") from exc
+
+
+def _optional_waveform(data: dict[str, Any], location: str) -> Waveform | None:
+    """Load ``waveform``, checking it against the vocabulary."""
+    raw = optional_field(data, "waveform", location)
+    if raw is None:
+        return None
+    return cast(Waveform, require_choice(raw, WAVEFORMS, f"{location}.waveform"))
 
 
 def _optional_label(

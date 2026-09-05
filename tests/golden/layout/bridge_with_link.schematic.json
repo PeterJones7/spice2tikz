@@ -33,7 +33,8 @@
           "b": [14, 0],
           "value_label": {
             "text": "\\SI{10}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",
@@ -44,7 +45,8 @@
           "b": [0, 0],
           "value_label": {
             "text": "\\SI{5}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",

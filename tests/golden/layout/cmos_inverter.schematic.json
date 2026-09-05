@@ -51,7 +51,8 @@
           "ref": "VIN",
           "kind": "vsource",
           "a": [8, 6],
-          "b": [8, 0]
+          "b": [8, 0],
+          "waveform": "pulse"
         },
         {
           "type": "component",
@@ -84,7 +85,8 @@
           "b": [0, 0],
           "value_label": {
             "text": "\\SI{3.3}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",
@@ -95,7 +97,8 @@
           "b": [24, 14],
           "value_label": {
             "text": "\\SI{50}{\\micro\\ampere}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "wire",

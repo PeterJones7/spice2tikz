@@ -35,7 +35,8 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [8, 6],
-          "b": [8, 0]
+          "b": [8, 0],
+          "waveform": "sine"
         },
         {
           "type": "component",
@@ -46,7 +47,8 @@
           "b": [0, 0],
           "value_label": {
             "text": "\\SI{5}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",

@@ -326,7 +326,29 @@ def _style_options(style: StyleOverride | None) -> list[str]:
 # --- element emission --------------------------------------------------------
 
 
-def _bipole_name(kind: Kind) -> str:
+WAVEFORM_BIPOLES: Final[dict[tuple[Kind, str], str]] = {
+    (Kind.VSOURCE, "ac"): "sV",
+    (Kind.VSOURCE, "sine"): "sV",
+    (Kind.VSOURCE, "pulse"): "sqV",
+    (Kind.ISOURCE, "ac"): "sI",
+    (Kind.ISOURCE, "sine"): "sI",
+}
+"""Symbols for sources that do something other than sit at a fixed level.
+
+A reader should be able to see that a source is a stimulus without reading its
+label, so a sinusoid gets the sine symbol and a pulse train the square-wave
+one (CircuiTikZ manual §4.5.3 and §4.5.5: ``sV``, ``sI``, ``sqV``).
+
+Three gaps, all circuitikz's rather than choices made here: there is **no
+square current source** — ``sqI`` does not exist, and a document using it does
+not compile — and no shape for an exponential or piecewise-linear source. Those
+keep the plain symbol, and their waveform belongs in the caption. ``DC 5 AC 1``
+is a biased supply rather than a stimulus, so it keeps the plain symbol too;
+:func:`~spice2tikz.layout.place.source_waveform` decides that, not this table.
+"""
+
+
+def _bipole_name(kind: Kind, waveform: str | None = None) -> str:
     """Return the circuitikz bipole to draw *kind* with.
 
     Capacitors have no style variant: circuitikz offers no American/European
@@ -334,11 +356,15 @@ def _bipole_name(kind: Kind) -> str:
     plate shapes are *polarized* devices, which is a component distinction
     rather than a drawing style.  See DECISIONS 2.3.
     """
+    if waveform is not None:
+        special = WAVEFORM_BIPOLES.get((kind, waveform))
+        if special is not None:
+            return special
     return BIPOLE_NAMES.get(kind, "generic")
 
 
 def _emit_path(el: PathComponent, style: StyleDefaults) -> list[str]:
-    bipole = _bipole_name(el.kind)
+    bipole = _bipole_name(el.kind, el.waveform)
     natural, opposite = _path_sides(el.a, el.b)
 
     ref_derived = derive_ref_label(el.ref) if style.label_refs else None

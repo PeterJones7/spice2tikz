@@ -95,7 +95,8 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [0, 13],
-          "b": [0, 0]
+          "b": [0, 0],
+          "waveform": "ac"
         },
         {
           "type": "component",
@@ -128,7 +129,8 @@
           "b": [42, 0],
           "value_label": {
             "text": "\\SI{0}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",

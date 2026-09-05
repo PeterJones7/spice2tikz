@@ -75,7 +75,8 @@ def test_a_netlist_becomes_circuitikz():
     assert latex.count(r"\draw") >= 3
     assert "R=$R_1$" in latex
     assert "C=$C_1$" in latex
-    assert "american voltage source" in latex
+    # `AC 1` is a stimulus, so it gets the sine symbol rather than a battery.
+    assert "to[sV" in latex
     assert r"\SI{10}{\kilo\ohm}" in latex
     assert r"\SI{100}{\nano\farad}" in latex
     assert "node[ground]" in latex

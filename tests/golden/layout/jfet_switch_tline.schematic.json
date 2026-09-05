@@ -125,7 +125,8 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [16, 6],
-          "b": [16, 0]
+          "b": [16, 0],
+          "waveform": "sine"
         },
         {
           "type": "component",
@@ -144,7 +145,8 @@
           "ref": "VC",
           "kind": "vsource",
           "a": [48, 13],
-          "b": [48, 0]
+          "b": [48, 0],
+          "waveform": "pulse"
         },
         {
           "type": "component",
@@ -166,7 +168,8 @@
           "b": [8, 0],
           "value_label": {
             "text": "\\SI{15}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",
@@ -177,7 +180,8 @@
           "b": [0, 31],
           "value_label": {
             "text": "\\SI{5}{\\volt}"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "component",

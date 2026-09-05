@@ -88,7 +88,8 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [8, 16],
-          "b": [8, 0]
+          "b": [8, 0],
+          "waveform": "dc"
         },
         {
           "type": "component",
@@ -107,7 +108,8 @@
           "b": [0, 0],
           "label": {
             "text": "-"
-          }
+          },
+          "waveform": "dc"
         },
         {
           "type": "wire",

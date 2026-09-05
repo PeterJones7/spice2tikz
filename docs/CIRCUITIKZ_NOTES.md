@@ -340,6 +340,27 @@ S
 
 Additional bulk-related anchors are documented.
 
+## Independent sources
+
+| symbol | draws | manual |
+|---|---|---|
+| `american voltage source` | circle with `+` / `-` | §4.5 |
+| `american current source` | circle with an arrow | §4.5 |
+| `sV` (alias of `vsourcesin`) | circle with a sine wave | §4.5.3 |
+| `sI` (alias of `isourcesin`) | circle with a sine wave | §4.5.3 |
+| `sqV` (alias of `vsourcesquare`) | circle with a square wave | §4.5.5 |
+| `cV`, `cI` | controlled sources, drawn as diamonds | §4.5 |
+
+**There is no `sqI`.** circuitikz has a square *voltage* source and no square
+current source; `to[sqI]` does not compile. Verified by compiling each of the
+above — `sV`, `sqV`, `sI` and `american voltage source` all work, `sqI` fails.
+A pulsed current source therefore keeps the plain symbol.
+
+There is no shape for an exponential or piecewise-linear source either.
+
+`sV` and `sI` are the same drawing; the manual says to tell them apart by the
+label, which is what a voltage or current label does anyway.
+
 ## Operational amplifier
 
 ```latex

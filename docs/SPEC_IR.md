@@ -145,6 +145,8 @@ PathComponent {                          // → \draw (a) to[R=...] (b);
   type: "component"; mode: "path";
   ref: string; kind: Kind;
   a: [int, int]; b: [int, int];          // pin a / p / anode at "a"
+  waveform?: "dc" | "ac" | "sine" | "pulse" | "exp" | "pwl"
+                                         // independent sources only
   label?: LabelSpec; value_label?: LabelSpec; style?: StyleOverride
 }
 
@@ -219,6 +221,20 @@ circuitikz anchor is looked up from the shape. A generated symbol's pin names
 come from the deck (`PLUS`, `VCC`), which no table can map, so each pin states
 its `anchor` instead. The pin names on a sheet are therefore always the ones
 the netlist uses, which is what lets a drawing be checked against its circuit.
+
+### Source waveforms
+
+`waveform` says what an independent source puts out, in the netlist's own
+vocabulary rather than in drawing terms: the sheet records what the deck said,
+and the emitter decides which symbol says that. It is derived from the Netlist
+IR's `params` — a `SIN(...)` spec gives `sine`, `PULSE(...)` gives `pulse` —
+so nothing is stored twice. A transient specification wins over `AC`, and a
+card carrying both `DC` and `AC` is a biased supply (`dc`), not a stimulus.
+
+Only three waveforms have a symbol, because only three exist in circuitikz:
+`sine` → `sV` / `sI`, and `pulse` → `sqV`. There is **no square current
+source**, and no shape at all for `exp` or `pwl`; those keep the plain symbol
+and their waveform belongs in the caption.
 
 ## 3. Derived-label formatting (emitter rules)
 

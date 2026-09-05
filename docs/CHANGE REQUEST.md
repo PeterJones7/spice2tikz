@@ -4,19 +4,6 @@ Do each in turn. Update documentation and push changes after each  request is im
 
 Once addressed they can be removed from this document (with evidence left in changelog.md)
 
-# Source type
-
-When a voltage (or current) source is time varying (e.g.  V1 in 0 AC 1 SIN(0 10m 1k)) then an AC source symbol should be used rather than the DC sort.  e.g. \draw (0,0) to[sV] (0,3); 
-(this should also be reflected in JSON and IR format)
-
-DC      -> V
-SINE    -> sV
-PULSE   -> sqV
-
-
-V % DC voltage source sV % sine-wave voltage source sqV % square-wave voltage source  cV % controlled voltage source (diamond)
-to[I] % DC current source to[sI] % sinusoidal current source to[sqI] % square-wave current source
-
 # AI prompt
 Add to the documentation a concise prompt for any AI tools writing SPICE for spice2tikz.  Consider how to write spice code to allow for optimum layout, plus also instructions on using key components (e.g. opeamp); metadata usage (e.g. layout)
 Here's a first draft (but needs opamp and metadata added)

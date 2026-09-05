@@ -301,7 +301,7 @@ Here is the whole of the RC low-pass above, as emitted:
 \begin{circuitikz}[scale=0.5]
   \ctikzset{european resistors}
   \ctikzset{cute inductors}
-  \draw (0,6) to[american voltage source, l=$V_1$] (0,0);
+  \draw (0,6) to[sV, l=$V_1$] (0,0);
   \draw (0,6) to[R=$R_1$, a=\SI{10}{\kilo\ohm}] (8,6);
   \draw (8,6) to[C=$C_1$, a=\SI{100}{\nano\farad}] (8,0);
   \draw (0,0) -- (8,0);

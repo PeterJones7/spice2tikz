@@ -39,7 +39,13 @@ from .._serde import warn
 from ..emit.circuitikz import escape_latex, format_quantity
 from ..netlist_ir import Component, Kind
 from ..quantity import Quantity
-from ..schematic_ir import LabelSide, LabelSpec, NodeComponent, PathComponent
+from ..schematic_ir import (
+    LabelSide,
+    LabelSpec,
+    NodeComponent,
+    PathComponent,
+    Waveform,
+)
 from ..symbols import (
     BUILTIN_SYMBOLS,
     OPAMP_BASE,
@@ -788,6 +794,7 @@ def _place_path(
             b=b,
             label=label,
             value_label=value_label,
+            waveform=source_waveform(component),
         )
     )
     placement.add_pin(first, a)
@@ -922,6 +929,40 @@ def _shown_value(component: Component, siunitx: bool) -> LabelSpec | None:
         return explicit
     name = component.model or component.subckt
     return None if name is None else LabelSpec(text=escape_latex(name))
+
+
+TRANSIENT_PREFIXES: Final[tuple[tuple[str, Waveform], ...]] = (
+    ("sin_", "sine"),
+    ("pulse_", "pulse"),
+    ("exp_", "exp"),
+    ("pwl_", "pwl"),
+)
+"""Parameter prefixes the parser gives each transient form, and what they mean.
+
+Read from the parameters rather than re-parsing the card: the parser has
+already decided what ``SIN(0 1 1k)`` was, and two readings of one card is how
+they come to disagree.
+"""
+
+
+def source_waveform(component: Component) -> Waveform | None:
+    """Return what an independent source puts out, or ``None`` for anything else.
+
+    A transient specification wins over ``AC``, because a card may carry both
+    and the transient one is what the source actually does. ``AC`` on its own
+    is a sinusoid — that is what an AC analysis drives the circuit with — but
+    ``DC 5 AC 1`` is a biased supply with a small signal on it, and drawing
+    that as a sine source would misrepresent the bias.
+    """
+    if component.kind not in (Kind.VSOURCE, Kind.ISOURCE):
+        return None
+    params = component.params or {}
+    for prefix, waveform in TRANSIENT_PREFIXES:
+        if any(key.startswith(prefix) for key in params):
+            return waveform
+    if "ac" in params:
+        return "dc" if "dc" in params else "ac"
+    return "dc" if "dc" in params else None
 
 
 def _value_label(component: Component, siunitx: bool) -> LabelSpec | None:

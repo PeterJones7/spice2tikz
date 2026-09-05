@@ -11,6 +11,19 @@ minor releases.
 
 ### Added
 
+- An independent source is now drawn from what it *does*, not just from what
+  it is: a sinusoid gets the sine symbol (`sV`, `sI`) and a pulse train the
+  square-wave one (`sqV`), so a reader can see a stimulus without reading its
+  label. `AC 1` counts as a sinusoid — that is what an AC analysis drives the
+  circuit with — but `DC 5 AC 1` does not, being a supply with a small signal
+  on it. The waveform is recorded on the Schematic IR as `PathComponent
+  .waveform`, derived from the Netlist IR's existing parameters so nothing is
+  stored twice.
+
+  Three specifications keep the plain symbol because circuitikz has no shape
+  for them: pulsed **current** (there is no `sqI` — a document using it does
+  not compile), exponential, and piecewise-linear. Their waveform is several
+  numbers and belongs in the caption.
 - Drawing metadata in inline `;` comments, as `key=value`. A simulator ignores
   comments, which makes them the one place a deck can say something about the
   *drawing* without changing the circuit. The parser keeps them, both IRs

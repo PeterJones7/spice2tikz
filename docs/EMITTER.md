@@ -78,6 +78,12 @@ order of the output, which keeps generated `.tex` diffs readable.
   cannot express (e.g. `"above"` on a horizontal path) falls back to the
   default side.
 
+An independent source is drawn from its `waveform` as well as its kind:
+`sine` gives `sV`/`sI` and `pulse` gives `sqV`, so a reader can see that a
+source is a stimulus without reading its label. `WAVEFORM_BIPOLES` holds the
+three that exist — circuitikz has no square current source and no exponential
+or piecewise-linear shape, and the rest fall back to `BIPOLE_NAMES`.
+
 ### NodeComponent with a circuitikz shape → `\node[nmos, ...]`
 
 ```latex

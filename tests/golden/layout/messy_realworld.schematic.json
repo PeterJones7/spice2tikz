@@ -56,7 +56,8 @@
           "b": [0, 0],
           "value_label": {
             "text": "\\SI{0}{\\volt}"
-          }
+          },
+          "waveform": "sine"
         },
         {
           "type": "component",

@@ -103,6 +103,14 @@
     "wire_length": 16,
     "wires": 1
   },
+  "source_types": {
+    "alignment": 1.0,
+    "bbox_area": 1180,
+    "components": 16,
+    "crossings": 0,
+    "wire_length": 176,
+    "wires": 9
+  },
   "subckt_rc_stages": {
     "alignment": 1.0,
     "bbox_area": 294,

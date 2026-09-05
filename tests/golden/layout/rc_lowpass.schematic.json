@@ -19,7 +19,8 @@
           "ref": "V1",
           "kind": "vsource",
           "a": [0, 6],
-          "b": [0, 0]
+          "b": [0, 0],
+          "waveform": "ac"
         },
         {
           "type": "component",

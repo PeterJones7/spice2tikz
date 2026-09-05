@@ -262,6 +262,25 @@ A device's "value" is its value if it has one, and otherwise its model or
 subcircuit name — which is what a reader would call it. A transistor shows no
 value unless asked, exactly as before.
 
+### Sources show what they do
+
+Nothing to write for this one: a source that is a *stimulus* gets a symbol
+that says so, from its own SPICE specification.
+
+| card | symbol |
+|---|---|
+| `V1 in 0 DC 5` | the usual `+`/`-` circle |
+| `V1 in 0 SIN(0 1 1k)` | a sine wave |
+| `V1 in 0 AC 1` | a sine wave — that is what an AC analysis drives with |
+| `V1 in 0 PULSE(0 5 0 1n 1n 1u 2u)` | a square wave |
+| `V1 in 0 DC 5 AC 1` | the usual circle: a bias with a small signal on it is a supply, not a stimulus |
+| `I1 in 0 SIN(0 1m 1k)` | a sine wave |
+
+Three gaps, all circuitikz's: there is no square *current* source, and no shape
+for an exponential or piecewise-linear source. Those keep the plain symbol —
+their waveform is three numbers and belongs in the caption. See
+`tests/corpus/spice/source_types.sp` for one of each.
+
 ### `symbol=` — draw a subcircuit as a real symbol
 
 Put it on the `.subckt` card, and every instance is drawn that way:
