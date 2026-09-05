@@ -38,11 +38,17 @@ small in-tree subset parser rather than a dependency on a back-port.
 
 Dev dependencies are not covered by that rule.
 
-A LaTeX toolchain is optional. Without one, `tests/test_compile.py` skips
-itself and `tools/render_goldens.py` reports what is missing and exits 3.
-With one — `latexmk` and circuitikz, plus `pdftoppm`, `pdftocairo`, `magick`
-or `gs` for images — you can check your work locally instead of waiting for
-CI. §3 explains why you want to.
+A LaTeX toolchain is optional. Without one, `tests/test_compile.py` and the
+compiling half of `tests/test_render.py` skip themselves, and
+`tools/render_goldens.py` reports what is missing and exits 3. With one —
+`latexmk` and circuitikz, plus `pdftoppm`, `pdftocairo`, `magick` or `gs` for
+images — you can check your work locally instead of waiting for CI. §3
+explains why you want to.
+
+It is a *user*-facing optional dependency in the same way: `-o figure.png`
+drives the same tools through `src/spice2tikz/render.py`. Nothing about that
+weakens D1 — it is `subprocess` and `shutil`, and every entry point reports a
+missing tool by name.
 
 ## 2. The four checks
 
@@ -83,7 +89,9 @@ This is the section worth reading twice.
   corpus document, plus golden IR JSON for the importer and parser corpora as
   those land (roadmap §3, §4).
 - `tools/render_goldens.py` — compiles the standalone goldens and renders
-  them to PNG under `build/golden-review/`. Not a test; a reviewing aid.
+  them to PNG under `build/golden-review/`. Not a test; a reviewing aid. It
+  shares toolchain detection with `render.py` so the two cannot disagree
+  about what counts as an available `latexmk`.
 
 The test modules discover the corpus by globbing, so **adding a corpus file
 is enough to be covered by everything**. `tests/test_golden.py` picks up
@@ -199,7 +207,7 @@ The SPICE parser is roadmap §4 and lives in
 currently the only one** (D10); the Netlist IR carries `meta.dialect`
 (`docs/SPEC_IR.md` §1) precisely so that a second one can exist without a
 format change. Further dialect quirks — LTspice netlists, PSpice — are
-roadmap §7.5, that is, deliberately deferred rather than forgotten.
+roadmap §7.4, that is, deliberately deferred rather than forgotten.
 
 A dialect, when the time comes, is three things:
 
@@ -230,7 +238,7 @@ An importer's entire contract is: **produce a valid Schematic IR**
 (`docs/SPEC_IR.md` §2). Nothing downstream knows or cares where the document
 came from — that is the point of the IR, and it is why the LTspice `.asc`
 importer (roadmap §3) can be a useful release with no layout engine behind
-it. KiCad is roadmap §7.2.
+it. KiCad is roadmap §7.1.
 
 A complete importer is four things:
 

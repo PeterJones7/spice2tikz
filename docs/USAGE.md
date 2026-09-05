@@ -45,6 +45,19 @@ spice2tikz --version
 The generated LaTeX needs `circuitikz` and, if you keep siunitx value labels,
 `siunitx`. Both ship with TeX Live and MiKTeX.
 
+Writing `.tex` needs nothing more. If you want spice2tikz to hand you a **PDF,
+PNG or SVG** directly (`-o figure.png`), it also needs a LaTeX toolchain on
+your `PATH` — `latexmk` or `pdflatex` — and, for the images, a converter. On
+Debian or Ubuntu:
+
+```sh
+sudo apt install latexmk texlive-latex-extra texlive-pictures texlive-science poppler-utils
+```
+
+`poppler-utils` provides `pdftoppm` and `pdftocairo`, which cover both PNG and
+SVG. Ghostscript, ImageMagick, `dvisvgm`, `mutool` and Inkscape are used as
+fallbacks if they are what you have.
+
 ---
 
 ## 2. The three workflows
@@ -96,9 +109,10 @@ spice2tikz INPUT [-o OUTPUT] [options]
 
 | option | effect |
 |---|---|
-| `-o FILE` | write the LaTeX to a file instead of stdout |
+| `-o FILE` | write to a file; the extension picks the format |
 | `--from {spice,asc,netlist-ir,schematic-ir}` | force the input format |
 | `--standalone` | wrap the output in a compilable document |
+| `--dpi N` | raster resolution for PNG (default 150) |
 | `--dump-netlist FILE` | also write the Netlist IR as JSON |
 | `--dump-layout FILE` | also write the Schematic IR as JSON |
 | `--style KEY=VALUE` | override one style default; repeatable |
@@ -111,9 +125,29 @@ spice2tikz INPUT [-o OUTPUT] [options]
 SPICE; `.asc` is LTspice; `.json` is sniffed from its `ir` field — or forced
 with `--from`.
 
-**Output** goes to stdout, which carries the generated LaTeX and nothing else;
-every diagnostic goes to stderr. A shell redirect therefore produces exactly
-the bytes `-o` would write, with LF line endings on every platform.
+**Output format** comes from the extension you give `-o`:
+
+| `-o` | you get |
+|---|---|
+| `figure.tex` | CircuiTikZ source (a snippet, or a document with `--standalone`) |
+| `figure.pdf` | a cropped PDF |
+| `figure.png` | a cropped bitmap, at `--dpi` |
+| `figure.svg` | a cropped vector image |
+
+`.pdf`, `.png` and `.svg` are *rendered derivatives*: spice2tikz emits the same
+CircuiTikZ it always does, compiles it, and converts the result, so they need a
+LaTeX toolchain (see §1). `--standalone` is implied for them — a snippet has no
+preamble and cannot be compiled on its own. Anything else is refused by name:
+
+```
+spice2tikz: cannot tell what to write from the extension '.jpeg';
+use one of .tex, .pdf, .png, .svg
+```
+
+With no `-o`, the LaTeX goes to stdout, which carries the generated source and
+nothing else; every diagnostic goes to stderr. A shell redirect therefore
+produces exactly the bytes `-o figure.tex` would write, with LF line endings on
+every platform.
 
 **Exit codes**: `0` ok, `1` input parse error, `2` validation error, `3`
 internal error. Validation *warnings* are reported and conversion continues;
@@ -156,13 +190,33 @@ what you want inside a document:
 \end{document}
 ```
 
-`--standalone` instead produces a complete document that crops to the drawing,
-which is what you want for a standalone PDF or PNG:
+`--standalone` instead produces a complete document that crops to the drawing.
+You rarely need to ask for it, though, because asking for an image implies it:
+
+```sh
+spice2tikz amplifier.sp -o amplifier.pdf
+spice2tikz amplifier.sp -o amplifier.png --dpi 300
+spice2tikz amplifier.sp -o amplifier.svg
+```
+
+Each of those emits CircuiTikZ, compiles it with `latexmk` or `pdflatex`, and —
+for PNG and SVG — converts the PDF with whichever of `pdftoppm`, `pdftocairo`,
+`gs`, `magick`, `dvisvgm`, `mutool` or `inkscape` is installed and able. Every
+intermediate lives in a temporary directory that is removed afterwards, so a
+failed compile leaves nothing behind but the message. If no suitable tool is
+found, spice2tikz says which ones it looked for; write `.tex` and compile it
+yourself:
 
 ```sh
 spice2tikz amplifier.sp --standalone -o amplifier.tex
 latexmk -pdf amplifier.tex
 ```
+
+Rendering is deterministic too: spice2tikz pins `SOURCE_DATE_EPOCH`, so the
+same input gives the same PDF bytes rather than a new timestamp every run. That
+holds within one toolchain — a PDF records the pdfTeX version that made it, and
+the images inherit whatever the local converter does — so the thing worth
+committing is still the `.tex`, with images rendered in your build.
 
 Because conversion is deterministic, generated `.tex` files can be committed
 and will diff cleanly: the same input always produces the same bytes, with no
@@ -224,8 +278,7 @@ and add an explicit label, which is emitted verbatim:
 Re-emit:
 
 ```sh
-spice2tikz amp.schematic.json --standalone -o amp.tex
-latexmk -pdf amp.tex
+spice2tikz amp.schematic.json -o amp.pdf
 ```
 
 The only change in the output is the one you made. To move something, edit its
@@ -275,3 +328,16 @@ attached — see `docs/CONTRIBUTING.md`.
 **The LaTeX does not compile.** The generated snippet needs `circuitikz`;
 value labels need `siunitx`. If a golden-quality file still fails, that is a
 bug: every file this tool ships is compiled in CI against TeX Live.
+
+**"no LaTeX toolchain found"**, or **"no PDF-to-PNG converter found"** — you
+asked for `-o` with a `.pdf`, `.png` or `.svg` extension on a machine without
+the tools to produce one. The message lists what was looked for; see §1 for
+what to install. Writing `.tex` never needs them.
+
+**"dvisvgm failed: ... Ghostscript version 10.02.1 is not supported"**, or a
+similar complaint from a converter that *is* installed. Being installed is not
+the same as being able: dvisvgm reads PDF only with Ghostscript older than
+10.01 or mutool alongside it, and ImageMagick's default policy refuses PDF
+outright. spice2tikz tries every installed converter in turn and only gives up
+when they all fail, so the fix is to install one that works — `poppler-utils`
+is the reliable choice for both PNG and SVG.

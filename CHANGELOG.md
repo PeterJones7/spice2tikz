@@ -9,6 +9,38 @@ minor releases.
 
 ## [Unreleased]
 
+### Added
+
+- `-o` now chooses the output format from the file extension: `.tex` writes
+  CircuiTikZ as before, and `.pdf`, `.png` and `.svg` render it. There is one
+  emitter, and the images are derivatives of its output — spice2tikz compiles
+  the same LaTeX with `latexmk` or `pdflatex` and converts the PDF with
+  whichever of `pdftoppm`, `pdftocairo`, `gs`, `magick`, `dvisvgm`, `mutool`
+  or `inkscape` is installed *and able*; being installed is not the same
+  thing, so a converter that fails is passed over and only an exhausted list
+  is an error. `--standalone` is implied by the rendered formats, `--dpi` sets
+  the PNG resolution, and every intermediate lives in a temporary directory
+  that is removed afterwards. An unknown extension is refused by name rather
+  than guessed at. Rendering is deterministic: `SOURCE_DATE_EPOCH` is pinned,
+  so the same input gives the same PDF bytes on a given toolchain instead of a
+  fresh timestamp each run.
+
+### Changed
+
+- `tools/render_goldens.py`, `tools/contact_sheet.py` and `examples/build.sh`
+  now drive `spice2tikz.render` instead of each carrying its own copy of the
+  compile-and-convert pipeline. There were four; there is one. The review
+  images and the committed gallery therefore show exactly what `-o figure.png`
+  gives a user, and a converter added in one place is found in all of them.
+  Neither tool's command line changed.
+
+### Removed
+
+- The planned native SVG emitter (`emit/svg.py`, roadmap §7.1). SVG is now a
+  rendered derivative of the CircuiTikZ output, and two drawing back ends
+  would have drifted apart while only one of them produced publication-quality
+  symbols. Later roadmap items in section 7 shift up by one.
+
 ### Fixed
 
 - Imported LTspice PMOS and PNP devices were drawn with their source and drain

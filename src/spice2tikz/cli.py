@@ -40,6 +40,13 @@ from .emit.circuitikz import emit
 from .layout import layout, measure
 from .layout.metrics import format_metrics
 from .netlist_ir import NetlistIR
+from .render import (
+    DEFAULT_DPI,
+    RENDERED_FORMATS,
+    RenderError,
+    format_for,
+    render,
+)
 from .schematic_ir import (
     COMPONENT_VARIANTS,
     INDUCTOR_VARIANTS,
@@ -109,7 +116,17 @@ def build_parser() -> ArgumentParser:
         "-o",
         "--output",
         metavar="FILE",
-        help="write the generated LaTeX to FILE instead of stdout",
+        help=(
+            "write to FILE instead of stdout; the extension chooses the format "
+            "(.tex, .pdf, .png, .svg)"
+        ),
+    )
+    parser.add_argument(
+        "--dpi",
+        type=int,
+        default=DEFAULT_DPI,
+        metavar="N",
+        help=f"resolution for PNG output (default {DEFAULT_DPI})",
     )
     parser.add_argument(
         "--from",
@@ -179,6 +196,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run(args)
     except UsageError as error:
         _report(f"{PROG}: {error}")
+        return EXIT_INPUT_ERROR
+    except RenderError as error:
+        # Not an internal fault: the run cannot produce what was asked for on
+        # this machine, which is a problem with the invocation, so it shares
+        # the input-error code rather than inventing a fifth one.
+        _report(f"{PROG}: cannot render {args.output}: {error}")
         return EXIT_INPUT_ERROR
     except IRError as error:
         _report(f"{PROG}: {args.input}: {error}")
@@ -260,13 +283,23 @@ def _run(args: Namespace) -> int:
         # DESIGN §6: never emit silently-wrong output.
         return EXIT_VALIDATION_ERROR
 
-    output = emit(schematic, standalone=args.standalone)
-    if args.output:
-        _write_text(Path(args.output), output)
-        if args.verbose:
-            _report(f"{PROG}: wrote {args.output}")
-    else:
-        _write_stdout(output)
+    if not args.output:
+        _write_stdout(emit(schematic, standalone=args.standalone))
+        return EXIT_OK
+
+    target = Path(args.output)
+    output_format = format_for(target)
+    # Every format but .tex is produced by compiling the document, so it has to
+    # be a standalone one whether or not --standalone was given.
+    standalone = args.standalone or output_format in RENDERED_FORMATS
+    render(
+        emit(schematic, standalone=standalone),
+        target,
+        output_format,
+        dpi=args.dpi,
+    )
+    if args.verbose:
+        _report(f"{PROG}: wrote {target} ({output_format})")
     return EXIT_OK
 
 

@@ -76,17 +76,28 @@ Python ≥ 3.10, and nothing else — the package has **no runtime dependencies*
 The LaTeX it generates needs the `circuitikz` and `siunitx` packages, both of
 which ship with TeX Live and MiKTeX.
 
+To have spice2tikz hand you a **PDF, PNG or SVG** instead of LaTeX, it also
+needs a toolchain to compile with. On Debian or Ubuntu:
+
+```sh
+sudo apt install latexmk texlive-latex-extra texlive-pictures texlive-science poppler-utils
+```
+
 ## Usage
 
 ```sh
-spice2tikz amplifier.sp > amplifier.tex          # netlist, laid out automatically
-spice2tikz amplifier.asc > amplifier.tex         # LTspice, your geometry preserved
-spice2tikz amplifier.sp --standalone -o amp.tex  # a complete, compilable document
+spice2tikz amplifier.sp > amplifier.tex   # netlist, laid out automatically
+spice2tikz amplifier.asc > amplifier.tex  # LTspice, your geometry preserved
+spice2tikz amplifier.sp -o amp.pdf        # or .png, or .svg, or .tex
 ```
 
 The input format comes from the extension — `.sp`, `.cir` and `.net` are SPICE,
 `.asc` is LTspice, `.json` is either intermediate format — or force it with
-`--from`.
+`--from`. The **output** format comes from the extension too: `.tex` is the
+CircuiTikZ source, and `.pdf`, `.png` and `.svg` are rendered from exactly that
+source by a LaTeX run, so the picture you check is the picture your document
+gets. `--dpi` sets the PNG resolution; `--standalone` wraps the `.tex` in a
+compilable document and is implied by the rendered formats.
 
 Drop the result into a document:
 
@@ -244,7 +255,7 @@ at all.
 | **SPICE netlists** | `.sp` / `.cir` / `.net`, ngspice dialect: `R C L D V I Q M J E G H F S T X`, `.model`, nested `.subckt`, and source specifications (`DC`, `AC`, `SIN`, `PULSE`, `PWL`, `EXP`) |
 | **LTspice schematics** | `.asc`, including UTF-16 files, with wires, flags, I/O pins, all eight symbol orientations, and per-symbol pin offsets taken from the shipped `.asy` files |
 | **Automatic layout** | signal flow left to right, ground at the bottom, supplies at the top, orthogonal wires, junction dots, devices turned by convention |
-| **Output** | a CircuiTikZ snippet to `\input`, or a standalone document that crops to the drawing |
+| **Output** | a CircuiTikZ snippet to `\input`, a standalone document that crops to the drawing, or a PDF, PNG or SVG rendered from it |
 | **Escape hatch** | both intermediate formats dump to documented, hand-editable JSON and load straight back |
 
 Deliberately **not** included:
@@ -255,7 +266,7 @@ Deliberately **not** included:
 - **No GUI**, and no netlist editing: conversion is one-way.
 - **No hierarchy expansion.** A subcircuit instance is one labelled box; its
   contents are not drawn on their own sheet.
-- **No current or voltage annotations** yet ([roadmap](docs/ROADMAP.md) §7.4).
+- **No current or voltage annotations** yet ([roadmap](docs/ROADMAP.md) §7.3).
 - **One dialect.** ngspice, on purpose;
   [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) §5 says how to add another.
 

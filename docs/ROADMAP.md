@@ -260,12 +260,17 @@ Tag `v0.0.3`.
 
 ## Section 7 — Future work (do not start unless instructed)
 
-- 7.1 SVG emitter (`emit/svg.py`) reusing symbol geometry.
-- 7.2 KiCad `.kicad_sch` importer (s-expressions; geometry present).
-- 7.3 Layout v2: layered orthogonal placement, crossing minimization,
+There is one canonical emitter: Schematic IR → CircuiTikZ. PDF, PNG and SVG
+are *rendered derivatives* of that output, produced by `render.py` driving a
+LaTeX toolchain, and a second native emitter is deliberately not planned —
+two drawing back ends would drift apart, and the CircuiTikZ one is what makes
+the symbols publication-quality in the first place.
+
+- 7.1 KiCad `.kicad_sch` importer (s-expressions; geometry present).
+- 7.2 Layout v2: layered orthogonal placement, crossing minimization,
   evaluation against the `.asc` human-layout corpus.
-- 7.4 Current/voltage annotations (`i=`, `v=`) as optional
+- 7.3 Current/voltage annotations (`i=`, `v=`) as optional
   PathComponent fields (IR v1.1, additive).
-- 7.5 Additional SPICE dialect quirks (LTspice netlist, PSpice).
-- 7.6 Opamp/subckt recognition: user-supplied mapping file
+- 7.4 Additional SPICE dialect quirks (LTspice netlist, PSpice).
+- 7.5 Opamp/subckt recognition: user-supplied mapping file
   ("this subckt is an opamp") → proper symbols.

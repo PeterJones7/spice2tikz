@@ -58,6 +58,8 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends python3 python3-pip python3-venv
+      - name: Install a PDF converter
+        run: apt-get install -y --no-install-recommends poppler-utils
       - name: Install package with dev extras
         run: |
           python3 -m venv /tmp/venv
@@ -67,6 +69,10 @@ jobs:
         run: latexmk --version
       - name: Compile every standalone golden
         run: /tmp/venv/bin/python -m pytest tests/test_compile.py -v
+      # The only job with a toolchain, so the only one where rendering to PDF,
+      # PNG and SVG actually runs rather than skipping itself.
+      - name: Render to PDF, PNG and SVG
+        run: /tmp/venv/bin/python -m pytest tests/test_render.py -v
       # Only the .tex is compared: PNG bytes depend on the Ghostscript and
       # TeX Live versions, so they would differ on every image without the
       # drawing having changed.

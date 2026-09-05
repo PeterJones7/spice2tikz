@@ -201,7 +201,7 @@ occasionally tighter, because it wastes no space. On a circuit with stacked
 devices it uses two to three times the wire and area and introduces crossings,
 because it has no notion of putting two transistors in the *same* column with
 one above the other. That is the largest single gap, and it is what layout v2
-(roadmap §7.3) would attack first.
+(roadmap §7.2) would attack first.
 
 ---
 
@@ -216,7 +216,7 @@ one above the other. That is the largest single gap, and it is what layout v2
 - **Boxes for anything without a circuitikz shape.** Controlled sources with
   four terminals, switches, transmission lines and subcircuits are rectangles
   with labelled pins. Correct, dull, and the right answer until someone maps
-  them to real symbols (roadmap §7.6 covers the subcircuit case).
+  them to real symbols (roadmap §7.5 covers the subcircuit case).
 - **Feedback is drawn the long way round.** A net whose column is to the left
   of the device driving it gets a Z route out and back; nothing tries to
   shorten it.

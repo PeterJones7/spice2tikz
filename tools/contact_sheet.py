@@ -34,8 +34,6 @@ from __future__ import annotations
 import argparse
 import base64
 import html
-import shutil
-import subprocess
 import sys
 import tempfile
 from collections.abc import Sequence
@@ -47,6 +45,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from spice2tikz.emit.circuitikz import emit_standalone  # noqa: E402
 from spice2tikz.netlist_ir import Kind  # noqa: E402
+from spice2tikz.render import RenderError, missing_tools  # noqa: E402
+from spice2tikz.render import render as render_to  # noqa: E402
 from spice2tikz.schematic_ir import (  # noqa: E402
     Grid,
     Label,
@@ -64,7 +64,6 @@ from spice2tikz.symbols import BUILTIN_SYMBOLS, resolve_pins  # noqa: E402
 GOLDEN_DIR = REPO_ROOT / "tests" / "golden"
 STANDALONE_SUFFIX = ".standalone.tex"
 DEFAULT_OUTPUT = REPO_ROOT / "build" / "contact-sheet.html"
-TIMEOUT_SECONDS = 180
 
 EXIT_OK = 0
 EXIT_FAILED = 1
@@ -232,86 +231,19 @@ def net_symbol_sheet() -> SchematicIR:
 # --- rendering ---------------------------------------------------------------
 
 
-def find_latex() -> list[str] | None:
-    """Return the LaTeX command, or ``None``."""
-    if shutil.which("latexmk"):
-        return ["latexmk", "-pdf", "-interaction=nonstopmode", "-halt-on-error"]
-    if shutil.which("pdflatex"):
-        return ["pdflatex", "-interaction=nonstopmode", "-halt-on-error"]
-    return None
+def render_tex(source: str, dpi: int) -> tuple[bytes | None, str | None]:
+    """Compile standalone LaTeX *source* and return its PNG bytes.
 
-
-def find_converter() -> str | None:
-    """Return a PDF-to-PNG converter command, or ``None``."""
-    for command in ("pdftoppm", "pdftocairo", "gs", "gswin64c", "magick"):
-        if shutil.which(command):
-            return command
-    return None
-
-
-def to_png(pdf: Path, png: Path, converter: str, dpi: int, work: Path) -> str | None:
-    """Convert *pdf* to *png*; return an error message or ``None``."""
-    if converter in ("pdftoppm", "pdftocairo"):
-        prefix = png.with_suffix("")
-        args = [converter, "-png", "-r", str(dpi), "-singlefile", str(pdf), str(prefix)]
-    elif converter in ("gs", "gswin64c"):
-        args = [
-            converter,
-            "-q",
-            "-dNOPAUSE",
-            "-dBATCH",
-            "-dSAFER",
-            "-sDEVICE=pngalpha",
-            f"-r{dpi}",
-            f"-sOutputFile={png}",
-            str(pdf),
-        ]
-    else:
-        args = [converter, "-density", str(dpi), str(pdf), str(png)]
-    result = subprocess.run(
-        args,
-        cwd=work,
-        capture_output=True,
-        text=True,
-        timeout=TIMEOUT_SECONDS,
-        check=False,
-    )
-    if result.returncode != 0 or not png.exists():
-        return (result.stderr or "conversion failed").strip().splitlines()[:1][0]
-    return None
-
-
-def render_tex(
-    source: str, latex: list[str], converter: str, dpi: int
-) -> tuple[bytes | None, str | None]:
-    """Compile standalone LaTeX *source* and return its PNG bytes."""
+    The pipeline is :mod:`spice2tikz.render`, the same one behind
+    ``spice2tikz -o figure.png``, so this sheet shows what users get rather
+    than what a second implementation happens to produce.
+    """
     with tempfile.TemporaryDirectory(prefix="s2t-sheet-") as tmp:
-        work = Path(tmp)
-        tex = work / "figure.tex"
-        tex.write_text(source, encoding="utf-8", newline="\n")
-        result = subprocess.run(
-            [*latex, tex.name],
-            cwd=work,
-            capture_output=True,
-            text=True,
-            timeout=TIMEOUT_SECONDS,
-            check=False,
-        )
-        pdf = work / "figure.pdf"
-        if result.returncode != 0 or not pdf.exists():
-            log = work / "figure.log"
-            message = "compilation failed"
-            if log.exists():
-                text = log.read_text(encoding="utf-8", errors="replace")
-                for line in text.splitlines():
-                    if line.startswith("!"):
-                        message = line
-                        break
-            return None, message
-        png = work / "figure.png"
-        error = to_png(pdf, png, converter, dpi, work)
-        if error is not None:
-            return None, error
+        png = Path(tmp) / "figure.png"
+        try:
+            render_to(source, png, "png", dpi=dpi)
+        except RenderError as error:
+            return None, str(error)
         return png.read_bytes(), None
 
 
@@ -738,14 +670,11 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     """Build the contact sheet and return a process exit code."""
     args = build_parser().parse_args(argv)
-    latex, converter = find_latex(), find_converter()
-    if latex is None or converter is None:
-        print(
-            "contact_sheet: needs a LaTeX toolchain and a PDF-to-PNG converter",
-            file=sys.stderr,
-        )
+    missing = missing_tools("png")
+    if missing:
+        print(f"contact_sheet: missing {' and '.join(missing)}", file=sys.stderr)
         return EXIT_NO_TOOLS
-    print(f"contact_sheet: {latex[0]} + {converter} at {args.dpi} dpi")
+    print(f"contact_sheet: rendering at {args.dpi} dpi")
 
     groups: list[Group] = []
 
@@ -772,7 +701,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     sheets["net-symbols"] = net_symbol_sheet()
     for name, document in sheets.items():
         print(f"  {name:34}", end="", flush=True)
-        png, error = render_tex(emit_standalone(document), latex, converter, args.dpi)
+        png, error = render_tex(emit_standalone(document), args.dpi)
         print("ok" if error is None else f"FAILED: {error}")
         reference.figures.append(
             Figure(name=name, caption="generated reference sheet", png=png, error=error)
@@ -784,9 +713,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for path in paths:
             name = path.relative_to(GOLDEN_DIR).as_posix()[: -len(STANDALONE_SUFFIX)]
             print(f"  {name:34}", end="", flush=True)
-            png, error = render_tex(
-                path.read_text(encoding="utf-8"), latex, converter, args.dpi
-            )
+            png, error = render_tex(path.read_text(encoding="utf-8"), args.dpi)
             print("ok" if error is None else f"FAILED: {error}")
             group.figures.append(
                 Figure(

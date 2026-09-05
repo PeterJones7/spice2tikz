@@ -9,7 +9,7 @@ on the same circuit.
 This **reports**; it does not judge.  The engine is not expected to match a
 hand layout, and the numbers are noisy on circuits this small — they exist so
 that the gap can be watched over releases, and as the ground truth a future
-layout v2 (roadmap §7.3) would be evaluated against.
+layout v2 (roadmap §7.2) would be evaluated against.
 
 Usage::
 
