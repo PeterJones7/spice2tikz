@@ -35,7 +35,7 @@ from ..schematic_ir import (
     PathComponent,
     Wire,
 )
-from ..symbols import Point, Rotation
+from ..symbols import Point
 from .place import Placement, source_value
 
 MIN_JUNCTION_CONDUCTORS: Final = 3
@@ -515,7 +515,7 @@ def _net_symbols(
     points: list[Point],
     supply_marker: Point | None = None,
 ) -> list[NetSymbol]:
-    """Return the ground, supply, or tap markers this net carries (D7)."""
+    """Return the ground marker this net carries, if any."""
     graph = placement.graph
     if graph.is_ground(net):
         return [
@@ -523,65 +523,7 @@ def _net_symbols(
                 net=net, variant="ground", at=_rail_marker(placement, net, points)
             )
         ]
-    if net in graph.supply_nets:
-        return []
-    if net in (placement.input_net, placement.output_net):
-        top = max(points, key=lambda point: (point[1], point[0]))
-        return [
-            NetSymbol(
-                net=net,
-                variant="tap",
-                at=top,
-                rot=_free_direction(placement, top),
-                text=net,
-            )
-        ]
     return []
-
-
-LABEL_REACH: Final = 4
-"""How far a label needs to be clear of anything before it is worth putting there."""
-
-_DIRECTIONS: Final[tuple[tuple[Rotation, tuple[int, int]], ...]] = (
-    (90, (0, 1)),
-    (0, (1, 0)),
-    (270, (0, -1)),
-    (180, (-1, 0)),
-)
-"""Rotations the emitter turns into above / right / below / left, best first."""
-
-
-def _free_direction(placement: Placement, at: Point) -> Rotation:
-    """Return the rotation whose side of *at* has room for a label.
-
-    A tap sits on a terminal, and a terminal usually has a component on one
-    side and a wire on another. Dropping the text on whichever side is empty is
-    the difference between a readable label and one printed over a transistor.
-    """
-    for rot, (dx, dy) in _DIRECTIONS:
-        probes = [
-            (at[0] + dx * step, at[1] + dy * step) for step in range(1, LABEL_REACH + 1)
-        ]
-        if not any(_occupied(placement, probe) for probe in probes):
-            return rot
-    return 90
-
-
-def _occupied(placement: Placement, point: Point) -> bool:
-    """Return ``True`` when something is drawn at *point*."""
-    for element in placement.components:
-        if isinstance(element, PathComponent):
-            if _on_segment(point, element.a, element.b):
-                return True
-            continue
-        size = placement.symbol(element.symbol).size
-        half_w, half_h = size[0] / 2, size[1] / 2
-        if (
-            abs(point[0] - element.at[0]) <= half_w
-            and abs(point[1] - element.at[1]) <= half_h
-        ):
-            return True
-    return False
 
 
 SUPPLY_STUB: Final = 2

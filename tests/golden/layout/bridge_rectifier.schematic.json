@@ -82,22 +82,6 @@
         },
         {
           "type": "net_symbol",
-          "net": "acp",
-          "variant": "tap",
-          "at": [0, 12],
-          "rot": 90,
-          "text": "acp"
-        },
-        {
-          "type": "net_symbol",
-          "net": "outp",
-          "variant": "tap",
-          "at": [16, 12],
-          "rot": 90,
-          "text": "outp"
-        },
-        {
-          "type": "net_symbol",
           "net": "0",
           "variant": "ground",
           "at": [7, 0],

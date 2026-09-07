@@ -198,22 +198,6 @@
         },
         {
           "type": "net_symbol",
-          "net": "in",
-          "variant": "tap",
-          "at": [14, 6],
-          "rot": 90,
-          "text": "in"
-        },
-        {
-          "type": "net_symbol",
-          "net": "c2",
-          "variant": "tap",
-          "at": [70, 10],
-          "rot": 90,
-          "text": "c2"
-        },
-        {
-          "type": "net_symbol",
           "net": "0",
           "variant": "ground",
           "at": [35, 0],

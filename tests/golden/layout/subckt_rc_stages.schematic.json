@@ -113,22 +113,6 @@
         },
         {
           "type": "net_symbol",
-          "net": "src",
-          "variant": "tap",
-          "at": [5, 12],
-          "rot": 90,
-          "text": "src"
-        },
-        {
-          "type": "net_symbol",
-          "net": "outa",
-          "variant": "tap",
-          "at": [4, 12],
-          "rot": 90,
-          "text": "outa"
-        },
-        {
-          "type": "net_symbol",
           "net": "0",
           "variant": "ground",
           "at": [13, 0],

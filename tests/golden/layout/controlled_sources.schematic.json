@@ -264,22 +264,6 @@
         },
         {
           "type": "net_symbol",
-          "net": "in",
-          "variant": "tap",
-          "at": [27, 19],
-          "rot": 90,
-          "text": "in"
-        },
-        {
-          "type": "net_symbol",
-          "net": "fout",
-          "variant": "tap",
-          "at": [76, 6],
-          "rot": 90,
-          "text": "fout"
-        },
-        {
-          "type": "net_symbol",
           "net": "0",
           "variant": "ground",
           "at": [38, 0],

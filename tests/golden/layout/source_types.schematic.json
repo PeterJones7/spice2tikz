@@ -229,22 +229,6 @@
         },
         {
           "type": "net_symbol",
-          "net": "b",
-          "variant": "tap",
-          "at": [34, 6],
-          "rot": 90,
-          "text": "b"
-        },
-        {
-          "type": "net_symbol",
-          "net": "h",
-          "variant": "tap",
-          "at": [118, 6],
-          "rot": 90,
-          "text": "h"
-        },
-        {
-          "type": "net_symbol",
           "net": "0",
           "variant": "ground",
           "at": [59, 0],

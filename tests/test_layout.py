@@ -399,6 +399,16 @@ def test_supply_nets_are_not_drawn_as_rail_glyphs_or_labels():
     assert supplies == []
 
 
+def test_input_and_output_nets_are_not_drawn_as_tap_labels():
+    ir = lay_out("common_source_amp")
+    taps = [
+        element
+        for element in ir.sheets[0].elements
+        if getattr(element, "variant", None) == "tap"
+    ]
+    assert taps == []
+
+
 def test_routing_is_a_pure_function_of_the_placement():
     graph = build_graph(parse("bjt_amp"))
     ranks = rank_nets(graph, input_net(graph, pick_input_source(graph)))

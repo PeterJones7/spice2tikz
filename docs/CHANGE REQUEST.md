@@ -5,8 +5,7 @@ Do each in turn. Update documentation and push changes after each  request is im
 Once addressed they can be removed from this document (with evidence left in changelog.md)
 
 ---
-
-# change 1 LTSPICE .asc export
+# change  LTSPICE .asc export
 Change Request: LTspice .asc Export (Editable Layout Workflow)
 Objective
 

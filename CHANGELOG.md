@@ -97,6 +97,9 @@ minor releases.
   rail label: the rail remains a conductor, while the value stays on the
   source component that establishes it. This removes the duplicate `net = value`
   annotation and keeps the drawing consistent with the change request.
+- Input and output tap nets no longer receive automatic labels. Ground symbols
+  and supply-net handling are unchanged, so generated schematics retain their
+  reference-node and rail semantics without the extra tap annotations.
 - A path component was modelled as the bare line between its two endpoints,
   which is where the wire is but not where the *drawing* is. circuitikz puts
   the rectangle, circle or plates around the middle of that line, so a wire

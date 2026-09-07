@@ -62,22 +62,6 @@
         },
         {
           "type": "net_symbol",
-          "net": "in",
-          "variant": "tap",
-          "at": [0, 6],
-          "rot": 90,
-          "text": "in"
-        },
-        {
-          "type": "net_symbol",
-          "net": "vc",
-          "variant": "tap",
-          "at": [16, 6],
-          "rot": 90,
-          "text": "vc"
-        },
-        {
-          "type": "net_symbol",
           "net": "0",
           "variant": "ground",
           "at": [8, 0],
