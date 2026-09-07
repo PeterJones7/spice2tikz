@@ -389,16 +389,14 @@ def test_ground_gets_exactly_one_symbol():
     assert grounds[0].at[1] == 0
 
 
-def test_a_supply_rail_is_labelled_with_its_voltage():
+def test_supply_nets_are_not_drawn_as_rail_glyphs_or_labels():
     ir = lay_out("common_source_amp")
     supplies = [
         element
         for element in ir.sheets[0].elements
-        if getattr(element, "variant", None) == "vcc"
+        if getattr(element, "variant", None) in ("vcc", "vee")
     ]
-    assert len(supplies) == 1
-    assert supplies[0].text is not None
-    assert "vdd" in supplies[0].text
+    assert supplies == []
 
 
 def test_routing_is_a_pure_function_of_the_placement():
@@ -623,18 +621,18 @@ def test_a_dc_source_shows_its_voltage_on_the_symbol():
 
 
 def test_a_supply_rail_is_not_annotated_with_a_voltage_its_source_shows():
-    """Stating it twice attaches the value to the net rather than the part."""
+    """A net carries connectivity, not the value that belongs on the source."""
     ir = lay_out("voltage_divider")
     supplies = [
         element
         for element in ir.sheets[0].elements
-        if getattr(element, "variant", None) == "vcc"
+        if getattr(element, "variant", None) in ("vcc", "vee")
     ]
-    assert [symbol.text for symbol in supplies] == ["in"]
+    assert supplies == []
 
 
-def test_a_supply_with_no_drawn_source_still_carries_its_voltage():
-    """A netlist may declare a rail whose source is off-sheet; nothing else says it."""
+def test_a_supply_with_no_drawn_source_is_not_labelled_as_a_rail():
+    """A netlist-declared rail remains just connectivity; values stay on sources."""
     netlist = netlist_ir.loads(
         '{"ir": "netlist", "version": "1.0", "meta": {},'
         ' "circuit": {"components": ['
@@ -651,9 +649,9 @@ def test_a_supply_with_no_drawn_source_still_carries_its_voltage():
     supplies = [
         element
         for element in ir.sheets[0].elements
-        if getattr(element, "variant", None) == "vcc"
+        if getattr(element, "variant", None) in ("vcc", "vee")
     ]
-    assert [symbol.text for symbol in supplies] == ["vdd = 9"]
+    assert supplies == []
 
 
 def test_a_time_varying_source_shows_no_value():

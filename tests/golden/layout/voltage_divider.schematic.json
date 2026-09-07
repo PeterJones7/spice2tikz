@@ -55,7 +55,7 @@
         {
           "type": "wire",
           "net": "in",
-          "points": [[0, 10], [10, 10]]
+          "points": [[0, 10], [8, 10]]
         },
         {
           "type": "net_symbol",
@@ -73,20 +73,8 @@
           "rot": 0
         },
         {
-          "type": "net_symbol",
-          "net": "in",
-          "variant": "vcc",
-          "at": [10, 10],
-          "rot": 0,
-          "text": "in"
-        },
-        {
           "type": "junction",
           "at": [4, 0]
-        },
-        {
-          "type": "junction",
-          "at": [8, 10]
         }
       ]
     }

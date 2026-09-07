@@ -211,32 +211,8 @@
           "rot": 0
         },
         {
-          "type": "net_symbol",
-          "net": "vcc",
-          "variant": "vcc",
-          "at": [10, 20],
-          "rot": 0,
-          "text": "vcc"
-        },
-        {
-          "type": "net_symbol",
-          "net": "vee",
-          "variant": "vcc",
-          "at": [2, 26],
-          "rot": 0,
-          "text": "vee"
-        },
-        {
-          "type": "junction",
-          "at": [2, 26]
-        },
-        {
           "type": "junction",
           "at": [8, 0]
-        },
-        {
-          "type": "junction",
-          "at": [10, 20]
         },
         {
           "type": "junction",

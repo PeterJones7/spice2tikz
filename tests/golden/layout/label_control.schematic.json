@@ -144,7 +144,7 @@
         {
           "type": "wire",
           "net": "in",
-          "points": [[8, 16], [18, 16]]
+          "points": [[8, 16], [16, 16]]
         },
         {
           "type": "wire",
@@ -172,32 +172,8 @@
           "rot": 0
         },
         {
-          "type": "net_symbol",
-          "net": "in",
-          "variant": "vcc",
-          "at": [18, 16],
-          "rot": 0,
-          "text": "in"
-        },
-        {
-          "type": "net_symbol",
-          "net": "g",
-          "variant": "vcc",
-          "at": [2, 22],
-          "rot": 0,
-          "text": "g"
-        },
-        {
-          "type": "junction",
-          "at": [2, 22]
-        },
-        {
           "type": "junction",
           "at": [8, 0]
-        },
-        {
-          "type": "junction",
-          "at": [16, 16]
         },
         {
           "type": "junction",

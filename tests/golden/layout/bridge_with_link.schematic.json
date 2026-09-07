@@ -130,12 +130,12 @@
         {
           "type": "wire",
           "net": "n1",
-          "points": [[14, 10], [46, 10]]
+          "points": [[14, 10], [42, 10]]
         },
         {
           "type": "wire",
           "net": "n3",
-          "points": [[0, 16], [50, 16]]
+          "points": [[0, 16], [48, 16]]
         },
         {
           "type": "net_symbol",
@@ -151,22 +151,6 @@
           "variant": "ground",
           "at": [7, 0],
           "rot": 0
-        },
-        {
-          "type": "net_symbol",
-          "net": "n1",
-          "variant": "vcc",
-          "at": [46, 10],
-          "rot": 0,
-          "text": "n1"
-        },
-        {
-          "type": "net_symbol",
-          "net": "n3",
-          "variant": "vcc",
-          "at": [50, 16],
-          "rot": 0,
-          "text": "n3"
         },
         {
           "type": "junction",
@@ -187,14 +171,6 @@
         {
           "type": "junction",
           "at": [42, 6]
-        },
-        {
-          "type": "junction",
-          "at": [42, 10]
-        },
-        {
-          "type": "junction",
-          "at": [48, 16]
         }
       ]
     }

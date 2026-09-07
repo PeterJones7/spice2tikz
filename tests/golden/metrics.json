@@ -17,34 +17,34 @@
   },
   "bridge_two_supplies": {
     "alignment": 1.0,
-    "bbox_area": 800,
+    "bbox_area": 768,
     "components": 6,
-    "crossings": 2,
-    "wire_length": 120,
+    "crossings": 1,
+    "wire_length": 114,
     "wires": 9
   },
   "bridge_with_link": {
     "alignment": 1.0,
-    "bbox_area": 800,
+    "bbox_area": 768,
     "components": 7,
-    "crossings": 2,
-    "wire_length": 124,
+    "crossings": 1,
+    "wire_length": 118,
     "wires": 9
   },
   "cmos_inverter": {
     "alignment": 1.0,
-    "bbox_area": 468,
+    "bbox_area": 432,
     "components": 7,
     "crossings": 3,
-    "wire_length": 112,
+    "wire_length": 110,
     "wires": 11
   },
   "common_source_amp": {
     "alignment": 0.909,
-    "bbox_area": 216,
+    "bbox_area": 192,
     "components": 4,
     "crossings": 0,
-    "wire_length": 41,
+    "wire_length": 39,
     "wires": 5
   },
   "controlled_sources": {
@@ -60,7 +60,7 @@
     "bbox_area": 1736,
     "components": 11,
     "crossings": 18,
-    "wire_length": 333,
+    "wire_length": 331,
     "wires": 20
   },
   "label_control": {
@@ -68,7 +68,7 @@
     "bbox_area": 880,
     "components": 8,
     "crossings": 0,
-    "wire_length": 124,
+    "wire_length": 122,
     "wires": 9
   },
   "messy_realworld": {
@@ -108,7 +108,7 @@
     "bbox_area": 1180,
     "components": 16,
     "crossings": 0,
-    "wire_length": 176,
+    "wire_length": 174,
     "wires": 9
   },
   "subckt_rc_stages": {
@@ -121,10 +121,10 @@
   },
   "voltage_divider": {
     "alignment": 1.0,
-    "bbox_area": 100,
+    "bbox_area": 80,
     "components": 3,
     "crossings": 0,
-    "wire_length": 18,
+    "wire_length": 16,
     "wires": 2
   }
 }

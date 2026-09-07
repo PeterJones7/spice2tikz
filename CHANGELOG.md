@@ -93,6 +93,10 @@ minor releases.
   rather than a terminal, steps further out before the rail itself moves.
   Reported with a repro deck, now `tests/corpus/spice/bridge_two_supplies.sp`,
   which was drawn with two shorts and zero findings from the validator.
+- Supply nets are no longer rendered as `vcc`/`vee` rail glyphs or given a
+  rail label: the rail remains a conductor, while the value stays on the
+  source component that establishes it. This removes the duplicate `net = value`
+  annotation and keeps the drawing consistent with the change request.
 - A path component was modelled as the bare line between its two endpoints,
   which is where the wire is but not where the *drawing* is. circuitikz puts
   the rectangle, circle or plates around the middle of that line, so a wire

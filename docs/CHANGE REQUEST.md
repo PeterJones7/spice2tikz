@@ -6,54 +6,7 @@ Once addressed they can be removed from this document (with evidence left in cha
 
 ---
 
-# Change request: Remove supply rail glyphs and annotations
-
-Current behaviour
-
-Supply nets may be rendered using a supply rail glyph (arrow symbol). Following the recent change, an explicit source shows its DC value on the source symbol, while a supply rail whose source is drawn is labelled only with the net name. The changelog also describes a special case where a rail may still carry a voltage annotation if the establishing source is not drawn.
-
-Proposed behaviour
-
-Always draw explicit voltage and current sources.
-Never draw supply rail glyphs (arrow symbols).
-Never display voltage values on nets.
-Never display supply-net labels solely because a net is a supply.
-Display values only on the source component that establishes them.
-
-Rationale
-
-A source is a component and should always be visible. A net represents connectivity and should not carry component information such as voltage values. Showing values on supply rails duplicates information already shown on the source component and introduces special-case behaviour that is difficult to justify. The rendering rule becomes simple and consistent:
-
-Components show values. Nets show connectivity.
-
-Example
-
-SPICE:
-
-V1 IN 0 DC 5
-
-R1 IN OUT 10k ; labels=value
-R2 IN OUT 10k ; labels=value
-
-R3 OUT N1 10k ; labels=value
-R4 N1 0 10k ; labels=value
-
-.end
-
-
-Current behaviour may suppress or replace the source with a supply-rail representation because IN is inferred to be a supply net.
-
-Proposed behaviour:
-
-Draw V1 as a normal 5 V source.
-Show 5 V beside V1.
-Treat IN as an ordinary net.
-Draw no supply glyph.
-Draw no IN = 5 V or similar rail annotation.
-
-This makes the origin of the supply explicit and avoids duplicating information.
-
-# change 2 LTSPICE .asc export
+# change 1 LTSPICE .asc export
 Change Request: LTspice .asc Export (Editable Layout Workflow)
 Objective
 

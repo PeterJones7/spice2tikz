@@ -225,7 +225,7 @@
         {
           "type": "wire",
           "net": "a",
-          "points": [[0, 10], [16, 10]]
+          "points": [[0, 10], [14, 10]]
         },
         {
           "type": "net_symbol",
@@ -251,20 +251,8 @@
           "rot": 0
         },
         {
-          "type": "net_symbol",
-          "net": "a",
-          "variant": "vcc",
-          "at": [16, 10],
-          "rot": 0,
-          "text": "a"
-        },
-        {
           "type": "junction",
           "at": [14, 0]
-        },
-        {
-          "type": "junction",
-          "at": [14, 10]
         },
         {
           "type": "junction",

@@ -148,7 +148,7 @@
         {
           "type": "wire",
           "net": "vdd",
-          "points": [[0, 18], [26, 18]]
+          "points": [[0, 18], [24, 18]]
         },
         {
           "type": "wire",
@@ -179,14 +179,6 @@
           "rot": 0
         },
         {
-          "type": "net_symbol",
-          "net": "vdd",
-          "variant": "vcc",
-          "at": [26, 18],
-          "rot": 0,
-          "text": "vdd"
-        },
-        {
           "type": "junction",
           "at": [8, 0]
         },
@@ -213,10 +205,6 @@
         {
           "type": "junction",
           "at": [17, 18]
-        },
-        {
-          "type": "junction",
-          "at": [24, 18]
         }
       ]
     }

@@ -129,12 +129,10 @@ def route(placement: Placement) -> list[Element]:
         points = _unique(placement.net_pins.get(net, []))
         if not points:
             continue
-        # A supply glyph is drawn just past the end of its rail, so the rail
-        # is extended to reach it as it is built; if the spine has to move, the
-        # glyph moves with it.
-        wiring = _wire_net(
-            placement, obstacles, net, points, _supply_marker(placement, net, points)
+        marker = None if net in placement.graph.supply_nets else _supply_marker(
+            placement, net, points
         )
+        wiring = _wire_net(placement, obstacles, net, points, marker)
         for wire in wiring.wires:
             for segment in wire.segments():
                 obstacles.drawn.append((segment, net))
@@ -526,15 +524,7 @@ def _net_symbols(
             )
         ]
     if net in graph.supply_nets:
-        marker = supply_marker or _rail_marker(placement, net, points)
-        return [
-            NetSymbol(
-                net=net,
-                variant="vcc",
-                at=marker,
-                text=_supply_text(placement, net),
-            )
-        ]
+        return []
     if net in (placement.input_net, placement.output_net):
         top = max(points, key=lambda point: (point[1], point[0]))
         return [

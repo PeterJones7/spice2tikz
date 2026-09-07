@@ -287,7 +287,7 @@
         {
           "type": "wire",
           "net": "vee",
-          "points": [[0, 31], [34, 31]]
+          "points": [[0, 31], [32, 31]]
         },
         {
           "type": "wire",
@@ -318,28 +318,8 @@
           "rot": 0
         },
         {
-          "type": "net_symbol",
-          "net": "vdd",
-          "variant": "vcc",
-          "at": [10, 25],
-          "rot": 0,
-          "text": "vdd"
-        },
-        {
-          "type": "net_symbol",
-          "net": "vee",
-          "variant": "vcc",
-          "at": [34, 31],
-          "rot": 0,
-          "text": "vee"
-        },
-        {
           "type": "junction",
           "at": [8, 0]
-        },
-        {
-          "type": "junction",
-          "at": [10, 25]
         },
         {
           "type": "junction",
@@ -368,10 +348,6 @@
         {
           "type": "junction",
           "at": [29, 31]
-        },
-        {
-          "type": "junction",
-          "at": [32, 31]
         },
         {
           "type": "junction",

@@ -220,14 +220,6 @@
           "rot": 0
         },
         {
-          "type": "net_symbol",
-          "net": "vcc",
-          "variant": "vcc",
-          "at": [44, 18],
-          "rot": 0,
-          "text": "vcc"
-        },
-        {
           "type": "junction",
           "at": [14, 0]
         },
@@ -254,10 +246,6 @@
         {
           "type": "junction",
           "at": [42, 18]
-        },
-        {
-          "type": "junction",
-          "at": [44, 18]
         },
         {
           "type": "junction",
