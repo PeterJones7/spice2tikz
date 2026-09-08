@@ -92,3 +92,10 @@ in `docs/USAGE.md` §6, not a longer prompt.
 Nor should a prompt talk the model into writing a *different circuit*. Every
 rule above is about how a circuit is expressed. If following one would change
 what the circuit does, the circuit wins.
+
+## CLI usage if agentic:
+```bash
+spice2tikz circuit.sp -o circuit.png # single PNG
+spice2tikz -b . # batch convert directory of .sp to .PNG
+spice2tikz --help # further usage and options
+```
