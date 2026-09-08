@@ -5,6 +5,50 @@ Do each in turn. Update documentation and push changes after each  request is im
 Once addressed they can be removed from this document (with evidence left in changelog.md)
 
 ---
+
+# change Add Impedance block, Z
+
+Add support for generic complex impedances using a new Z component.
+
+Rationale:
+For AC circuit teaching, students often work directly with impedances (e.g. 10+j5 Ω, -j20 Ω) rather than decomposing them into R, L and C components. Spice2tikz should support these expressions as drawing input even though they are not standard SPICE simulator elements.
+
+Required changes:
+
+- Introduce a new component kind: IMPEDANCE.
+- Parse SPICE cards beginning with Z:
+
+    Z1 in out 10+j5
+    Z2 out 0 -j20
+    Z3 a b 50∠30
+
+- Treat the impedance value as text. Do not attempt to evaluate, simplify, validate, or convert it.
+- Store the value verbatim in the Netlist IR.
+- Treat Z as a normal two-terminal component for connectivity, graph analysis, placement, routing, series-chain detection and parallel-group detection.
+- Emit Z as a generic impedance element (boxed symbol preferred), displaying the supplied impedance text as its value.
+- Preserve existing behaviour for R, L and C components.
+- update docs and AI prompt, plus log changes in changelog.md etc
+
+Non-goals:
+
+- No simulator compatibility.
+- No conversion of complex impedances into equivalent R/L/C networks.
+- No frequency-dependent interpretation.
+- No automatic symbol selection based on impedance value.
+- No special mathematical parsing beyond storing the text.
+
+Acceptance criteria:
+
+- Z cards parse successfully.
+- Generated schematics display a two-terminal impedance component with the supplied text.
+- Layout and routing behave exactly as for other two-terminal components.
+- Existing SPICE decks remain unchanged.
+- Add corpus examples and golden files covering:
+  - purely real impedance
+  - purely imaginary impedance
+  - mixed complex impedance
+  - multiple impedance elements in series and parallel
+
 # change  LTSPICE .asc export
 Change Request: LTspice .asc Export (Editable Layout Workflow)
 Objective

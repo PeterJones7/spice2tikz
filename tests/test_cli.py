@@ -8,8 +8,13 @@ from pathlib import Path
 
 import pytest
 
-from spice2tikz import cli, schematic_ir
+from spice2tikz import cli, render, schematic_ir
 from spice2tikz.emit.circuitikz import emit_snippet, emit_standalone
+
+requires_latexmk = pytest.mark.skipif(
+    render.find_latex() is None,
+    reason="no LaTeX toolchain; rendering is checked in CI",
+)
 
 CORPUS = Path(__file__).parent / "corpus"
 BROKEN = CORPUS / "broken"
@@ -259,6 +264,36 @@ def test_no_arguments_prints_usage(capsys: pytest.CaptureFixture[str]):
     assert out == ""
     assert "usage: spice2tikz" in err
     assert "no input file given" in err
+
+
+@requires_latexmk
+def test_batch_mode_renders_every_sp_file_in_directory(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    good = tmp_path / "good.sp"
+    good.write_text(SPICE_DECK.read_text(encoding="utf-8"), encoding="utf-8")
+
+    code, _, err = run(capsys, "-b", str(tmp_path), "-q")
+
+    assert code == cli.EXIT_OK
+    assert (tmp_path / "good.png").exists()
+    assert "batch mode summary" in err
+    assert "1 success(es), 0 failure(s)" in err
+
+
+@requires_latexmk
+def test_batch_mode_accepts_keep_and_keeps_intermediates(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+):
+    deck = tmp_path / "keep.sp"
+    deck.write_text(SPICE_DECK.read_text(encoding="utf-8"), encoding="utf-8")
+
+    code, _, err = run(capsys, "-b", str(tmp_path), "--keep", "-q")
+
+    assert code == cli.EXIT_OK
+    assert "batch mode summary" in err
+    assert "1 success(es), 0 failure(s)" in err
+    assert (tmp_path / "keep.png").exists()
 
 
 def test_unknown_fields_are_reported_as_warnings(

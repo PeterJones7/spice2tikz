@@ -113,6 +113,12 @@ def build_parser() -> ArgumentParser:
         help="circuit description to read (.sp/.cir/.net, .asc, or IR .json)",
     )
     parser.add_argument(
+        "-b",
+        "--batch",
+        action="store_true",
+        help="render every *.sp file in a directory to PNG beside its source",
+    )
+    parser.add_argument(
         "-o",
         "--output",
         metavar="FILE",
@@ -120,6 +126,11 @@ def build_parser() -> ArgumentParser:
             "write to FILE instead of stdout; the extension chooses the format "
             "(.tex, .pdf, .png, .svg)"
         ),
+    )
+    parser.add_argument(
+        "--keep",
+        action="store_true",
+        help="keep temporary LaTeX/PDF files for debugging",
     )
     parser.add_argument(
         "--dpi",
@@ -188,12 +199,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process exit code."""
     parser = build_parser()
     args = parser.parse_args(argv)
-    if args.input is None:
+    if args.input is None and not args.batch:
         parser.print_usage(sys.stderr)
         _report(f"{PROG}: no input file given (use --help for usage)")
         return EXIT_INPUT_ERROR
     try:
-        return _run(args)
+        return _run_batch(args) if args.batch else _run(args)
     except UsageError as error:
         _report(f"{PROG}: {error}")
         return EXIT_INPUT_ERROR
@@ -212,6 +223,44 @@ def main(argv: Sequence[str] | None = None) -> int:
     except Exception as error:  # unexpected: report instead of a traceback
         _report(f"{PROG}: internal error: {type(error).__name__}: {error}")
         return EXIT_INTERNAL_ERROR
+
+
+def _run_batch(args: Namespace) -> int:
+    """Render every .sp file in *args.input* to PNG beside its source."""
+    directory = Path(args.input) if args.input else Path(".")
+    if not directory.exists() or not directory.is_dir():
+        raise UsageError(f"--batch {directory}: not a directory")
+
+    files = sorted(path for path in directory.glob("*.sp") if path.is_file())
+    successes = 0
+    failures = 0
+    if args.verbose:
+        _report(f"{PROG}: batch mode: {directory} ({len(files)} file(s))")
+
+    for path in files:
+        file_args = Namespace(**vars(args))
+        file_args.input = str(path)
+        file_args.output = str(path.with_suffix(".png"))
+        file_args.batch = False
+        file_args.quiet = True
+        file_args.verbose = False
+        try:
+            code = _run(file_args)
+        except (UsageError, RenderError, IRError, OSError) as error:
+            code = EXIT_INPUT_ERROR
+            _report(f"{PROG}: {path.name}: {error}")
+        except Exception as error:  # pragma: no cover - defensive
+            code = EXIT_INTERNAL_ERROR
+            _report(f"{PROG}: {path.name}: internal error: {type(error).__name__}: {error}")
+
+        if code == EXIT_OK:
+            successes += 1
+        else:
+            failures += 1
+            _report(f"{PROG}: {path.name}: failed (exit {code})")
+
+    _report(f"{PROG}: batch mode summary: {successes} success(es), {failures} failure(s)")
+    return EXIT_OK if failures == 0 else EXIT_INPUT_ERROR
 
 
 def _run(args: Namespace) -> int:
@@ -300,6 +349,7 @@ def _run(args: Namespace) -> int:
         target,
         output_format,
         dpi=args.dpi,
+        keep=args.keep,
     )
     if args.verbose:
         _report(f"{PROG}: wrote {target} ({output_format})")

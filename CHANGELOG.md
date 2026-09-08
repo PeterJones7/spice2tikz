@@ -65,6 +65,11 @@ minor releases.
   than guessed at. Rendering is deterministic: `SOURCE_DATE_EPOCH` is pinned,
   so the same input gives the same PDF bytes on a given toolchain instead of a
   fresh timestamp each run.
+- Batch rendering mode: `spice2tikz -b DIRECTORY` scans that directory for
+  `*.sp` files, renders each to a PNG beside its source, continues on errors,
+  and reports a final summary. The temporary LaTeX/PDF files are removed by
+  default, while `--keep` retains them for debugging. The directory is walked
+  with `pathlib.Path.glob("*.sp")` to avoid shell wildcard dependence.
 
 ### Changed
 

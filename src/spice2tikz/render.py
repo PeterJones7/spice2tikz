@@ -296,7 +296,12 @@ def _tool_failure(command: str, result: subprocess.CompletedProcess[str]) -> str
 
 
 def render(
-    source: str, target: Path, output_format: str, *, dpi: int = DEFAULT_DPI
+    source: str,
+    target: Path,
+    output_format: str,
+    *,
+    dpi: int = DEFAULT_DPI,
+    keep: bool = False,
 ) -> None:
     """Write *source* to *target* in *output_format*.
 
@@ -305,13 +310,29 @@ def render(
 
     Every intermediate file lives in a temporary directory that is removed
     whether or not the run succeeds, so a failed compile leaves nothing behind
-    but the message.
+    but the message. Set *keep* to retain the temporary work directory for
+    debugging.
     """
     if output_format == TEX:
         target.write_text(source, encoding="utf-8", newline="\n")
         return
     if output_format not in RENDERED_FORMATS:
         raise RenderError(f"unknown output format {output_format!r}")
+
+    if keep:
+        work = Path(tempfile.mkdtemp(prefix="spice2tikz-keep-"))
+        try:
+            pdf = _compile(source, work)
+            if output_format == PDF:
+                shutil.move(str(pdf), str(target))
+            elif output_format == PNG:
+                _to_png(pdf, target, work, dpi)
+            else:
+                _to_svg(pdf, target, work)
+        finally:
+            if not target.exists():
+                raise RenderError(f"failed to render {target}")
+        return
 
     with tempfile.TemporaryDirectory(prefix="spice2tikz-") as tmp:
         work = Path(tmp)
